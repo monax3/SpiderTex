@@ -1,0 +1,22 @@
+[package]
+name = "SpiderTex"
+version = "1.0.0-beta3"
+edition = "2021"
+authors = ["mona"]
+license = "MIT or Apache-2.0"
+
+[dependencies]
+base64 = "0.13.0"
+color-eyre = { version = "0.6.2", default-features = false }
+serde = { version = "1.0.143", features = ["derive"] }
+serde_json = "1.0.83"
+zerocopy = { version = "0.6.1", features = ["alloc"] }
+image = { version = "0.24.3", default-features = false, features = ["png"] }
+windows = { version = "0.39.0", features = [
+    "Win32_Foundation",
+    "Win32_UI_WindowsAndMessaging",
+] }
+
+[build-dependencies]
+vcpkg = "0.2.15"
+winres = "0.1.12"
