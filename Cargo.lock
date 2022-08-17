@@ -4,7 +4,7 @@ version = 3
 
 [[package]]
 name = "SpiderTex"
-version = "1.0.0-beta3"
+version = "1.0.0-beta4"
 dependencies = [
  "base64",
  "color-eyre",

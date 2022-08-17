@@ -1,6 +1,6 @@
 [package]
 name = "SpiderTex"
-version = "1.0.0-beta3"
+version = "1.0.0-beta4"
 edition = "2021"
 authors = ["mona"]
 license = "MIT or Apache-2.0"
