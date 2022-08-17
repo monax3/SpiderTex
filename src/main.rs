@@ -273,7 +273,7 @@ fn run() -> Result<()> {
     {
         return Err(eyre!(
             "To convert a high-resolution texture, please drag the original texture onto this \
-             program."
+             program. If no low-resolution version exists, please other methods for now."
         ));
     }
 
