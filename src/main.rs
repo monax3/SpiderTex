@@ -241,7 +241,7 @@ fn convert_texture_to_png(texture_file: &Path) -> Result<()> {
         mipmaps,
         &texture_data,
     )
-    .map_err(|code| eyre!("Decompressindg texture failed with code {code}"))?;
+    .map_err(|code| eyre!("Decompressing texture failed with code {code}"))?;
 
     eprintln!("Uncompressed texture data is {} bytes", decompressed.len());
 
