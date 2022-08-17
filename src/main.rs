@@ -128,8 +128,8 @@ fn get_hd_texture(metadata: &TextureInfo, image: &DynamicImage) -> Result<DXBuf>
 fn convert_png_to_texture(png_file: &Path) -> Result<()> {
     let metadata = read_metadata(png_file)?;
 
-    let image =
-        image::open(png_file).wrap_err_with(|| eyre!("Failed to open {}", png_file.display()))?;
+    let image: DynamicImage =
+        image::open(png_file).wrap_err_with(|| eyre!("Failed to open {}", png_file.display()))?.into_rgba8().into();
 
     let texture_file = png_file.with_extension("custom.texture");
 
