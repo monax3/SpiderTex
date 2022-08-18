@@ -1,0 +1,76 @@
+use eframe::egui::style::{Margin, Spacing};
+use eframe::egui::{Vec2, vec2, Color32, Visuals, Style, FontId, TextStyle};
+use eframe::egui::{RichText, WidgetText};
+use eframe::epaint::FontFamily;
+
+pub const SIDEBAR_WIDTH: f32 = 300.0;
+pub const EXTRA_SPACING: f32 = 10.0;
+pub const TEXT_HIGHLIGHT_COLOR: Color32 = Color32::LIGHT_GREEN;
+
+pub const PREVIEW_FRAME_SIZE: f32 = 4.0;
+pub const PREVIEW_FRAME_COLOR: Color32 = Color32::LIGHT_GRAY;
+pub const PREVIEW_SIZE: f32 = 512.0;
+
+pub const BUTTON_HEIGHT: f32 = 30.0;
+pub const STATUS_HEIGHT: f32 = 250.0;
+
+pub fn button_size() -> Vec2 {
+    vec2(120.0, BUTTON_HEIGHT)
+}
+
+pub fn nav_button_size() -> Vec2 {
+    vec2(30.0, 30.0)
+}
+
+pub fn visuals() -> Visuals {
+    Visuals::dark()
+}
+
+pub fn button_text(text: impl Into<String>) -> impl Into<WidgetText> {
+    RichText::new(text).strong().size(20.0)
+}
+
+pub fn highlight_text(text: impl Into<String>) -> impl Into<WidgetText> {
+    RichText::new(text).strong().color(TEXT_HIGHLIGHT_COLOR)
+}
+
+pub fn log_text(text: impl Into<String>, level: tracing::Level) -> impl Into<WidgetText> {
+    let color = match level {
+            level if level == tracing::Level::ERROR => Color32::RED,
+            level if level == tracing::Level::WARN => Color32::GOLD,
+        _ => Color32::LIGHT_GRAY,
+    };
+
+    RichText::new(text).text_style(TextStyle::Monospace).size(12.0).color(color)
+}
+
+pub fn spacing() -> Spacing {
+    Spacing::default()
+}
+
+pub fn window_size() -> Vec2 {
+    let spacing = spacing();
+
+    let size = vec2(spacing.item_spacing.x.mul_add(2.0, SIDEBAR_WIDTH), 0.0);
+
+    size + spacing.window_margin.sum() + preview_size_with_frame()
+}
+
+pub fn preview_size() -> Vec2 {
+    Vec2::splat(PREVIEW_SIZE)
+}
+
+pub fn preview_size_with_frame() -> Vec2 {
+    Vec2::splat(PREVIEW_SIZE) + Vec2::splat(PREVIEW_FRAME_SIZE * 2.0)
+}
+
+pub fn style() -> Style {
+    Style {
+        override_font_id: Some(text_font()),
+        .. Style::default()
+    }
+}
+
+pub fn text_font() -> FontId {
+    FontId::proportional(16.0)
+}

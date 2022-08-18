@@ -1,0 +1,153 @@
+{
+  "formats": {
+    "BC1 Rgba 360x260/1": {
+      "example_file": "ui_textures_pause_character_suit_mk4.texture",
+      "format": 71,
+      "standard": {
+        "data_size": 46800,
+        "width": 360,
+        "height": 260,
+        "mipmaps": 1
+      },
+      "planes": "Rgba",
+      "array_size": 1,
+      "raw_headers": "d0b6000000000000680104016801040101001000470000000000000001000100000101010000000000000000"
+    },
+    "BC1 sRGB Rgba 256x128/5": {
+      "example_file": "textures_gzumberge_gz_flag_gz_flag_rainbow_01_c.texture",
+      "format": 72,
+      "standard": {
+        "data_size": 21824,
+        "width": 256,
+        "height": 128,
+        "mipmaps": 5
+      },
+      "planes": "Rgba",
+      "array_size": 1,
+      "raw_headers": "4055000000000000000180000001800001009100480000000000000001000500000101010000000000000000"
+    },
+    "BC4 Luma 2048x2048/9 8192x8192/2": {
+      "example_file": "characters_hero_hero_peterparker_heads_textures_hero_peterparker_detail_v.texture",
+      "format": 80,
+      "standard": {
+        "data_size": 2796192,
+        "width": 2048,
+        "height": 2048,
+        "mipmaps": 9
+      },
+      "highres": {
+        "data_size": 41943040,
+        "width": 8192,
+        "height": 8192,
+        "mipmaps": 2
+      },
+      "planes": "Luma",
+      "array_size": 1,
+      "raw_headers": "a0aa2a0000008002002000200008000801001012500000000000000001000900020101010000000000000000"
+    },
+    "BC4 Rgba 512x512/7 2048x2048/2": {
+      "example_file": "characters_hero_hero_spiderman_stealth_textures_hero_spiderman_stealth_glow_h.texture",
+      "format": 80,
+      "standard": {
+        "data_size": 174752,
+        "width": 512,
+        "height": 512,
+        "mipmaps": 7
+      },
+      "highres": {
+        "data_size": 2621440,
+        "width": 2048,
+        "height": 2048,
+        "mipmaps": 2
+      },
+      "planes": "Rgba",
+      "array_size": 1,
+      "raw_headers": "a0aa020000002800000800080002000201001000500000000000000001000700020101010000000000000000"
+    },
+    "BC7 Bgra 36x36/1": {
+      "example_file": "ui_textures_buttons_ps4_key_1.texture",
+      "format": 98,
+      "standard": {
+        "data_size": 1296,
+        "width": 36,
+        "height": 36,
+        "mipmaps": 1
+      },
+      "planes": "Bgra",
+      "array_size": 1,
+      "raw_headers": "1005000000000000240024002400240001001000620000000000000001000100000101010000000000000000"
+    },
+    "BC7 Rgba 1024x1024/8 4096x4096/2 x3": {
+      "example_file": "characters_hero_hero_peterparker_heads_textures_hero_peterparker_head_wm1_n.texture",
+      "format": 98,
+      "standard": {
+        "data_size": 4194240,
+        "width": 1024,
+        "height": 1024,
+        "mipmaps": 8
+      },
+      "highres": {
+        "data_size": 62914560,
+        "width": 4096,
+        "height": 4096,
+        "mipmaps": 2
+      },
+      "planes": "Rgba",
+      "array_size": 3,
+      "raw_headers": "c0ff3f000000c00300100010000400040300140162000000000000bf01000800020101010000000000000000"
+    },
+    "BC7 sRGB Rgba 256x256/6 1024x1024/2": {
+      "example_file": "characters_hero_hero_spiderman_textures_hero_spiderman_glove_c.texture",
+      "format": 99,
+      "standard": {
+        "data_size": 87360,
+        "width": 256,
+        "height": 256,
+        "mipmaps": 6
+      },
+      "highres": {
+        "data_size": 1310720,
+        "width": 1024,
+        "height": 1024,
+        "mipmaps": 2
+      },
+      "planes": "Rgba",
+      "array_size": 1,
+      "raw_headers": "4055010000001400000400040001000101009100630000000000000002000600020101010000000000000000"
+    },
+    "BC7 sRGB Rgba 512x512/7 2048x2048/2": {
+      "example_file": "characters_hero_hero_spiderman_ironspider_textures_hero_spiderman_ironspider_armortorso_c.texture",
+      "format": 99,
+      "standard": {
+        "data_size": 349504,
+        "width": 512,
+        "height": 512,
+        "mipmaps": 7
+      },
+      "highres": {
+        "data_size": 5242880,
+        "width": 2048,
+        "height": 2048,
+        "mipmaps": 2
+      },
+      "planes": "Rgba",
+      "array_size": 1,
+      "raw_headers": "4055050000005000000800080002000201009100630000000000000001000700020101010000000000000000"
+    }
+  },
+  "lengths": {
+    "1424": "BC7 Bgra 36x36/1",
+    "21952": "BC1 sRGB Rgba 256x128/5",
+    "46928": "BC1 Rgba 360x260/1",
+    "87488": "BC7 sRGB Rgba 256x256/6 1024x1024/2",
+    "174880": "BC4 Rgba 512x512/7 2048x2048/2",
+    "349632": "BC7 sRGB Rgba 512x512/7 2048x2048/2",
+    "1310720": "BC7 sRGB Rgba 256x256/6 1024x1024/2",
+    "2621440": "BC4 Rgba 512x512/7 2048x2048/2",
+    "2796320": "BC4 Luma 2048x2048/9 8192x8192/2",
+    "4194368": "BC7 Rgba 1024x1024/8 4096x4096/2 x3",
+    "5242880": "BC7 sRGB Rgba 512x512/7 2048x2048/2",
+    "41943040": "BC4 Luma 2048x2048/9 8192x8192/2",
+    "62914560": "BC7 Rgba 1024x1024/8 4096x4096/2 x3"
+  }
+}

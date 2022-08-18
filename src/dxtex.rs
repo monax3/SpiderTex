@@ -17,19 +17,94 @@ extern "C" {
         format: u32,
         width: usize,
         height: usize,
+        array_size: usize,
         mipmaps: u8,
         src: *const u8,
         src_len: usize,
         dst: *mut *mut u8,
     ) -> isize;
 
+    fn ExpectedSize(
+        format: u32,
+        width: usize,
+        height: usize,
+        depth: usize,
+        mipmaps: u8,
+    ) -> usize;
+
+    fn ExpectedSizeCube(
+        format: u32,
+        width: usize,
+        height: usize,
+        depth: usize,
+        mipmaps: u8,
+    ) -> usize;
+
+    fn ExpectedSizeArray(
+        format: u32,
+        width: usize,
+        height: usize,
+        depth: usize,
+        mipmaps: u8,
+    ) -> usize;
+
     fn Free(ptr: *const u8);
+}
+
+pub fn expected_size(
+    format: u32,
+    width: u32,
+    height: u32,
+    depth: u32,
+    mipmaps: u8,
+) -> usize {
+    unsafe {
+        ExpectedSize(
+            format,
+            width as usize,
+            height as usize,
+            depth as usize,
+            mipmaps,
+        )
+    }
+}
+
+pub fn expected_size3(
+    format: u32,
+    width: u32,
+    height: u32,
+    depth: u32,
+    mipmaps: u8,
+) -> (usize, usize, usize) {
+    unsafe {
+        (ExpectedSize(
+            format,
+            width as usize,
+            height as usize,
+            depth as usize,
+            mipmaps,
+        ),
+        ExpectedSizeArray(
+            format,
+            width as usize,
+            height as usize,
+            depth as usize,
+            mipmaps,
+        ),
+        ExpectedSizeCube(
+            format,
+            width as usize,
+            height as usize,
+            depth as usize,
+            mipmaps,
+        ))
+    }
 }
 
 pub fn compress_texture(
     format: u32,
-    width: u32,
-    height: u32,
+    width: usize,
+    height: usize,
     mipmaps: u8,
     data: &[u8],
 ) -> Result<DXBuf, isize> {
@@ -37,8 +112,8 @@ pub fn compress_texture(
     let len = unsafe {
         CompressTexture(
             format,
-            width as usize,
-            height as usize,
+            width,
+            height,
             mipmaps,
             data.as_ptr(),
             data.len(),
@@ -54,8 +129,9 @@ pub fn compress_texture(
 
 pub fn decompress_texture(
     format: u32,
-    width: u32,
-    height: u32,
+    width: usize,
+    height: usize,
+    array_size: usize,
     mipmaps: u8,
     data: &[u8],
 ) -> Result<DXBuf, isize> {
@@ -63,8 +139,9 @@ pub fn decompress_texture(
     let len = unsafe {
         DecompressTexture(
             format,
-            width as usize,
-            height as usize,
+            width,
+            height,
+            array_size,
             mipmaps,
             data.as_ptr(),
             data.len(),
@@ -95,6 +172,16 @@ impl DXBuf {
     #[inline]
     pub fn as_slice(&self) -> &[u8] {
         unsafe { std::slice::from_raw_parts(self.0.as_ptr(), self.1) }
+    }
+
+    #[inline]
+    pub fn as_slices(&self, array_size: usize) -> Vec<&[u8]> {
+        debug_assert!(self.1 % array_size == 0);
+        let array_len = self.1 / array_size;
+
+        (0 .. array_size).map(|i|
+            unsafe { std::slice::from_raw_parts(self.0.as_ptr().add(i * array_len), array_len) }
+        ).collect()
     }
 }
 
