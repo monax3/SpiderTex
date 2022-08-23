@@ -12,15 +12,26 @@ const GROUP_SEP: char = '#';
 #[must_use]
 #[cfg_attr(feature = "debug-inputs", instrument(level = "trace", ret))]
 pub fn base_name(file: &Utf8Path) -> &str {
+    let path_sep = file.as_str()
+        .rfind(|c| std::path::is_separator(c)).unwrap_or_default();
+
     let without_ext = file
-        .as_str()
-        .rfind('.')
-        .map_or(file.as_str(), |pos| &file.as_str()[.. pos]);
+        .as_str()[path_sep..]
+        .find('.')
+        .map_or(file.as_str(), |pos| &file.as_str()[.. path_sep + pos]);
+
+    event!(TRACE, f = file.as_str(), without_ext);
+
+    // let without_ext = file
+    //     .as_str()
+    //     .rfind('.')
+    //     .map_or(file.as_str(), |pos| &file.as_str()[.. pos]);
 
     let without_seps = without_ext
         .rfind(|c| c == GROUP_SEP)
         .map_or(without_ext, |sep| &without_ext[.. sep]);
-
+    // let without_custom = without_seps.strip_suffix(".custom").or_else(|| without_seps.strip_suffix(".customhd")).unwrap_or(without_seps);
+    // let without_suffix = without_custom.strip_suffix("_hd").unwrap_or(without_custom);
     let without_suffix = without_seps.strip_suffix("_hd").unwrap_or(without_seps);
 
     // let without_path = without_suffix
@@ -359,19 +370,20 @@ pub fn ng_format_for_image_file(image_file: &Utf8Path) -> Option<TextureFormat> 
 #[must_use]
 #[cfg_attr(
     any(feature = "debug-inputs", feature = "debug-formats"),
-    instrument(ret, skip(registry))
+    instrument(ret)
 )]
 pub fn ng_format_for_texture_file(texture_file: &Utf8Path) -> Option<TextureFormat> {
-    registry().get_override(texture_file).or_else(|| {
+    // FIXME
+    let texture_file = texture_file.with_extension("texture");
+
         if texture_file.exists() {
-            texture_file::read_header(texture_file)
+            texture_file::read_header(&texture_file)
                 .log_failure_with(|| format!("Failed to read header of {texture_file}"))
                 .ok()
                 .and_then(|(header, _)| header.map(|header| header.to()))
         } else {
             None
         }
-    })
 }
 
 #[derive(Debug, Clone)]
@@ -491,16 +503,17 @@ pub fn as_images(texture_format: &TextureFormat, files: &[Utf8PathBuf]) -> Vec<U
 pub fn as_textures(format: &TextureFormat, files: &[Utf8PathBuf]) -> Vec<Utf8PathBuf> {
     if let Some(first) = files.get(0).log_failure_as("as_textures on an empty Vec") {
         let mut base_name = base_name(first).to_string();
-        base_name.push_str(".custom.texture");
 
         let texture = first.with_file_name(&base_name).with_extension("texture");
         // panic!("{files:?} ---- {texture} ---- {base_name}");
 
         if format.has_highres() {
-            let raw = texture.with_extension("raw");
+            let raw = first.with_file_name(&base_name).with_extension("customhd.texture");
+            let texture = first.with_file_name(&base_name).with_extension("custom.texture");
             vec![raw, texture]
         } else {
-            vec![texture]
+            base_name.push_str(".custom.texture");
+            vec![Utf8PathBuf::from(base_name)]
         }
     } else {
         Vec::new()
@@ -548,14 +561,14 @@ pub fn merge_file_format_iter(iter: impl Iterator<Item = FileFormat>) -> FileFor
 
 #[cfg_attr(
     any(feature = "debug-inputs", feature = "debug-formats"),
-    instrument(ret, skip(registry))
+    instrument(ret)
 )]
 pub fn format_for_texture_file(file: &Utf8Path) -> FileFormat {
     let registry = registry();
 
-    if let Some(format) = registry.get_override(file) {
+    /*if let Some(format) = registry.get_override(file) {
         FileFormat::MetaOverride(format)
-    } else if !file.exists() {
+    } else*/ if !file.exists() {
         FileFormat::Unknown
     } else if let Ok((Some(format), _)) = texture_file::read_header(file).log_failure() {
         FileFormat::FromHeader(format.into())

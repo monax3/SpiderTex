@@ -132,6 +132,17 @@ impl TextureFormat {
 
     #[inline]
     #[must_use]
+    pub fn expected_standard_buffer_size_with_mips(&self) -> usize {
+        let mut start = self.expected_standard_buffer_size() / self.array_size;
+        let pow = start.trailing_zeros();
+        for i in 1 .. (self.standard.mipmaps as u32) {
+            start += 1 << (pow - 2 * i);
+        }
+        start * self.array_size
+    }
+
+    #[inline]
+    #[must_use]
     pub fn expected_highres_buffer_size(&self) -> Option<usize> {
         self.highres.map(|highres| {
             highres.width * highres.height * self.array_size * self.dxgi_format.planes().bpp_dxgi()
@@ -176,9 +187,10 @@ impl TextureFormat {
         let (best, other) = self.all_dimensions();
         let mut fallback = None;
         for file in files {
-            event!(TRACE, name="best_texture", %file);
+            // event!(TRACE, name="best_texture", %file);
             if let Ok(size) = std::fs::metadata(file.as_ref()).map(|file| file.len() as usize) {
-                event!(TRACE, size, ?best, ?other);
+                // event!(TRACE, name="best_texture", %file, %size);
+                // event!(TRACE, size, ?best, ?other);
                 if size == best.data_size || size == best.data_size + texture_file::TEXTURE_HEADER_SIZE {return Some((best, file)); }
                 if let Some(other) = other {
                     if size == other.data_size || size == other.data_size  + texture_file::TEXTURE_HEADER_SIZE{
@@ -187,6 +199,7 @@ impl TextureFormat {
                 }
             }
         }
+        event!(TRACE, "fallback");
         fallback
     }
 

@@ -78,17 +78,31 @@
       "dxgi_format": 98,
       "standard": {
         "data_size": 21760,
-        "width": 64,
+        "width": 256,
         "height": 64,
         "mipmaps": 4
       },
       "highres": {
         "data_size": 327680,
-        "width": 256,
+        "width": 1024,
         "height": 256,
         "mipmaps": 2
+      }
+    },
+    "00800aa63": {
+      "dxgi_format": 99,
+      "standard": {
+        "data_size": 21760,
+        "width": 256,
+        "height": 64,
+        "mipmaps": 4
       },
-      "array_size": 4
+      "highres": {
+        "data_size": 327680,
+        "width": 1024,
+        "height": 256,
+        "mipmaps": 2
+      }
     },
     "00801fe5f": {
       "dxgi_format": 95,
@@ -107,6 +121,12 @@
         "width": 512,
         "height": 128,
         "mipmaps": 5
+      },
+      "highres": {
+        "data_size": 131072,
+        "width": 1024,
+        "height": 256,
+        "mipmaps": 1
       }
     },
     "01002aa48": {
@@ -142,11 +162,27 @@
         "mipmaps": 5
       },
       "highres": {
-        "data_size": 65536,
-        "width": 256,
-        "height": 256,
-        "mipmaps": 1
+        "data_size": 327680,
+        "width": 512,
+        "height": 512,
+        "mipmaps": 2
       }
+    },
+    "01003ff62": {
+      "dxgi_format": 98,
+      "standard": {
+        "data_size": 65472,
+        "width": 128,
+        "height": 128,
+        "mipmaps": 5
+      },
+      "highres": {
+        "data_size": 983040,
+        "width": 512,
+        "height": 512,
+        "mipmaps": 2
+      },
+      "array_size": 3
     },
     "011866d62": {
       "dxgi_format": 98,
@@ -192,6 +228,21 @@
       },
       "array_size": 2
     },
+    "02002aae2": {
+      "dxgi_format": 98,
+      "standard": {
+        "data_size": 87360,
+        "width": 256,
+        "height": 256,
+        "mipmaps": 6
+      },
+      "highres": {
+        "data_size": 1310720,
+        "width": 1024,
+        "height": 1024,
+        "mipmaps": 2
+      }
+    },
     "02002aae3": {
       "dxgi_format": 99,
       "standard": {
@@ -223,6 +274,12 @@
         "width": 256,
         "height": 256,
         "mipmaps": 6
+      },
+      "highres": {
+        "data_size": 655360,
+        "width": 1024,
+        "height": 1024,
+        "mipmaps": 2
       }
     },
     "0208bfd47": {
@@ -250,6 +307,21 @@
         "width": 320,
         "height": 460,
         "mipmaps": 1
+      }
+    },
+    "040010150": {
+      "dxgi_format": 80,
+      "standard": {
+        "data_size": 163840,
+        "width": 512,
+        "height": 512,
+        "mipmaps": 2
+      },
+      "highres": {
+        "data_size": 2621440,
+        "width": 2048,
+        "height": 2048,
+        "mipmaps": 2
       }
     },
     "040015547": {
@@ -297,6 +369,21 @@
         "mipmaps": 2
       }
     },
+    "04003aae2": {
+      "dxgi_format": 98,
+      "standard": {
+        "data_size": 349504,
+        "width": 512,
+        "height": 512,
+        "mipmaps": 7
+      },
+      "highres": {
+        "data_size": 5242880,
+        "width": 2048,
+        "height": 2048,
+        "mipmaps": 2
+      }
+    },
     "04003aae3": {
       "dxgi_format": 99,
       "standard": {
@@ -307,6 +394,36 @@
       },
       "highres": {
         "data_size": 5242880,
+        "width": 2048,
+        "height": 2048,
+        "mipmaps": 2
+      }
+    },
+    "040055547": {
+      "dxgi_format": 71,
+      "standard": {
+        "data_size": 174752,
+        "width": 512,
+        "height": 512,
+        "mipmaps": 7
+      },
+      "highres": {
+        "data_size": 2621440,
+        "width": 2048,
+        "height": 2048,
+        "mipmaps": 2
+      }
+    },
+    "040055548": {
+      "dxgi_format": 72,
+      "standard": {
+        "data_size": 174752,
+        "width": 512,
+        "height": 512,
+        "mipmaps": 7
+      },
+      "highres": {
+        "data_size": 2621440,
         "width": 2048,
         "height": 2048,
         "mipmaps": 2
@@ -424,7 +541,8 @@
       "00022081d"
     ],
     "21888": [
-      "00800aa62"
+      "00800aa62",
+      "00800aa63"
     ],
     "21952": [
       "01002aa48",
@@ -452,15 +570,20 @@
     "65536": [
       "01002ea63"
     ],
+    "65600": [
+      "01003ff62"
+    ],
     "65664": [
       "0200100c7"
     ],
     "87488": [
       "02002aad0",
+      "02002aae2",
       "02002aae3",
       "04002aac8"
     ],
     "131072": [
+      "010015548",
       "02005d548"
     ],
     "131200": [
@@ -472,17 +595,25 @@
     "157088": [
       "03685ee47"
     ],
+    "163968": [
+      "040010150"
+    ],
     "173728": [
       "011866d62"
     ],
     "174880": [
+      "040055547",
+      "040055548",
       "040055550"
     ],
     "327680": [
       "00800aa62",
-      "01002ea62"
+      "00800aa63",
+      "01002ea62",
+      "01002ea63"
     ],
     "349632": [
+      "04003aae2",
       "04003aae3"
     ],
     "524288": [
@@ -494,14 +625,22 @@
     "655360": [
       "010015548",
       "02005d547",
+      "02005d548",
       "040015547",
       "040015548"
     ],
+    "983040": [
+      "01003ff62"
+    ],
     "1310720": [
+      "02002aae2",
       "02002aae3",
       "04002aac8"
     ],
     "2621440": [
+      "040010150",
+      "040055547",
+      "040055548",
       "040055550"
     ],
     "2796320": [
@@ -511,6 +650,7 @@
       "08003fffe"
     ],
     "5242880": [
+      "04003aae2",
       "04003aae3"
     ],
     "6291584": [
@@ -537,6 +677,142 @@
     [
       "DISABLED.*_g$",
       "011866d62"
+    ],
+    [
+      "DISABLED.*_g$",
+      "011866d62"
+    ],
+    [
+      "DISABLED.*_g$",
+      "011866d62"
+    ],
+    [
+      "DISABLED.*_g$",
+      "011866d62"
+    ],
+    [
+      "DISABLED.*_g$",
+      "011866d62"
+    ],
+    [
+      "DISABLED.*_g$",
+      "011866d62"
+    ],
+    [
+      "DISABLED.*_g$",
+      "011866d62"
+    ],
+    [
+      "DISABLED.*_g$",
+      "011866d62"
+    ],
+    [
+      "DISABLED.*_g$",
+      "011866d62"
+    ],
+    [
+      "DISABLED.*_g$",
+      "011866d62"
+    ],
+    [
+      "DISABLED.*_g$",
+      "011866d62"
+    ],
+    [
+      "DISABLED.*_g$",
+      "011866d62"
+    ],
+    [
+      "DISABLED.*_g$",
+      "011866d62"
+    ],
+    [
+      "DISABLED.*_g$",
+      "011866d62"
+    ],
+    [
+      "DISABLED.*_g$",
+      "011866d62"
+    ],
+    [
+      "DISABLED.*_g$",
+      "011866d62"
+    ],
+    [
+      "DISABLED.*_g$",
+      "011866d62"
+    ],
+    [
+      "DISABLED.*_g$",
+      "011866d62"
+    ],
+    [
+      "DISABLED.*_g$",
+      "011866d62"
+    ],
+    [
+      "DISABLED.*_g$",
+      "011866d62"
+    ],
+    [
+      "DISABLED.*_g$",
+      "011866d62"
+    ],
+    [
+      "DISABLED.*_g$",
+      "011866d62"
+    ],
+    [
+      "DISABLED.*_g$",
+      "011866d62"
+    ],
+    [
+      "DISABLED.*_g$",
+      "011866d62"
+    ],
+    [
+      "DISABLED.*_g$",
+      "011866d62"
+    ],
+    [
+      "DISABLED.*_g$",
+      "011866d62"
+    ],
+    [
+      "DISABLED.*_g$",
+      "011866d62"
+    ],
+    [
+      "DISABLED.*_g$",
+      "011866d62"
+    ],
+    [
+      "DISABLED.*_g$",
+      "011866d62"
+    ],
+    [
+      "DISABLED.*_g$",
+      "011866d62"
+    ],
+    [
+      "DISABLED.*_g$",
+      "011866d62"
+    ],
+    [
+      "DISABLED.*_g$",
+      "011866d62"
+    ],
+    [
+      "DISABLED.*_g$",
+      "011866d62"
+    ],
+    [
+      "DISABLED.*_g$",
+      "011866d62"
+    ],
+    [
+      "DISABLED.*_g$",
+      "011866d62"
     ]
   ],
   "raw_headers": {
@@ -548,26 +824,33 @@
     "00489b262": "9009000000000000440024004400240001001000620000000000000001000100000101",
     "0048e1e62": "70080000000000003c0024003c00240001001000620000000000000001000100000101",
     "00800265f": "00600000000000004000400040004000010040005f0000000000000001000100000101",
-    "00800aa62": "0055000000000500000100014000400004001401620000000000000001000400020101",
+    "00800aa62": "0055000000000500000400010001400001001001620000000000000001000400020101",
+    "00800aa63": "0055000000000500000400010001400001009100630000000000000001000400020101",
     "00801fe5f": "807f0000000000004000400040004000010040005f0000000000000001000400000101",
-    "010015548": "80aa000000000a00000800020002800001009100480000000000000001000500020101",
+    "010015548": "80aa000000000200000400010002800001001112480000000000000001000500010101",
     "01002aa48": "4055000000000000000180000001800001009100480000000000000001000500000101",
     "01002ea62": "4055000000000500000200028000800001001001620000000000000001000500020101",
-    "01002ea63": "4055000000000100000100018000800001009100630000000000000001000500010303",
+    "01002ea63": "4055000000000500000200028000800001009100630000000000000001000500020101",
+    "01003ff62": "c0ff000000000f00000200028000800003001401620000000000000001000500020101",
     "011866d62": "20a6020000000000d8048c00d8048c0001001000620000000000000001000100000101",
     "0200100c7": "0000010000000000000200010002000101001000470000000000000001000100000101",
     "02001ffff": "80ff0700000078000004000400010001010040005f0000000000000001000600020101",
     "02002aad0": "4055010000000000000100010001000102001608500000000000000001000600000303",
-    "02002aae3": "4055010000001400000400040001000101001132630000000000000001000600020101",
-    "02005d547": "a0aa000000000a00000400040001000101001000470000000000000001000600020101",
-    "02005d548": "a0aa000000000200000200020001000101009100480000000000000001000600010101",
+    "02002aae2": "4055010000001400000400040001000101001001620000000000000001000600020101",
+    "02002aae3": "4055010000001400000400040001000101009100630000000000000001000600020101",
+    "02005d547": "a0aa000000000000000100010001000101001000470000000000000001000604000101",
+    "02005d548": "a0aa000000000a00000400040001000101001112480000000000000001000600020101",
     "0208bfd47": "d0b6000000000000680104016801040101001000470000000000000001000100000101",
     "03685ee47": "2065020000000000d002b401d002b40101001000470000000000000001000100000101",
     "03980fc62": "003f0200000000004001cc014001cc0101001000620000000000000001000100000101",
+    "040010150": "0080020000002800000800080002000201001000500000000000000001000200020101",
     "040015547": "80aa000000000a00000200088000000201001000470000000000000001000500020101",
     "040015548": "80aa000000000a00000200088000000201001100480000000000000001000500020101",
     "04002aac8": "4055010000001400000400080001000201001100480000000000000001000600020101",
+    "04003aae2": "4055050000005000000800080002000201001001620000000000000001000700020101",
     "04003aae3": "4055050000005000000800080002000201009100630000000000000001000700020101",
+    "040055547": "a0aa020000002800000800080002000201001000470000000000000001000700020101",
+    "040055548": "a0aa020000002800000800080002000201009100480000000000000001000700020101",
     "040055550": "a0aa020000002800000800080002000201001000500000000000000001000700020101",
     "04007ffe8": "e0ff070000007800000800080002000203009500480000000000000001000704020101",
     "08002005f": "00006000000000000004000400040004010042085f0000000000000001000100000101",
@@ -586,25 +869,32 @@
     "0048e1e62": "ui_textures_buttons_ps4_key_6.texture",
     "00800265f": "material_atmosphere_atm_bsm_sky_night_night_irradiance_map_fog_04.texture",
     "00800aa62": "characters_hero_hero_spiderman_TASM_textures_hero_spiderman_tasm_textile_red_01_n.texture",
+    "00800aa63": "textures_concrete_jn_damaged_concrete_rv_gbl_concrete_edge_damage_01_c.texture",
     "00801fe5f": "material_atmosphere_atm_bsm_sky_night_night_irradiance_map_fog_01.texture",
     "010015548": "materialtemplates_jtuason_jt_times_square_billboard_textures_dailygrind_times_sq_20x8_02_c.texture",
     "01002aa48": "textures_gzumberge_gz_flag_gz_flag_rainbow_01_c.texture",
     "01002ea62": "characters_ambient_amb_rat_textures_amb_rat_n.texture",
     "01002ea63": "characters_civilians_civ_male_student_textures_civ_esu_logo_01_c.texture",
+    "01003ff62": "characters_hero_hero_spiderman_futurefoundation_textures_hero_spiderman_futurefoundation_detailarray_n_0.texture",
     "011866d62": "ui_textures_weather_stations_main_panel_data.texture",
     "0200100c7": "ui_textures_newspapers_thumbnails_ctns_dailybugle_hh_lockedup_tight_02.texture",
     "02001ffff": "material_atmosphere_atm_bsm_sky_night_4k_nightcloudy_nosunspot_1_hdr.texture",
     "02002aad0": "textures_effects_i20_masks_spirit_spider_skull_01.texture",
+    "02002aae2": "characters_hero_hero_spiderman_futurefoundation_textures_hero_spiderman_futurefoundation_lens_inner_n.texture",
     "02002aae3": "characters_hero_hero_spiderman_bagman_textures_hero_spiderman_bagman_body_g.texture",
     "02005d547": "materialtemplates_jtuason_jt_research_screen_01_textures_jt_research_screen_01_bars_mask.texture",
     "02005d548": "characters_ambient_amb_rat_textures_amb_rat_c.texture",
     "0208bfd47": "ui_textures_pause_character_suit_mk4.texture",
     "03685ee47": "ui_textures_hud_notifications_img_research_station.texture",
     "03980fc62": "ui_textures_weather_stations_side_panel_data.texture",
+    "040010150": "characters_npc_npc_police_heads_texture_npc_police_warden_hair_a.texture",
     "040015547": "materialtemplates_jtuason_jt_times_square_billboard_textures_hauteunlimited_sign_times_sq_8x20_logo.texture",
     "040015548": "materialtemplates_jtuason_jt_times_square_billboard_textures_hauteunlimited_sign_times_sq_8x20_03.texture",
     "04002aac8": "textures_signs_movie_posters_mp_mandarkpast.texture",
+    "04003aae2": "characters_hero_hero_spiderman_futurefoundation_textures_hero_spiderman_futurefoundation_mask_detailmask.texture",
     "04003aae3": "characters_hero_hero_spiderman_futurefoundation_textures_hero_spiderman_futurefoundation_feet_c.texture",
+    "040055547": "characters_civilians_civ_male_homeless_textures_civ_male_homeless_militaryjacket_n.texture",
+    "040055548": "characters_civilians_civ_male_homeless_textures_civ_male_homelesstshirt_c.texture",
     "040055550": "characters_hero_hero_spiderman_stealth_textures_hero_spiderman_stealth_glow_h.texture",
     "04007ffe8": "characters_shared_textures_detail_hero_spiderman_damage_c.texture",
     "08002005f": "material_atmosphere_atm_bsm_sky_night_sky_night_2_16bit.texture",
@@ -612,5 +902,32 @@
     "08003fffe": "characters_hero_hero_peterparker_heads_textures_hero_peterparker_head_wm1_n.texture",
     "08010005f": "material_atmosphere_atm_bsm_sky_night_8k_nightsky1.texture",
     "100055554": "characters_hero_hero_peterparker_heads_textures_hero_peterparker_detail_v.texture"
+  },
+  "suffixes": {
+    "c": [
+      "00800aa63",
+      "010015548",
+      "01002ea63",
+      "02002aae3",
+      "02005d548",
+      "04003aae3",
+      "040055548",
+      "04007ffe8"
+    ],
+    "g": [
+      "010015548",
+      "02002aae3",
+      "02005d548",
+      "04003aae3",
+      "040055548"
+    ],
+    "n": [
+      "00800aa62",
+      "01002ea62",
+      "02002aae2",
+      "02005d547",
+      "04003aae2",
+      "040055547"
+    ]
   }
 }

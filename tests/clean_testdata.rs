@@ -17,13 +17,14 @@ fn clean_testdata() -> Result<()> {
     let Inputs { textures, .. } = spidertexlib::inputs::gather(testdata_images);
     for Categorized { files, .. } in textures {
         for file in files {
-            if file.as_str().contains(".custom.") {
+            if file.as_str().contains(".custom.") || file.as_str().contains(".customhd.") {
                 event!(TRACE, "Removing old import {file}");
                 std::fs::remove_file(file)?;
+            } else {
+                event!(TRACE, file = %file.as_str())
             }
         }
     }
-
     let Inputs { images, textures } = spidertexlib::inputs::gather(testdata_textures);
     for Categorized { files, .. } in images {
         for file in files {

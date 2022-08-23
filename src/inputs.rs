@@ -59,6 +59,7 @@ pub struct Inputs {
 }
 
 impl Inputs {
+    #[must_use]
     pub fn default_action(&self) -> Action {
         if self.textures.len() > self.images.len() {
             Action::Export
@@ -74,6 +75,48 @@ impl Inputs {
     #[inline]
     #[must_use]
     pub fn len(&self) -> usize { self.textures.len() + self.images.len() }
+
+    pub fn add_pairs(&mut self) {
+        for texture in &mut self.textures {
+            texture.files.retain(|f| {
+                if f.as_str().contains(".custom") {
+                    event!(WARN, "Skipping {f}");
+                    false
+                } else {
+                    true
+                }
+            });
+
+            let set = BTreeSet::from_iter(&texture.files);
+            let mut extras = Vec::new();
+
+            if let Some((file, base_name)) = texture.files.first().map(|f| (f, base_name(f))) {
+                let raw = Utf8Path::new(base_name).with_extension("raw");
+                if !set.contains(&raw) && raw.exists() {
+                    event!(DEBUG, "Adding {raw}");
+                    extras.push(raw);
+                 }
+                 let hd = Utf8PathBuf::from(format!("{base_name}_hd.texture"));
+                 if !set.contains(&hd) && hd.exists() {
+                     event!(DEBUG, "Adding {hd}");
+                     extras.push(hd);
+                 }
+                 let hd2 = Utf8PathBuf::from(format!("{base_name}.hd.texture"));
+                 if !set.contains(&hd2) && hd2.exists() {
+                     event!(DEBUG, "Adding {hd2}");
+                     extras.push(hd2);
+                 }
+                 let texture = Utf8PathBuf::from(format!("{base_name}.texture"));
+                 if !set.contains(&texture) && texture.exists() {
+                     event!(DEBUG, "Adding {texture}");
+                     extras.push(texture);
+                 }
+              }
+            if !extras.is_empty() {
+                texture.files.extend(extras);
+            }
+        }
+    }
 }
 
 pub struct InputsIter {
@@ -199,12 +242,13 @@ pub fn walk<'a>(
 ) -> impl Iterator<Item = Utf8PathBuf> + 'a {
     let mut walker = WalkArgs::new(iter);
 
-    std::iter::from_fn(move || {
-        while let Some(next) = walker.next() {
-            if !next.as_str().contains(".custom.") {
-                return Some(next);
-            }
-        }
-        None
-    })
+    walker
+    // std::iter::from_fn(move || {
+    //     while let Some(next) = walker.next() {
+    //         if !next.as_str().contains(".custom.") {
+    //             return Some(next);
+    //         }
+    //     }
+    //     None
+    // })
 }

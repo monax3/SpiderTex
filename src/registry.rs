@@ -74,6 +74,8 @@ pub struct Registry {
     pub raw_headers: BTreeMap<FormatId, String>,
     #[serde(default)]
     pub examples:    BTreeMap<FormatId, String>,
+    #[serde(default)]
+    pub suffixes: BTreeMap<String, BTreeSet<FormatId>>
 }
 
 impl Registry {
@@ -132,27 +134,32 @@ impl Registry {
     #[inline]
     pub fn load() -> Result<Self> { Ok(Self::default()) }
 
-    #[must_use]
+    #[cfg(disabled)]
     pub fn get_override(&self, file: &Utf8Path) -> Option<TextureFormat> {
-        let size = std::fs::metadata(file).ok()?.len() as usize;
-        let file_stem = file.file_stem()?;
-
-        if file_stem.ends_with("_g") {
-            event!(DEBUG, ?file_stem, ?size);
-        }
-
-        let format = if file_stem.ends_with("_g") && size == 327_680 {
-            Some(registry::get(FormatId(0x800_aa62)))
-        } else {
-            None
-        };
-
-        let format = *format?;
-        Some(TextureFormat {
-            source: Source::FromFilename,
-            ..format
-        })
+        None
     }
+
+    // #[must_use]
+    // pub fn get_override(&self, file: &Utf8Path) -> Option<TextureFormat> {
+    //     let size = std::fs::metadata(file).ok()?.len() as usize;
+    //     let file_stem = file.file_stem()?;
+
+    //     if file_stem.ends_with("_g") {
+    //         event!(DEBUG, ?file_stem, ?size);
+    //     }
+
+    //     let format = if file_stem.ends_with("_g") && size == 327_680 {
+    //         Some(registry::get(FormatId(0x800_aa62)))
+    //     } else {
+    //         None
+    //     };
+
+    //     let format = *format?;
+    //     Some(TextureFormat {
+    //         source: Source::FromFilename,
+    //         ..format
+    //     })
+    // }
 
     pub fn make_ref(&mut self, format: TextureFormat) -> &TextureFormat {
         let id = format.id();
@@ -205,16 +212,42 @@ impl Registry {
         self.formats.insert(id, format);
     }
 
+    pub fn update_suffix(&mut self, id: FormatId, file: &Utf8Path) {
+        let stem = file.file_stem().unwrap();
+
+        if let Some(suffix) = stem.rfind('_').map(|pos| &stem[pos + 1..]) {
+            if suffix.chars().all(|c| c.is_ascii_digit()) {
+                return;
+            }
+
+            match suffix {
+                s if s == "c" => (),
+                s if s == "g" => (),
+                s if s == "n" => (),
+                s if s == "v" => (),
+                s if s ==  "damagemask" => return,
+                s if s.len() > 1 => return,
+                _ => { event!(DEBUG, %suffix, %id); return; }
+            }
+        self.suffixes.entry(suffix.to_string()).or_default().insert(id);
+    }
+    }
+
     pub fn update_format(
         &mut self,
         format: impl Into<TextureFormat>,
-        example_file: Option<impl Into<Utf8PathBuf>>,
+        example_file: Option<impl AsRef<Utf8Path>>,
     ) -> FormatId {
         let mut format: TextureFormat = format.into();
+        let example_file = example_file.map(|f| f.as_ref().to_owned());
 
         texture_file::texture_format_overrides(&mut format);
 
         let id = format.id();
+
+        if let Some(example_file) = &example_file {
+            self.update_suffix(id, &example_file);
+        }
 
         self.update_length(format.sd_file_len(), id);
         if let Some(hd_len) = format.hd_len() {
@@ -229,7 +262,7 @@ impl Registry {
             event!(TRACE, ?id, ?format, "Inserting format");
             self.formats.insert(id, format);
             if let Some(example_file) =
-                example_file.and_then(|f| f.into().file_name().map(ToOwned::to_owned))
+                example_file.and_then(|f| f.file_name().map(ToOwned::to_owned))
             {
                 self.examples.insert(id, example_file);
             }

@@ -48,7 +48,7 @@ fn load_overrides(registry: &mut Registry) -> Result<()> {
 }
 
 fn main() -> Result<()> {
-    spidertexlib::util::log_for_tests(false);
+    spidertexlib::util::log_for_tests(true);
 
     let mut registry = Registry::load()?;
     load_overrides(&mut registry)?;
@@ -66,6 +66,7 @@ fn main() -> Result<()> {
         {
             let len = std::fs::metadata(&file).map(|m| m.len())? as usize;
 
+            if file.extension().unwrap() == "raw" && file.with_extension("texture").exists() { continue; }
             // FIXME: this should be read_header except we're now gonna do luma detection
             match texture_file::read_texture(&file) {
                 Err(error) => event!(ERROR, %error),
@@ -80,7 +81,8 @@ fn main() -> Result<()> {
                 }
                 Ok((Some(header), data)) => {
                     let mut format = header.to();
-                    if registry.known(format.id()) {
+                    if registry.known(format.id()) && false {
+                        event!(INFO, "Known {format}");
                         registry.replace_format(format);
                     } else {
                         event!(INFO, "Added {format}");
@@ -115,7 +117,7 @@ fn main() -> Result<()> {
                         let id = registry.update_format(format, Some(file));
                         let format = registry.get(id);
 
-                        let expected_size = format.expected_standard_buffer_size();
+                        let expected_size = format.expected_standard_buffer_size_with_mips();
                         if image_size != expected_size {
                             event!(ERROR, "OUTPUT {image_size} != {expected_size}");
                             // if image_size == expected_size * 4 {

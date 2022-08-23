@@ -102,7 +102,7 @@ fn test_expected_size(dx: &DXImage, format: &TextureFormat, highres: bool) {
 fn test() -> Result<()> {
     const EXPORT_TESTDATA: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/testdata/export");
 
-    spidertexlib::util::log_for_tests(false);
+    spidertexlib::util::log_for_tests(true);
 
     registry::load()?;
 

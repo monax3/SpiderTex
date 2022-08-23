@@ -10,6 +10,7 @@ use std::io::BufWriter;
 
 use camino::{Utf8Path, Utf8PathBuf};
 use spidertexlib::dxtex::{DXImage, TEX_FILTER_FLAGS};
+use spidertexlib::files::as_images;
 use spidertexlib::files::{Categorized, FileGroup, FileStatus, OutputFormat, Scanned};
 use spidertexlib::formats::ColorPlanes;
 use spidertexlib::images::Warnings;
@@ -19,8 +20,8 @@ use spidertexlib::rgb::{CONTAINER_PNG, PIXEL_FORMAT_BGR, WIC};
 use spidertexlib::util::{log_for_tests, message_box_error, message_box_ok};
 use spidertexlib::{inputs, APP_TITLE};
 
-fn run(inputs: Inputs) -> Result<(String, Warnings)> {
-    log_for_tests(true);
+fn run(mut inputs: Inputs) -> Result<(String, Warnings)> {
+    inputs.add_pairs();
 
     registry::load()?;
 
@@ -36,6 +37,8 @@ fn run(inputs: Inputs) -> Result<(String, Warnings)> {
 }
 
 fn main() {
+    log_for_tests(true);
+
     match run(inputs::gather_from_args()) {
         Ok((mut message, warnings)) => {
             if !warnings.is_empty() {
@@ -74,7 +77,7 @@ fn export_texture(
 
     let (dimensions, texture_file) = format
         .best_texture(inputs)
-        .ok_or_else(|| Error::message("Internal error: Picked out a format and couldn't use it"))?;
+        .ok_or_else(|| Error::message("Detected a format and it didn't match, the file may be corrupted."))?;
     let all_data = std::fs::read(texture_file)?;
     let texture_data = format.without_header(&all_data);
 
@@ -130,6 +133,7 @@ fn export_textures(groups: impl IntoIterator<Item = Categorized>) -> Result<(Str
     for group in groups {
         let group = FileGroup(group);
         let orig_inputs = group.files.clone();
+        if orig_inputs.is_empty() { continue; }
         let Scanned {
             input,
             output, ..
@@ -138,6 +142,17 @@ fn export_textures(groups: impl IntoIterator<Item = Categorized>) -> Result<(Str
         match (input, output) {
             (FileStatus::Unknown, _) => continue,
             (FileStatus::Ok(new_warnings, inputs), OutputFormat::Exact { format, outputs }) => {
+                let first = orig_inputs.first().unwrap();
+                for warning in new_warnings {
+                    warnings.push(format!("{first}: {warning}"));
+                }
+
+                output_count += export_texture(format, &inputs, &outputs)?;
+                input_count += 1;
+            }
+            (FileStatus::Ok(new_warnings, inputs), OutputFormat::Candidates(candidates)) if candidates.len() == 1 => {
+                let format = *candidates.first().unwrap();
+                let outputs = as_images(&format, &inputs);
                 let first = orig_inputs.first().unwrap();
                 for warning in new_warnings {
                     warnings.push(format!("{first}: {warning}"));
@@ -250,7 +265,7 @@ fn bring_dx_to_format<'a>(
         Ok((image, warnings))
     } else {
         warnings.push(format!("Wrong dimensions ({}x{}), resized to {}x{}", metadata.width, metadata.height, dimensions.width, dimensions.height));
-        event!(WARN, "Resizing to {}x{} from {}x{}", metadata.width, metadata.height, dimensions.width, dimensions.height);
+        event!(WARN, "Resizing to {}x{} from {}x{}", dimensions.width, dimensions.height, metadata.width, metadata.height);
         Ok((Cow::Owned(
             image.resize(dimensions.width, dimensions.height)?,
         ), warnings))
@@ -258,6 +273,7 @@ fn bring_dx_to_format<'a>(
 }
 
 fn load_image_array(
+    array_size: usize,
     compressed_format: DXGI_FORMAT,
     pixel_format: DXGI_FORMAT,
     dimensions: Dimensions,
@@ -277,6 +293,10 @@ fn load_image_array(
             return Ok((dx, warnings));
         }
 
+        if images.len() != array_size {
+            return error_message(format!("This texture contains {} images and only {} files were provided", array_size, images.len()));
+        }
+
         let (image, input_warnings) = bring_dx_to_format( &dx, pixel_format, dimensions).log_failure()?;
         warnings.extend(input_warnings);
         buffer.extend(image.image(0).log_failure()?);
@@ -292,8 +312,12 @@ fn import_image(
 ) -> Result<(usize, Warnings)> {
     let mut output_count = 0;
 
+    let span = span!(TRACE, "import_image", ?format);
+    let _enter = span.enter();
+
     let dimensions = format.dimensions();
     let (image, warnings) = load_image_array(
+        format.array_size,
         format.dxgi_format,
         format.dxgi_format.uncompressed_format(),
         dimensions,
@@ -374,8 +398,8 @@ fn import_image(
             })?;
 
             event!(TRACE, "Writing .texture headers to {output_file}");
-            writer.write_all(bytemuck::bytes_of(&texture_file::FileHeader::default()))?;
-            writer.write_all(bytemuck::bytes_of(&texture_file::TextureHeader::default()))?;
+            writer.write_all(bytemuck::bytes_of(&texture_file::FileHeader::with_length(format.standard.data_size)))?;
+            writer.write_all(bytemuck::bytes_of(&texture_file::TextureHeader::new()))?;
             writer.write_all(texture_file::TEXTURE_TAG)?;
             writer.write_all(bytemuck::bytes_of(
                 &texture_file::FormatHeader::from_hexstring(raw_headers)?,
@@ -393,6 +417,8 @@ fn import_image(
 
 #[test]
 fn test_import() {
+    log_for_tests(true);
+
     let mut inputs = inputs::gather(concat!(env!("CARGO_MANIFEST_DIR"), "/testdata/import"));
     inputs.textures.clear();
 
@@ -406,6 +432,8 @@ fn test_import() {
 
 #[test]
 fn test_export() {
+    log_for_tests(true);
+
     let mut inputs = inputs::gather(concat!(env!("CARGO_MANIFEST_DIR"), "/testdata/export"));
     inputs.images.clear();
 

@@ -47,7 +47,7 @@ pub fn texture_format_overrides(format: &mut TextureFormat) {
 #[repr(C)]
 pub struct Header(FileHeader, TextureHeader, [u8; 20], FormatHeader);
 
-#[derive(Debug, Copy, Clone, Pod, Zeroable, Default)]
+#[derive(Debug, Copy, Clone, Pod, Zeroable)]
 #[repr(C)]
 pub struct FileHeader {
     magic:      [u8; 4],
