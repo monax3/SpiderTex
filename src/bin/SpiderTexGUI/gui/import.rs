@@ -1,12 +1,12 @@
 use camino::{Utf8Path, Utf8PathBuf};
-use color_eyre::eyre::eyre;
-use color_eyre::Result;
 use eframe::egui::{
     vec2,
     Button,
     CentralPanel,
     Context,
+    Event,
     Layout,
+    RadioButton,
     Rect,
     Response,
     RichText,
@@ -14,23 +14,26 @@ use eframe::egui::{
     SidePanel,
     TextStyle,
     Ui,
-    Widget, Event, RadioButton,
+    Widget,
 };
 use eframe::emath::Align;
 use eframe::App;
 use image::DynamicImage;
-use spidertexlib::formats::{FormatDb, FormatKey, TextureFormat};
+use spidertexlib::formats::TextureFormat;
+use spidertexlib::prelude::*;
+use spidertexlib::util;
 
-use crate::preview::Preview;
-use crate::{log, theme, util, widgets};
+use super::preview::Preview;
+use super::{theme, widgets};
+use crate::log;
 
 pub fn import_ui(import_files: Vec<Utf8PathBuf>, common_name: String) -> Result<()> {
-    let format_db = spidertexlib::formats::database::load_database()?;
+    let registry = Registry::load()?;
 
     let import_images: Vec<DynamicImage> = import_files
         .iter()
         .map(|file| image::open(&file))
-        .collect::<Result<_, image::ImageError>>()?;
+        .collect::<Result<_, _>>()?;
 
     let options = eframe::NativeOptions {
         initial_window_size: Some(theme::window_size()),
@@ -40,7 +43,7 @@ pub fn import_ui(import_files: Vec<Utf8PathBuf>, common_name: String) -> Result<
         ..Default::default()
     };
 
-    let selected_format = format_db.formats.keys().next().unwrap().clone();
+    let selected_format = registry.formats.keys().next().unwrap().clone();
 
     let mut title = common_name.clone();
 
@@ -51,14 +54,14 @@ pub fn import_ui(import_files: Vec<Utf8PathBuf>, common_name: String) -> Result<
     let common_name = import_files
         .first()
         .and_then(|f| f.parent())
-        .ok_or_else(|| eyre!("Internal error"))?
+        .ok_or_else(|| Error::message("Internal error"))?
         .join(common_name);
 
     let selections = ImportSelections {
         import_files,
         import_images,
         common_name,
-        format_db,
+        registry,
         selected_format,
         detected_format: None,
     };
@@ -80,6 +83,8 @@ pub fn import_ui(import_files: Vec<Utf8PathBuf>, common_name: String) -> Result<
             Box::new(ui)
         }),
     );
+
+    Ok(())
 }
 
 struct ImportUi {
@@ -94,14 +99,14 @@ enum ImportState {
 }
 
 struct ImportSelections {
-    import_files: Vec<Utf8PathBuf>,
+    import_files:  Vec<Utf8PathBuf>,
     import_images: Vec<DynamicImage>,
-    common_name:  Utf8PathBuf,
+    common_name:   Utf8PathBuf,
 
-    format_db:    FormatDb,
+    registry: Registry,
 
-    detected_format: Option<FormatKey>,
-    selected_format: FormatKey,
+    detected_format: Option<FormatId>,
+    selected_format: FormatId,
 }
 
 fn output_description(format: &TextureFormat) -> &'static str {
@@ -224,21 +229,21 @@ fn preview_state(
             .expect(concat!("Internal error at ", file!(), ":", line!()));
 
     ui.label("Output format:");
-    let items = selections.format_db.formats.len();
+    let items = selections.registry.formats.len();
 
     eframe::egui::ScrollArea::vertical()
         .max_height(max_scroll_height)
         .show_rows(ui, line_height, items, |ui, row_range| {
             ui.set_min_width(ui.available_width());
             let iter = selections
-                .format_db
+                .registry
                 .formats
                 .keys()
                 .skip(row_range.start)
                 .take(row_range.end - row_range.start);
 
             for key in iter {
-                let format = selections.format_db.formats.get(key);
+                let format = selections.registry.formats.get(key);
 
                 let selected = &selections.selected_format == key;
                 let detected = selections
@@ -256,7 +261,8 @@ fn preview_state(
                 }
 
                 let radio = RadioButton::new(selected, text);
-                let enabled = format.map_or(true, |f| f.array_size == selections.import_files.len());
+                let enabled =
+                    format.map_or(true, |f| f.array_size == selections.import_files.len());
 
                 if ui.add_enabled(enabled, radio).clicked() {
                     if selections.detected_format.is_none() {
@@ -268,30 +274,23 @@ fn preview_state(
         });
 
     ui.group(|ui| {
-        let format = selections
-            .format_db
-            .formats
-            .get(&selections.selected_format);
+        let format = selections.registry.get(selections.selected_format);
 
-        if let Some(format) = format {
-            // ui.label(output_description(format));
-            // ui.separator();
+        // ui.label(output_description(format));
+        // ui.separator();
 
-            let files = name_output_files(&selections.common_name);
+        let files = name_output_files(&selections.common_name);
 
-            if format.has_highres() {
-                ui.label("Using this format will create the following files:");
-                ui.add_space(theme::EXTRA_SPACING);
-                ui.label(theme::highlight_text(files[0].file_name().unwrap()));
-                ui.add_space(theme::EXTRA_SPACING);
-                ui.label(theme::highlight_text(files[1].file_name().unwrap()));
-            } else {
-                ui.label("Using format will create the following file:");
-                ui.add_space(theme::EXTRA_SPACING);
-                ui.label(theme::highlight_text(files[0].file_name().unwrap()));
-            }
+        if format.has_highres() {
+            ui.label("Using this format will create the following files:");
+            ui.add_space(theme::EXTRA_SPACING);
+            ui.label(theme::highlight_text(files[0].file_name().unwrap()));
+            ui.add_space(theme::EXTRA_SPACING);
+            ui.label(theme::highlight_text(files[1].file_name().unwrap()));
         } else {
-            ui.label("An internal error has occurred. Please contact the author of this program.");
+            ui.label("Using format will create the following file:");
+            ui.add_space(theme::EXTRA_SPACING);
+            ui.label(theme::highlight_text(files[0].file_name().unwrap()));
         }
     });
 
@@ -335,8 +334,19 @@ fn debug_notification(ui: &mut Ui, mut rect: Rect) {
 
     let fill = ui.visuals().widgets.noninteractive.bg_fill;
 
-    painter.rect(rect, eframe::egui::Rounding::same(10.0), fill, eframe::egui::Stroke::new(2.0, eframe::egui::Color32::RED));
-    painter.text(rect.center(), eframe::egui::Align2::CENTER_CENTER, "DEBUG MODE", eframe::egui::FontId::monospace(24.0), eframe::egui::Color32::RED);
+    painter.rect(
+        rect,
+        eframe::egui::Rounding::same(10.0),
+        fill,
+        eframe::egui::Stroke::new(2.0, eframe::egui::Color32::RED),
+    );
+    painter.text(
+        rect.center(),
+        eframe::egui::Align2::CENTER_CENTER,
+        "DEBUG MODE",
+        eframe::egui::FontId::monospace(24.0),
+        eframe::egui::Color32::RED,
+    );
 }
 
 use std::sync::mpsc::{channel, Receiver, Sender};
@@ -348,18 +358,14 @@ fn launch_import(ctx: &Context, selections: Box<ImportSelections>) -> Receiver<R
 
     std::thread::spawn(move || {
         let result = util::catch_panics(move || {
-            let format = selections
-                .format_db
-                .formats
-                .get(&selections.selected_format)
-                .expect("Internal error");
+            let format = selections.registry.get(selections.selected_format);
 
             // let [sd_name, hd_name] = name_output_files(&selections.import_file);
 
             spidertexlib::convert_to_texture(
                 format,
                 &selections.import_images,
-                name_output_files(&selections.common_name)
+                name_output_files(&selections.common_name),
             )
         });
 

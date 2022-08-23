@@ -1,6 +1,4 @@
 use camino::{Utf8Path, Utf8PathBuf};
-use color_eyre::eyre::eyre;
-use color_eyre::Result;
 use eframe::egui::{
     vec2,
     Button,
@@ -18,17 +16,22 @@ use eframe::egui::{
     Ui,
     Widget,
 };
-
 use eframe::emath::Align;
 use eframe::{App, Frame};
 use image::DynamicImage;
-use spidertexlib::formats::{probe_textures, FormatDb, FormatKey, TextureFormat};
+use spidertexlib::formats::{probe_textures_2, TextureFormat};
+use spidertexlib::prelude::*;
 
-use crate::preview::Preview;
-use crate::{log, theme, util, widgets};
+use super::preview::Preview;
+use super::{theme, widgets};
+use crate::log;
 
 pub fn export_ui(export_files: Vec<Utf8PathBuf>, common_name: String) -> Result<()> {
-    let (detected_format, smallest_file, image_buffer, format_db) = probe_textures(&export_files)?;
+    let mut registry = Registry::load()?;
+
+    let (detected_formats, smallest_file, image_buffer) =
+        probe_textures_2(&mut registry, &export_files)?;
+    let detected_formats: Vec<TextureFormat> = detected_formats.into_iter().cloned().collect();
 
     let options = eframe::NativeOptions {
         initial_window_size: Some(theme::window_size()),
@@ -38,10 +41,10 @@ pub fn export_ui(export_files: Vec<Utf8PathBuf>, common_name: String) -> Result<
         ..Default::default()
     };
 
-    let selected_format = detected_format
-        .as_ref()
-        .or_else(|| format_db.formats.values().next())
-        .map(Clone::clone)
+    let selected_format = detected_formats
+        .first()
+        .cloned()
+        .or_else(|| registry.formats.values().next().cloned())
         .expect("export_ui: Failed to select a format");
 
     let mut title = common_name.clone();
@@ -59,8 +62,8 @@ pub fn export_ui(export_files: Vec<Utf8PathBuf>, common_name: String) -> Result<
         export_files,
         image_buffer,
         common_name,
-        format_db,
-        detected_format,
+        registry,
+        detected_formats,
         selected_format,
     };
 
@@ -86,6 +89,7 @@ pub fn export_ui(export_files: Vec<Utf8PathBuf>, common_name: String) -> Result<
             Box::new(ui)
         }),
     );
+    Ok(())
 }
 
 struct ExportUi {
@@ -105,10 +109,10 @@ struct ExportSelections {
 
     common_name: Utf8PathBuf,
 
-    format_db: FormatDb,
+    registry: Registry,
 
-    detected_format: Option<TextureFormat>,
-    selected_format: TextureFormat,
+    detected_formats: Vec<TextureFormat>,
+    selected_format:  TextureFormat,
 }
 
 impl App for ExportUi {

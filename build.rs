@@ -7,6 +7,7 @@ fn main() {
 
     println!(r"cargo:rustc-link-search={}", env!("CARGO_MANIFEST_DIR"));
     println!(r"cargo:rustc-link-lib=static=DXTexWrapper");
+    println!("cargo:rerun-if-changed=DXTexWrapper.lib");
 
     let mut res = winres::WindowsResource::new();
 
@@ -19,7 +20,7 @@ fn main() {
         "/app_manifest.xml"
     )));
 
-    res.set_icon("spidertex32.ico");
+    res.set_icon("SpiderTex.ico");
 
     res.compile().expect("Failed to compile resources");
 }

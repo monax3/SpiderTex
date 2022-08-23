@@ -1,34 +1,56 @@
 [package]
 name = "SpiderTex"
-version = "1.0.0-beta4"
+description = "A texture tool for the PC version of Marvel's Spider-Man Remastered "
+version = "1.1.0-beta1"
 edition = "2021"
 authors = ["mona"]
 license = "MIT or Apache-2.0"
-default-run = "SpiderTex"
+default-run = "SpiderTexGUI"
+repository = "https://github.com/monax3/SpiderTex"
+categories = ["game-development"]
+keywords = ["textures", "spider-man"]
 
 [lib]
 name = "spidertexlib"
 
 [dependencies]
-base64 = "0.13.0"
-color-eyre = { version = "0.6.2", default-features = false }
-serde = { version = "1.0.143", features = ["derive"] }
-serde_json = "1.0.83"
-zerocopy = { version = "0.6.1", features = ["alloc"] }
-image = { version = "0.24.3", default-features = false, features = ["png", "tga"] }
+serde = { version = "1.0.144", features = ["derive"] }
+serde_json = "1.0.85"
+image = { version = "0.24.3", default-features = false, features = [
+    "png",
+    "tga",
+    "bmp",
+    "webp"
+] }
 windows = { version = "0.39.0", features = [
     "Win32_Foundation",
-    "Win32_UI_WindowsAndMessaging",
     "Win32_Graphics_Dxgi_Common",
+    "Win32_Graphics_Imaging",
+    "Win32_Graphics_Imaging_D2D",
+    "Win32_System_Com",
+    "Win32_UI_Shell_Common",
+    "Win32_UI_Shell",
+    "Win32_UI_WindowsAndMessaging",
+    "Win32_System_Com_StructuredStorage",
+    "Win32_System_SystemServices",
 ] }
 hex = "0.4.3"
 camino = "1.1.1"
-egui_extras = { version = "0.18.0", features = ["image"] }
-eframe = "0.18.0"
+eframe = "0.19.0"
 tracing = "0.1.36"
 tracing-subscriber = "0.3.15"
-bytemuck = { version = "1.12.1", features = ["derive"] }
+bytemuck = { version = "1.12.1", features = ["derive", "extern_crate_std"] }
+thiserror = "1.0.32"
+backtrace = "0.3.66"
+parking_lot = { version = "0.12.1", features = ["hardware-lock-elision"] }
+regex = "1.6.0"
 
 [build-dependencies]
 vcpkg = "0.2.15"
 winres = "0.1.12"
+
+[features]
+rebuild-registry = []
+debug-inputs = []
+debug-formats = []
+disable-wic = []

@@ -1,53 +1,319 @@
 {
   "formats": {
-    "BC1 Rgba 360x260/1": {
-      "example_file": "ui_textures_pause_character_suit_mk4.texture",
-      "format": 71,
+    "00021101c": {
+      "dxgi_format": 28,
       "standard": {
-        "data_size": 46800,
-        "width": 360,
-        "height": 260,
+        "data_size": 2048,
+        "width": 512,
+        "height": 1,
+        "mipmaps": 1
+      }
+    },
+    "00022081c": {
+      "dxgi_format": 28,
+      "standard": {
+        "data_size": 64,
+        "width": 16,
+        "height": 1,
+        "mipmaps": 1
+      }
+    },
+    "00022081d": {
+      "dxgi_format": 29,
+      "standard": {
+        "data_size": 4096,
+        "width": 1024,
+        "height": 1,
+        "mipmaps": 1
+      }
+    },
+    "00400105c": {
+      "dxgi_format": 28,
+      "standard": {
+        "data_size": 131072,
+        "width": 32,
+        "height": 32,
         "mipmaps": 1
       },
-      "planes": "Rgba",
-      "array_size": 1,
-      "raw_headers": "d0b6000000000000680104016801040101001000470000000000000001000100000101010000000000000000"
+      "array_size": 32
     },
-    "BC1 sRGB Rgba 256x128/5": {
-      "example_file": "textures_gzumberge_gz_flag_gz_flag_rainbow_01_c.texture",
-      "format": 72,
+    "00488b262": {
+      "dxgi_format": 98,
+      "standard": {
+        "data_size": 1296,
+        "width": 36,
+        "height": 36,
+        "mipmaps": 1
+      }
+    },
+    "00489b262": {
+      "dxgi_format": 98,
+      "standard": {
+        "data_size": 2448,
+        "width": 68,
+        "height": 36,
+        "mipmaps": 1
+      }
+    },
+    "0048e1e62": {
+      "dxgi_format": 98,
+      "standard": {
+        "data_size": 2160,
+        "width": 60,
+        "height": 36,
+        "mipmaps": 1
+      }
+    },
+    "00800265f": {
+      "dxgi_format": 95,
+      "standard": {
+        "data_size": 24576,
+        "width": 64,
+        "height": 64,
+        "mipmaps": 1
+      },
+      "array_size": 6
+    },
+    "00800aa62": {
+      "dxgi_format": 98,
+      "standard": {
+        "data_size": 21760,
+        "width": 64,
+        "height": 64,
+        "mipmaps": 4
+      },
+      "highres": {
+        "data_size": 327680,
+        "width": 256,
+        "height": 256,
+        "mipmaps": 2
+      },
+      "array_size": 4
+    },
+    "00801fe5f": {
+      "dxgi_format": 95,
+      "standard": {
+        "data_size": 32640,
+        "width": 64,
+        "height": 64,
+        "mipmaps": 4
+      },
+      "array_size": 6
+    },
+    "010015548": {
+      "dxgi_format": 72,
+      "standard": {
+        "data_size": 43648,
+        "width": 512,
+        "height": 128,
+        "mipmaps": 5
+      }
+    },
+    "01002aa48": {
+      "dxgi_format": 72,
       "standard": {
         "data_size": 21824,
         "width": 256,
         "height": 128,
         "mipmaps": 5
-      },
-      "planes": "Rgba",
-      "array_size": 1,
-      "raw_headers": "4055000000000000000180000001800001009100480000000000000001000500000101010000000000000000"
+      }
     },
-    "BC4 Luma 2048x2048/9 8192x8192/2": {
-      "example_file": "characters_hero_hero_peterparker_heads_textures_hero_peterparker_detail_v.texture",
-      "format": 80,
+    "01002ea62": {
+      "dxgi_format": 98,
       "standard": {
-        "data_size": 2796192,
-        "width": 2048,
-        "height": 2048,
-        "mipmaps": 9
+        "data_size": 21824,
+        "width": 128,
+        "height": 128,
+        "mipmaps": 5
       },
       "highres": {
-        "data_size": 41943040,
-        "width": 8192,
-        "height": 8192,
+        "data_size": 327680,
+        "width": 512,
+        "height": 512,
+        "mipmaps": 2
+      }
+    },
+    "01002ea63": {
+      "dxgi_format": 99,
+      "standard": {
+        "data_size": 21824,
+        "width": 128,
+        "height": 128,
+        "mipmaps": 5
+      },
+      "highres": {
+        "data_size": 65536,
+        "width": 256,
+        "height": 256,
+        "mipmaps": 1
+      }
+    },
+    "011866d62": {
+      "dxgi_format": 98,
+      "standard": {
+        "data_size": 173600,
+        "width": 1240,
+        "height": 140,
+        "mipmaps": 1
+      }
+    },
+    "0200100c7": {
+      "dxgi_format": 71,
+      "standard": {
+        "data_size": 65536,
+        "width": 512,
+        "height": 256,
+        "mipmaps": 1
+      }
+    },
+    "02001ffff": {
+      "dxgi_format": 95,
+      "standard": {
+        "data_size": 524160,
+        "width": 256,
+        "height": 256,
+        "mipmaps": 6
+      },
+      "highres": {
+        "data_size": 7864320,
+        "width": 1024,
+        "height": 1024,
         "mipmaps": 2
       },
-      "planes": "Luma",
-      "array_size": 1,
-      "raw_headers": "a0aa2a0000008002002000200008000801001012500000000000000001000900020101010000000000000000"
+      "array_size": 6
     },
-    "BC4 Rgba 512x512/7 2048x2048/2": {
-      "example_file": "characters_hero_hero_spiderman_stealth_textures_hero_spiderman_stealth_glow_h.texture",
-      "format": 80,
+    "02002aad0": {
+      "dxgi_format": 80,
+      "standard": {
+        "data_size": 87360,
+        "width": 256,
+        "height": 256,
+        "mipmaps": 6
+      },
+      "array_size": 2
+    },
+    "02002aae3": {
+      "dxgi_format": 99,
+      "standard": {
+        "data_size": 87360,
+        "width": 256,
+        "height": 256,
+        "mipmaps": 6
+      },
+      "highres": {
+        "data_size": 1310720,
+        "width": 1024,
+        "height": 1024,
+        "mipmaps": 2
+      }
+    },
+    "02005d547": {
+      "dxgi_format": 71,
+      "standard": {
+        "data_size": 43680,
+        "width": 256,
+        "height": 256,
+        "mipmaps": 6
+      }
+    },
+    "02005d548": {
+      "dxgi_format": 72,
+      "standard": {
+        "data_size": 43680,
+        "width": 256,
+        "height": 256,
+        "mipmaps": 6
+      }
+    },
+    "0208bfd47": {
+      "dxgi_format": 71,
+      "standard": {
+        "data_size": 46800,
+        "width": 360,
+        "height": 260,
+        "mipmaps": 1
+      }
+    },
+    "03685ee47": {
+      "dxgi_format": 71,
+      "standard": {
+        "data_size": 156960,
+        "width": 720,
+        "height": 436,
+        "mipmaps": 1
+      }
+    },
+    "03980fc62": {
+      "dxgi_format": 98,
+      "standard": {
+        "data_size": 147200,
+        "width": 320,
+        "height": 460,
+        "mipmaps": 1
+      }
+    },
+    "040015547": {
+      "dxgi_format": 71,
+      "standard": {
+        "data_size": 43648,
+        "width": 128,
+        "height": 512,
+        "mipmaps": 5
+      },
+      "highres": {
+        "data_size": 655360,
+        "width": 512,
+        "height": 2048,
+        "mipmaps": 2
+      }
+    },
+    "040015548": {
+      "dxgi_format": 72,
+      "standard": {
+        "data_size": 43648,
+        "width": 128,
+        "height": 512,
+        "mipmaps": 5
+      },
+      "highres": {
+        "data_size": 655360,
+        "width": 512,
+        "height": 2048,
+        "mipmaps": 2
+      }
+    },
+    "04002aac8": {
+      "dxgi_format": 72,
+      "standard": {
+        "data_size": 87360,
+        "width": 256,
+        "height": 512,
+        "mipmaps": 6
+      },
+      "highres": {
+        "data_size": 1310720,
+        "width": 1024,
+        "height": 2048,
+        "mipmaps": 2
+      }
+    },
+    "04003aae3": {
+      "dxgi_format": 99,
+      "standard": {
+        "data_size": 349504,
+        "width": 512,
+        "height": 512,
+        "mipmaps": 7
+      },
+      "highres": {
+        "data_size": 5242880,
+        "width": 2048,
+        "height": 2048,
+        "mipmaps": 2
+      }
+    },
+    "040055550": {
+      "dxgi_format": 80,
       "standard": {
         "data_size": 174752,
         "width": 512,
@@ -59,27 +325,46 @@
         "width": 2048,
         "height": 2048,
         "mipmaps": 2
-      },
-      "planes": "Rgba",
-      "array_size": 1,
-      "raw_headers": "a0aa020000002800000800080002000201001000500000000000000001000700020101010000000000000000"
+      }
     },
-    "BC7 Bgra 36x36/1": {
-      "example_file": "ui_textures_buttons_ps4_key_1.texture",
-      "format": 98,
+    "04007ffe8": {
+      "dxgi_format": 72,
       "standard": {
-        "data_size": 1296,
-        "width": 36,
-        "height": 36,
+        "data_size": 524256,
+        "width": 512,
+        "height": 512,
+        "mipmaps": 7
+      },
+      "highres": {
+        "data_size": 7864320,
+        "width": 2048,
+        "height": 2048,
+        "mipmaps": 2
+      },
+      "array_size": 3
+    },
+    "08002005f": {
+      "dxgi_format": 95,
+      "standard": {
+        "data_size": 6291456,
+        "width": 1024,
+        "height": 1024,
         "mipmaps": 1
       },
-      "planes": "Bgra",
-      "array_size": 1,
-      "raw_headers": "1005000000000000240024002400240001001000620000000000000001000100000101010000000000000000"
+      "array_size": 6
     },
-    "BC7 Rgba 1024x1024/8 4096x4096/2 x3": {
-      "example_file": "characters_hero_hero_peterparker_heads_textures_hero_peterparker_head_wm1_n.texture",
-      "format": 98,
+    "080021fff": {
+      "dxgi_format": 95,
+      "standard": {
+        "data_size": 8386560,
+        "width": 1024,
+        "height": 1024,
+        "mipmaps": 6
+      },
+      "array_size": 6
+    },
+    "08003fffe": {
+      "dxgi_format": 98,
       "standard": {
         "data_size": 4194240,
         "width": 1024,
@@ -92,62 +377,240 @@
         "height": 4096,
         "mipmaps": 2
       },
-      "planes": "Rgba",
-      "array_size": 3,
-      "raw_headers": "c0ff3f000000c00300100010000400040300140162000000000000bf01000800020101010000000000000000"
+      "array_size": 3
     },
-    "BC7 sRGB Rgba 256x256/6 1024x1024/2": {
-      "example_file": "characters_hero_hero_spiderman_textures_hero_spiderman_glove_c.texture",
-      "format": 99,
+    "08010005f": {
+      "dxgi_format": 95,
       "standard": {
-        "data_size": 87360,
-        "width": 256,
-        "height": 256,
-        "mipmaps": 6
-      },
-      "highres": {
-        "data_size": 1310720,
-        "width": 1024,
+        "data_size": 8388608,
+        "width": 8192,
         "height": 1024,
-        "mipmaps": 2
-      },
-      "planes": "Rgba",
-      "array_size": 1,
-      "raw_headers": "4055010000001400000400040001000101009100630000000000000002000600020101010000000000000000"
+        "mipmaps": 1
+      }
     },
-    "BC7 sRGB Rgba 512x512/7 2048x2048/2": {
-      "example_file": "characters_hero_hero_spiderman_ironspider_textures_hero_spiderman_ironspider_armortorso_c.texture",
-      "format": 99,
+    "100055554": {
+      "dxgi_format": 80,
       "standard": {
-        "data_size": 349504,
-        "width": 512,
-        "height": 512,
-        "mipmaps": 7
-      },
-      "highres": {
-        "data_size": 5242880,
+        "data_size": 2796192,
         "width": 2048,
         "height": 2048,
-        "mipmaps": 2
+        "mipmaps": 9
       },
-      "planes": "Rgba",
-      "array_size": 1,
-      "raw_headers": "4055050000005000000800080002000201009100630000000000000001000700020101010000000000000000"
+      "highres": {
+        "data_size": 41943040,
+        "width": 8192,
+        "height": 8192,
+        "mipmaps": 2
+      }
     }
   },
   "lengths": {
-    "1424": "BC7 Bgra 36x36/1",
-    "21952": "BC1 sRGB Rgba 256x128/5",
-    "46928": "BC1 Rgba 360x260/1",
-    "87488": "BC7 sRGB Rgba 256x256/6 1024x1024/2",
-    "174880": "BC4 Rgba 512x512/7 2048x2048/2",
-    "349632": "BC7 sRGB Rgba 512x512/7 2048x2048/2",
-    "1310720": "BC7 sRGB Rgba 256x256/6 1024x1024/2",
-    "2621440": "BC4 Rgba 512x512/7 2048x2048/2",
-    "2796320": "BC4 Luma 2048x2048/9 8192x8192/2",
-    "4194368": "BC7 Rgba 1024x1024/8 4096x4096/2 x3",
-    "5242880": "BC7 sRGB Rgba 512x512/7 2048x2048/2",
-    "41943040": "BC4 Luma 2048x2048/9 8192x8192/2",
-    "62914560": "BC7 Rgba 1024x1024/8 4096x4096/2 x3"
+    "192": [
+      "00022081c"
+    ],
+    "1424": [
+      "00488b262"
+    ],
+    "2176": [
+      "00021101c"
+    ],
+    "2288": [
+      "0048e1e62"
+    ],
+    "2576": [
+      "00489b262"
+    ],
+    "4224": [
+      "00022081d"
+    ],
+    "21888": [
+      "00800aa62"
+    ],
+    "21952": [
+      "01002aa48",
+      "01002ea62",
+      "01002ea63"
+    ],
+    "24704": [
+      "00800265f"
+    ],
+    "32768": [
+      "00801fe5f"
+    ],
+    "43776": [
+      "010015548",
+      "040015547",
+      "040015548"
+    ],
+    "43808": [
+      "02005d547",
+      "02005d548"
+    ],
+    "46928": [
+      "0208bfd47"
+    ],
+    "65536": [
+      "01002ea63"
+    ],
+    "65664": [
+      "0200100c7"
+    ],
+    "87488": [
+      "02002aad0",
+      "02002aae3",
+      "04002aac8"
+    ],
+    "131072": [
+      "02005d548"
+    ],
+    "131200": [
+      "00400105c"
+    ],
+    "147328": [
+      "03980fc62"
+    ],
+    "157088": [
+      "03685ee47"
+    ],
+    "173728": [
+      "011866d62"
+    ],
+    "174880": [
+      "040055550"
+    ],
+    "327680": [
+      "00800aa62",
+      "01002ea62"
+    ],
+    "349632": [
+      "04003aae3"
+    ],
+    "524288": [
+      "02001ffff"
+    ],
+    "524384": [
+      "04007ffe8"
+    ],
+    "655360": [
+      "010015548",
+      "02005d547",
+      "040015547",
+      "040015548"
+    ],
+    "1310720": [
+      "02002aae3",
+      "04002aac8"
+    ],
+    "2621440": [
+      "040055550"
+    ],
+    "2796320": [
+      "100055554"
+    ],
+    "4194368": [
+      "08003fffe"
+    ],
+    "5242880": [
+      "04003aae3"
+    ],
+    "6291584": [
+      "08002005f"
+    ],
+    "7864320": [
+      "02001ffff",
+      "04007ffe8"
+    ],
+    "8386688": [
+      "080021fff"
+    ],
+    "8388736": [
+      "08010005f"
+    ],
+    "41943040": [
+      "100055554"
+    ],
+    "62914560": [
+      "08003fffe"
+    ]
+  },
+  "overrides": [
+    [
+      "DISABLED.*_g$",
+      "011866d62"
+    ]
+  ],
+  "raw_headers": {
+    "00021101c": "00080000000000000002010000020100010010001c0000000000000001000100000101",
+    "00022081c": "40000000000000001000010010000100010008001c0000000000000000000100000101",
+    "00022081d": "0010000000000000000401000004010001000b081d0000000000000001000100000303",
+    "00400105c": "00000200000000002000200020002000200022081c0000000000000001000100000303",
+    "00488b262": "1005000000000000240024002400240001001000620000000000000001000100000101",
+    "00489b262": "9009000000000000440024004400240001001000620000000000000001000100000101",
+    "0048e1e62": "70080000000000003c0024003c00240001001000620000000000000001000100000101",
+    "00800265f": "00600000000000004000400040004000010040005f0000000000000001000100000101",
+    "00800aa62": "0055000000000500000100014000400004001401620000000000000001000400020101",
+    "00801fe5f": "807f0000000000004000400040004000010040005f0000000000000001000400000101",
+    "010015548": "80aa000000000a00000800020002800001009100480000000000000001000500020101",
+    "01002aa48": "4055000000000000000180000001800001009100480000000000000001000500000101",
+    "01002ea62": "4055000000000500000200028000800001001001620000000000000001000500020101",
+    "01002ea63": "4055000000000100000100018000800001009100630000000000000001000500010303",
+    "011866d62": "20a6020000000000d8048c00d8048c0001001000620000000000000001000100000101",
+    "0200100c7": "0000010000000000000200010002000101001000470000000000000001000100000101",
+    "02001ffff": "80ff0700000078000004000400010001010040005f0000000000000001000600020101",
+    "02002aad0": "4055010000000000000100010001000102001608500000000000000001000600000303",
+    "02002aae3": "4055010000001400000400040001000101001132630000000000000001000600020101",
+    "02005d547": "a0aa000000000a00000400040001000101001000470000000000000001000600020101",
+    "02005d548": "a0aa000000000200000200020001000101009100480000000000000001000600010101",
+    "0208bfd47": "d0b6000000000000680104016801040101001000470000000000000001000100000101",
+    "03685ee47": "2065020000000000d002b401d002b40101001000470000000000000001000100000101",
+    "03980fc62": "003f0200000000004001cc014001cc0101001000620000000000000001000100000101",
+    "040015547": "80aa000000000a00000200088000000201001000470000000000000001000500020101",
+    "040015548": "80aa000000000a00000200088000000201001100480000000000000001000500020101",
+    "04002aac8": "4055010000001400000400080001000201001100480000000000000001000600020101",
+    "04003aae3": "4055050000005000000800080002000201009100630000000000000001000700020101",
+    "040055550": "a0aa020000002800000800080002000201001000500000000000000001000700020101",
+    "04007ffe8": "e0ff070000007800000800080002000203009500480000000000000001000704020101",
+    "08002005f": "00006000000000000004000400040004010042085f0000000000000001000100000101",
+    "080021fff": "00f87f000000000000040004000400040100420c5f0000000000000001000600000101",
+    "08003fffe": "c0ff3f000000c00300100010000400040300140162000000000000bf01000800020101",
+    "08010005f": "00008000000000000020000400200004010010005f0000000000000001000100000101",
+    "100055554": "a0aa2a0000008002002000200008000801001012500000000000000001000900020101"
+  },
+  "examples": {
+    "00021101c": "characters_hero_hero_spiderman_spiderverse_textures_jt_iridescent_gradient_04.texture",
+    "00022081c": "textures_tmcnair_misc_tm_win_lut_chinatown_orange_01.texture",
+    "00022081d": "textures_effects_i20_gradients_fx_ramp_spirit_heat_01.texture",
+    "00400105c": "material_atmosphere_atm_bsm_sky_lut_bandw_lut_01.texture",
+    "00488b262": "ui_textures_buttons_ps4_key_1.texture",
+    "00489b262": "ui_textures_buttons_ps4_key_5.texture",
+    "0048e1e62": "ui_textures_buttons_ps4_key_6.texture",
+    "00800265f": "material_atmosphere_atm_bsm_sky_night_night_irradiance_map_fog_04.texture",
+    "00800aa62": "characters_hero_hero_spiderman_TASM_textures_hero_spiderman_tasm_textile_red_01_n.texture",
+    "00801fe5f": "material_atmosphere_atm_bsm_sky_night_night_irradiance_map_fog_01.texture",
+    "010015548": "materialtemplates_jtuason_jt_times_square_billboard_textures_dailygrind_times_sq_20x8_02_c.texture",
+    "01002aa48": "textures_gzumberge_gz_flag_gz_flag_rainbow_01_c.texture",
+    "01002ea62": "characters_ambient_amb_rat_textures_amb_rat_n.texture",
+    "01002ea63": "characters_civilians_civ_male_student_textures_civ_esu_logo_01_c.texture",
+    "011866d62": "ui_textures_weather_stations_main_panel_data.texture",
+    "0200100c7": "ui_textures_newspapers_thumbnails_ctns_dailybugle_hh_lockedup_tight_02.texture",
+    "02001ffff": "material_atmosphere_atm_bsm_sky_night_4k_nightcloudy_nosunspot_1_hdr.texture",
+    "02002aad0": "textures_effects_i20_masks_spirit_spider_skull_01.texture",
+    "02002aae3": "characters_hero_hero_spiderman_bagman_textures_hero_spiderman_bagman_body_g.texture",
+    "02005d547": "materialtemplates_jtuason_jt_research_screen_01_textures_jt_research_screen_01_bars_mask.texture",
+    "02005d548": "characters_ambient_amb_rat_textures_amb_rat_c.texture",
+    "0208bfd47": "ui_textures_pause_character_suit_mk4.texture",
+    "03685ee47": "ui_textures_hud_notifications_img_research_station.texture",
+    "03980fc62": "ui_textures_weather_stations_side_panel_data.texture",
+    "040015547": "materialtemplates_jtuason_jt_times_square_billboard_textures_hauteunlimited_sign_times_sq_8x20_logo.texture",
+    "040015548": "materialtemplates_jtuason_jt_times_square_billboard_textures_hauteunlimited_sign_times_sq_8x20_03.texture",
+    "04002aac8": "textures_signs_movie_posters_mp_mandarkpast.texture",
+    "04003aae3": "characters_hero_hero_spiderman_futurefoundation_textures_hero_spiderman_futurefoundation_feet_c.texture",
+    "040055550": "characters_hero_hero_spiderman_stealth_textures_hero_spiderman_stealth_glow_h.texture",
+    "04007ffe8": "characters_shared_textures_detail_hero_spiderman_damage_c.texture",
+    "08002005f": "material_atmosphere_atm_bsm_sky_night_sky_night_2_16bit.texture",
+    "080021fff": "material_atmosphere_atm_bsm_sky_night_night_ibl_defprobe_04.texture",
+    "08003fffe": "characters_hero_hero_peterparker_heads_textures_hero_peterparker_head_wm1_n.texture",
+    "08010005f": "material_atmosphere_atm_bsm_sky_night_8k_nightsky1.texture",
+    "100055554": "characters_hero_hero_peterparker_heads_textures_hero_peterparker_detail_v.texture"
   }
 }

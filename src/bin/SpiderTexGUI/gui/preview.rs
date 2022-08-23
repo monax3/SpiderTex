@@ -13,9 +13,10 @@ use eframe::egui::{
 use eframe::epaint::{vec2, Vec2};
 use image::DynamicImage;
 use spidertexlib::formats::{guess_dimensions, ColorPlanes, TextureFormat};
-use tracing::error;
+use spidertexlib::prelude::*;
+use spidertexlib::util::into_n_slices;
 
-use crate::theme;
+use super::theme;
 
 fn to_colorimage(image: &DynamicImage) -> ColorImage {
     let scalar = std::cmp::max(image.width(), image.height()) as f32;
@@ -35,7 +36,7 @@ fn to_colorimage(image: &DynamicImage) -> ColorImage {
 }
 
 fn to_texturehandle(ctx: &Context, image: ColorImage, name: impl Into<String>) -> TextureHandle {
-    ctx.load_texture(name, image)
+    ctx.load_texture(name, image, Default::default())
 }
 
 pub struct Preview {
@@ -45,7 +46,7 @@ pub struct Preview {
 }
 
 fn placeholder(ctx: &Context) -> TextureHandle {
-    ctx.load_texture("placeholder", ColorImage::example())
+    ctx.load_texture("placeholder", ColorImage::example(), Default::default())
 }
 
 fn compressed_to_texturehandles(
@@ -53,45 +54,43 @@ fn compressed_to_texturehandles(
     format: &TextureFormat,
     mut data: &[u8],
 ) -> Option<Vec<TextureHandle>> {
-    if !matches!(format.planes, ColorPlanes::Rgba) {
+    if !matches!(format.planes(), ColorPlanes::Rgba) {
         // FIXME
         return None;
     }
 
-    let (dimensions, strip_header) = guess_dimensions(data.len(), format)?;
+    // FIXME: handle multiple formats
+    let (dimensions, strip_header) = guess_dimensions(data.len(), &[format.clone()])?;
     if strip_header {
-        data = &data[spidertexlib::headers::TEXTURE_HEADER_SIZE ..];
+        data = &data[TEXTURE_HEADER_SIZE ..];
     }
 
-    match spidertexlib::dxtex::decompress_texture(
-        format.format,
+    spidertexlib::dxtex::decompress_texture(
+        format.dxgi_format,
         dimensions.width,
         dimensions.height,
         format.array_size,
         dimensions.mipmaps,
         data,
-    ) {
-        Ok(dxbuf) => {
-            let bufs = dxbuf.as_slices(format.array_size);
-            Some(rgba_to_texturehandles(ctx, [dimensions.width, dimensions.height], &bufs))
-        }
-        Err(code) => {
-            error!("Decompression failed with code {}", -code);
-            None
-        }
-    }
+    )
+    .log_failure()
+    .ok()
+    .and_then(|buf| {
+        into_n_slices(&buf, format.array_size)
+            .log_failure()
+            .map(|bufs| rgba_to_texturehandles(ctx, [dimensions.width, dimensions.height], bufs))
+    })
 }
 
-fn rgba_to_texturehandles(
+fn rgba_to_texturehandles<'a>(
     ctx: &Context,
     dimensions: [usize; 2],
-    data: &[&[u8]],
+    data: impl Iterator<Item = &'a [u8]> + 'a,
 ) -> Vec<TextureHandle> {
-    data.iter()
-        .enumerate()
-        .map(|(i, &img)| {
+    data.enumerate()
+        .map(|(i, img)| {
             let ci = ColorImage::from_rgba_unmultiplied(dimensions, img);
-            ctx.load_texture(format!("Image {}", i + 1), ci)
+            ctx.load_texture(format!("Image {}", i + 1), ci, Default::default())
         })
         .collect()
 }
@@ -113,17 +112,13 @@ impl Preview {
         }
     }
 
-    pub fn from_buffer_and_format(
-        ctx: &Context,
-        data: &[u8],
-        format: &TextureFormat,
-    ) -> Self {
+    pub fn from_buffer_and_format(ctx: &Context, data: &[u8], format: &TextureFormat) -> Self {
         let placeholder = placeholder(ctx);
         let images = compressed_to_texturehandles(ctx, format, data).unwrap_or_default();
 
         Self {
             images,
-            current:     0,
+            current: 0,
             placeholder,
         }
     }
