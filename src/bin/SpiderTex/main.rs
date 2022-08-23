@@ -43,6 +43,7 @@ fn main() {
             }
             for warning in warnings {
                 message.push_str(&warning);
+                message.push('\n');
             }
             let message = message.replace('\n', "\r\n");
             message_box_ok(&message, APP_TITLE);
@@ -181,18 +182,18 @@ fn import_images(groups: impl IntoIterator<Item = Categorized>) -> Result<(Strin
         let Scanned { input, output, .. } = group.scan().0;
         match (input, output) {
             (FileStatus::Unknown, _) => continue,
-            (FileStatus::Ok(new_warnings, inputs), OutputFormat::Exact { format, outputs }) => {
-                let first = orig_inputs.first().unwrap();
-                for warning in new_warnings {
-                    warnings.push(format!("{first}: {warning}"));
-                }
-
-                output_count += import_image(format, &inputs, &outputs).map_err(|error| {
+            (FileStatus::Ok(input_warnings, inputs), OutputFormat::Exact { format, outputs }) => {
+                let first = orig_inputs.first().and_then(|f| f.file_name()).unwrap_or_default();
+                let (new_outputs, output_warnings) = import_image(format, &inputs, &outputs).map_err(|error| {
                     Error::message(format!(
                         "Failed to import {inputs:?} to {}: {error}",
                         format.dxgi_format.display()
                     ))
                 })?;
+                for warning in input_warnings.into_iter().chain(output_warnings.into_iter()) {
+                    warnings.push(format!("{first}: {warning}"));
+                }
+                output_count += new_outputs;
                 input_count += 1;
             }
             (FileStatus::Error(error), _) => {
@@ -220,16 +221,17 @@ fn import_images(groups: impl IntoIterator<Item = Categorized>) -> Result<(Strin
     ))
 }
 
-fn bring_dx_to_format(
-    image: &DXImage,
+fn bring_dx_to_format<'a>(
+    image: &'a DXImage,
     format: DXGI_FORMAT,
     dimensions: Dimensions,
-) -> Result<Cow<'_, DXImage>> {
+) -> Result<(Cow<'a, DXImage>, Warnings)> {
+    let mut warnings = Warnings::new();
     let mut metadata = image.metadata()?;
     let image = if metadata.format == format
         && (metadata.width, metadata.height) == (dimensions.width, dimensions.height)
     {
-        return Ok(Cow::Borrowed(image));
+        return Ok((Cow::Borrowed(image), warnings));
     } else if metadata.format.is_compressed() {
         Cow::Owned(image.decompress()?)
     } else {
@@ -245,12 +247,13 @@ fn bring_dx_to_format(
 
     let metadata = image.metadata()?;
     if (metadata.width, metadata.height) == (dimensions.width, dimensions.height) {
-        Ok(image)
+        Ok((image, warnings))
     } else {
+        warnings.push(format!("Wrong dimensions ({}x{}), resized to {}x{}", metadata.width, metadata.height, dimensions.width, dimensions.height));
         event!(WARN, "Resizing to {}x{} from {}x{}", metadata.width, metadata.height, dimensions.width, dimensions.height);
-        Ok(Cow::Owned(
+        Ok((Cow::Owned(
             image.resize(dimensions.width, dimensions.height)?,
-        ))
+        ), warnings))
     }
 }
 
@@ -259,7 +262,8 @@ fn load_image_array(
     pixel_format: DXGI_FORMAT,
     dimensions: Dimensions,
     images: &[Utf8PathBuf],
-) -> Result<DXImage> {
+) -> Result<(DXImage, Warnings)> {
+    let mut warnings = Warnings::new();
     let mut buffer: Vec<u8> = Vec::with_capacity(dimensions.data_size);
 
     for file in images {
@@ -270,25 +274,26 @@ fn load_image_array(
             && metadata.format == compressed_format
             && dx.len() == dimensions.data_size
         {
-            return Ok(dx);
+            return Ok((dx, warnings));
         }
 
-        let image = bring_dx_to_format(&dx, pixel_format, dimensions).log_failure()?;
+        let (image, input_warnings) = bring_dx_to_format( &dx, pixel_format, dimensions).log_failure()?;
+        warnings.extend(input_warnings);
         buffer.extend(image.image(0).log_failure()?);
     }
 
-    DXImage::with_dimensions(pixel_format, Dimensions { mipmaps: 1, .. dimensions }, images.len(), &buffer).log_failure()
+    DXImage::with_dimensions(pixel_format, Dimensions { mipmaps: 1, .. dimensions }, images.len(), &buffer).log_failure().map(|img| (img, warnings))
 }
 
 fn import_image(
     format: TextureFormat,
     inputs: &[Utf8PathBuf],
     outputs: &[Utf8PathBuf],
-) -> Result<usize> {
+) -> Result<(usize, Warnings)> {
     let mut output_count = 0;
 
     let dimensions = format.dimensions();
-    let image = load_image_array(
+    let (image, warnings) = load_image_array(
         format.dxgi_format,
         format.dxgi_format.uncompressed_format(),
         dimensions,
@@ -383,13 +388,26 @@ fn import_image(
         output_count += 1;
     }
 
-    Ok(output_count)
+    Ok((output_count, warnings))
 }
 
 #[test]
 fn test_import() {
     let mut inputs = inputs::gather(concat!(env!("CARGO_MANIFEST_DIR"), "/testdata/import"));
     inputs.textures.clear();
+
+    let (string, warnings) = run(inputs).unwrap();
+
+    for warning in warnings {
+        event!(WARN, %warning);
+    }
+    event!(INFO, message = %string);
+}
+
+#[test]
+fn test_export() {
+    let mut inputs = inputs::gather(concat!(env!("CARGO_MANIFEST_DIR"), "/testdata/export"));
+    inputs.images.clear();
 
     let (string, warnings) = run(inputs).unwrap();
 
