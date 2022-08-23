@@ -312,10 +312,18 @@ impl FileGroup<Categorized> {
 
     #[must_use]
     pub fn scan_images(image_format: ImageFormat, files: Vec<Utf8PathBuf>) -> FileGroup<Scanned> {
-        let texture_formats: HashSet<TextureFormat> = files
+        let mut texture_formats: HashSet<TextureFormat> = files
             .iter()
             .filter_map(|image_file| ng_format_for_image_file(image_file))
             .collect();
+
+        if texture_formats.is_empty() {
+            let sizes: Vec<usize> = files
+                .iter()
+                .filter_map(|file| std::fs::metadata(file).map(|m| m.len() as usize).ok())
+                .collect();
+            texture_formats.extend(registry::formats_for_sizes(&sizes));
+        }
 
         let exact_format = if texture_formats.len() == 1 {
             texture_formats.iter().next()
