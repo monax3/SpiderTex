@@ -10,8 +10,8 @@ use std::io::BufWriter;
 
 use camino::{Utf8Path, Utf8PathBuf};
 use spidertexlib::dxtex::{DXImage, TEX_FILTER_FLAGS};
-use spidertexlib::files::as_images;
-use spidertexlib::files::{Categorized, FileGroup, FileStatus, OutputFormat, Scanned};
+use spidertexlib::files::as_textures;
+use spidertexlib::files::{as_images, Categorized, FileGroup, FileStatus, OutputFormat, Scanned};
 use spidertexlib::formats::ColorPlanes;
 use spidertexlib::images::Warnings;
 use spidertexlib::inputs::Inputs;
@@ -75,9 +75,9 @@ fn export_texture(
 ) -> Result<usize> {
     let mut output_count = 0;
 
-    let (dimensions, texture_file) = format
-        .best_texture(inputs)
-        .ok_or_else(|| Error::message("Detected a format and it didn't match, the file may be corrupted."))?;
+    let (dimensions, texture_file) = format.best_texture(inputs).ok_or_else(|| {
+        Error::message("Detected a format and it didn't match, the file may be corrupted.")
+    })?;
     let all_data = std::fs::read(texture_file)?;
     let texture_data = format.without_header(&all_data);
 
@@ -133,11 +133,10 @@ fn export_textures(groups: impl IntoIterator<Item = Categorized>) -> Result<(Str
     for group in groups {
         let group = FileGroup(group);
         let orig_inputs = group.files.clone();
-        if orig_inputs.is_empty() { continue; }
-        let Scanned {
-            input,
-            output, ..
-        } = group.scan().0;
+        if orig_inputs.is_empty() {
+            continue;
+        }
+        let Scanned { input, output, .. } = group.scan().0;
 
         match (input, output) {
             (FileStatus::Unknown, _) => continue,
@@ -150,14 +149,18 @@ fn export_textures(groups: impl IntoIterator<Item = Categorized>) -> Result<(Str
                 output_count += export_texture(format, &inputs, &outputs)?;
                 input_count += 1;
             }
-            (FileStatus::Ok(new_warnings, inputs), OutputFormat::Candidates(candidates)) if candidates.len() == 1 => {
+            (FileStatus::Ok(new_warnings, inputs), OutputFormat::Candidates(candidates))
+                if !candidates.is_empty() =>
+            {
                 let format = *candidates.first().unwrap();
                 let outputs = as_images(&format, &inputs);
                 let first = orig_inputs.first().unwrap();
+                warnings.push(format!(
+                    "{first}: Guessed the file format based on file size"
+                ));
                 for warning in new_warnings {
                     warnings.push(format!("{first}: {warning}"));
                 }
-
                 output_count += export_texture(format, &inputs, &outputs)?;
                 input_count += 1;
             }
@@ -198,14 +201,48 @@ fn import_images(groups: impl IntoIterator<Item = Categorized>) -> Result<(Strin
         match (input, output) {
             (FileStatus::Unknown, _) => continue,
             (FileStatus::Ok(input_warnings, inputs), OutputFormat::Exact { format, outputs }) => {
-                let first = orig_inputs.first().and_then(|f| f.file_name()).unwrap_or_default();
-                let (new_outputs, output_warnings) = import_image(format, &inputs, &outputs).map_err(|error| {
-                    Error::message(format!(
-                        "Failed to import {inputs:?} to {}: {error}",
-                        format.dxgi_format.display()
-                    ))
-                })?;
-                for warning in input_warnings.into_iter().chain(output_warnings.into_iter()) {
+                let first = orig_inputs
+                    .first()
+                    .and_then(|f| f.file_name())
+                    .unwrap_or_default();
+                let (new_outputs, output_warnings) = import_image(format, &inputs, &outputs)
+                    .map_err(|error| {
+                        Error::message(format!(
+                            "Failed to import {inputs:?} to {}: {error}",
+                            format.dxgi_format.display()
+                        ))
+                    })?;
+                for warning in input_warnings
+                    .into_iter()
+                    .chain(output_warnings.into_iter())
+                {
+                    warnings.push(format!("{first}: {warning}"));
+                }
+                output_count += new_outputs;
+                input_count += 1;
+            }
+            (FileStatus::Ok(input_warnings, inputs), OutputFormat::Candidates(candidates))
+                if !candidates.is_empty() =>
+            {
+                let format = *candidates.first().unwrap();
+                let outputs = as_textures(&format, &inputs);
+                let first = orig_inputs
+                    .first()
+                    .and_then(|f| f.file_name())
+                    .unwrap_or_default();
+                let (new_outputs, output_warnings) = import_image(format, &inputs, &outputs)
+                    .map_err(|error| {
+                        Error::message(format!(
+                            "Failed to import {inputs:?} to {}: {error}",
+                            format.dxgi_format.display()
+                        ))
+                    })?;
+                for warning in input_warnings
+                    .into_iter()
+                    .chain(output_warnings.into_iter()).chain(std::iter::once(Cow::Owned(format!(
+                        "{first}: Guessed the file format based on file size"
+                    ).into())))
+                {
                     warnings.push(format!("{first}: {warning}"));
                 }
                 output_count += new_outputs;
@@ -264,11 +301,22 @@ fn bring_dx_to_format<'a>(
     if (metadata.width, metadata.height) == (dimensions.width, dimensions.height) {
         Ok((image, warnings))
     } else {
-        warnings.push(format!("Wrong dimensions ({}x{}), resized to {}x{}", metadata.width, metadata.height, dimensions.width, dimensions.height));
-        event!(WARN, "Resizing to {}x{} from {}x{}", dimensions.width, dimensions.height, metadata.width, metadata.height);
-        Ok((Cow::Owned(
-            image.resize(dimensions.width, dimensions.height)?,
-        ), warnings))
+        warnings.push(format!(
+            "Wrong dimensions ({}x{}), resized to {}x{}",
+            metadata.width, metadata.height, dimensions.width, dimensions.height
+        ));
+        event!(
+            WARN,
+            "Resizing to {}x{} from {}x{}",
+            dimensions.width,
+            dimensions.height,
+            metadata.width,
+            metadata.height
+        );
+        Ok((
+            Cow::Owned(image.resize(dimensions.width, dimensions.height)?),
+            warnings,
+        ))
     }
 }
 
@@ -294,15 +342,30 @@ fn load_image_array(
         }
 
         if images.len() != array_size {
-            return error_message(format!("This texture contains {} images and only {} files were provided", array_size, images.len()));
+            return error_message(format!(
+                "This texture contains {} images and only {} files were provided",
+                array_size,
+                images.len()
+            ));
         }
 
-        let (image, input_warnings) = bring_dx_to_format( &dx, pixel_format, dimensions).log_failure()?;
+        let (image, input_warnings) =
+            bring_dx_to_format(&dx, pixel_format, dimensions).log_failure()?;
         warnings.extend(input_warnings);
         buffer.extend(image.image(0).log_failure()?);
     }
 
-    DXImage::with_dimensions(pixel_format, Dimensions { mipmaps: 1, .. dimensions }, images.len(), &buffer).log_failure().map(|img| (img, warnings))
+    DXImage::with_dimensions(
+        pixel_format,
+        Dimensions {
+            mipmaps: 1,
+            ..dimensions
+        },
+        images.len(),
+        &buffer,
+    )
+    .log_failure()
+    .map(|img| (img, warnings))
 }
 
 fn import_image(
@@ -323,7 +386,8 @@ fn import_image(
         dimensions,
         inputs,
     )
-    .log_failure().map_err(|error| Error::message(format!("Failed to load {inputs:?}: {error}")))?;
+    .log_failure()
+    .map_err(|error| Error::message(format!("Failed to load {inputs:?}: {error}")))?;
 
     for (dimensions, output_file) in format.dimensions_iter().zip(outputs.iter()) {
         let metadata = image.metadata().log_failure()?;
@@ -346,16 +410,31 @@ fn import_image(
 
         let image = if dimensions.mipmaps > 1 {
             let metadata = image.metadata()?;
-            // let expected = dxtex::expected_size_array(metadata.format, , format.array_size);
-            let expected = dxtex::expected_size_array(metadata.format, dimensions, format.array_size);
+            // let expected = dxtex::expected_size_array(metadata.format, ,
+            // format.array_size);
+            let expected =
+                dxtex::expected_size_array(metadata.format, dimensions, format.array_size);
             if image.len() == expected {
                 image
             } else {
                 // event!(DEBUG, "expected size is {expected}, image is {}", image.len());
                 let data = image.pixels()?;
-                let stripped = DXImage::with_dimensions(metadata.format, Dimensions { mipmaps: 1, ..dimensions }, format.array_size, &data).log_failure()?;
+                let stripped = DXImage::with_dimensions(
+                    metadata.format,
+                    Dimensions {
+                        mipmaps: 1,
+                        ..dimensions
+                    },
+                    format.array_size,
+                    &data,
+                )
+                .log_failure()?;
                 // event!(DEBUG, dimensions.mipmaps, len = stripped.len(), "generating mips");
-                Cow::Owned(stripped.generate_mipmaps(dimensions.mipmaps).log_failure()?)
+                Cow::Owned(
+                    stripped
+                        .generate_mipmaps(dimensions.mipmaps)
+                        .log_failure()?,
+                )
             }
             // let image = image.pixels();
             // event!(TRACE, "stripping mips");
@@ -366,7 +445,8 @@ fn import_image(
             image
         };
         // let metadata = image.metadata()?;
-        // event!(DEBUG, len = image.len(), "before compress, mips: {}", metadata.mipLevels);
+        // event!(DEBUG, len = image.len(), "before compress, mips: {}",
+        // metadata.mipLevels);
 
         let metadata = image.metadata()?;
         let image = if metadata.format == format.dxgi_format {
@@ -398,7 +478,9 @@ fn import_image(
             })?;
 
             event!(TRACE, "Writing .texture headers to {output_file}");
-            writer.write_all(bytemuck::bytes_of(&texture_file::FileHeader::with_length(format.standard.data_size)))?;
+            writer.write_all(bytemuck::bytes_of(&texture_file::FileHeader::with_length(
+                format.standard.data_size,
+            )))?;
             writer.write_all(bytemuck::bytes_of(&texture_file::TextureHeader::new()))?;
             writer.write_all(texture_file::TEXTURE_TAG)?;
             writer.write_all(bytemuck::bytes_of(
