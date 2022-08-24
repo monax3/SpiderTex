@@ -3,6 +3,7 @@ use std::{collections::HashMap, num::TryFromIntError};
 use crate::formats::TextureFormat;
 use formats::Dimensions;
 use packed_struct::prelude::*;
+use formats::DXGI_FORMAT;
 
 mod formats;
 
@@ -30,13 +31,13 @@ impl TryFrom<TextureFormat> for Format {
 
     fn try_from(value: TextureFormat) -> Result<Self, Self::Error> {
         let (dimensions, d2) = value.all_dimensions();
-        
+
         Ok(Format {
             hd: d2.is_some(),
             width: u16::try_from(dimensions.width)?,
             height: u16::try_from(dimensions.height)?,
             mip_levels: dimensions.mipmaps.into(),
-            dxgi_format: u8::try_from(value.dxgi_format)?.into(),
+            dxgi_format: u8::try_from(value.dxgi_format.0)?.into(),
             array_size: u8::try_from(value.array_size)?.into(),
             _reserved: Default::default()
         })
@@ -51,8 +52,10 @@ impl From<Format> for TextureFormat {
             height: value.height.into(),
             mipmaps: value.mip_levels,
         };
-        
-        let (standard, highres) = if value.hd {
+
+        let dxgi_format = DXGI_FORMAT(u32::from(value.dxgi_format));
+
+        let (mut standard, highres) = if value.hd {
             let (sm, hm) = if dim.mipmaps > 2 {
                 (dim.mipmaps - 2, 2)
             } else {
@@ -64,25 +67,20 @@ impl From<Format> for TextureFormat {
                 height: dim.width >> 2,
                 mipmaps: sm
             };
-            standard.data_size = standard.data_size(value.format, value.array_size);
             dim.mipmaps = hm;
-            dim.data_size = dim.data_size(value.format, value.array_size);
+            dim.data_size = dim.data_size(dxgi_format, usize::from(value.array_size));
             (standard, Some(dim))
         } else {
             (dim, None)
         };
+        standard.data_size = standard.data_size(dxgi_format, value.array_size.into());
 
-        let (dimensions, d2) = value.all_dimensions();
-        
-        Ok(Format {
-            hd: d2.is_some(),
-            width: u16::try_from(dimensions.width)?,
-            height: u16::try_from(dimensions.height)?,
-            mip_levels: dimensions.mipmaps.into(),
-            dxgi_format: u8::try_from(value.dxgi_format)?.into(),
-            array_size: u8::try_from(value.array_size)?.into(),
-            _reserved: Default::default()
-        })
+        TextureFormat {
+            dxgi_format: formats::DXGI_FORMAT(u32::from(value.dxgi_format)),
+            standard,
+            highres,
+            array_size: usize::from(value.array_size),
+        }
     }
 }
 
@@ -90,6 +88,10 @@ fn main() {
     let mut packed_formats: Vec<[u8;6]> = Vec::new();
     let formats: HashMap<String, TextureFormat> =
         serde_json::from_str(include_str!("../formats.json")).unwrap();
+
+    let packed = pack(formats.values().copied());
+    let unpacked = unpack(packed);
+
     for format in formats.values() {
         let format = Format::try_from(*format).unwrap();
         let packed = format.pack().unwrap();
@@ -104,7 +106,7 @@ fn pack<'a>(mut formats: impl Iterator<Item = TextureFormat> + 'a) -> impl Itera
             let temp= Format::try_from(format).unwrap();
             temp.pack().unwrap()
         })
-    })   
+    })
 }
 
 fn unpack<'a>(mut formats: impl Iterator<Item = [u8; 6]> + 'a) -> impl Iterator<Item = TextureFormat> + 'a {
@@ -113,5 +115,5 @@ fn unpack<'a>(mut formats: impl Iterator<Item = [u8; 6]> + 'a) -> impl Iterator<
             let temp = Format::unpack(&packed).unwrap();
             TextureFormat::from(temp)
         })
-    })   
+    })
 }

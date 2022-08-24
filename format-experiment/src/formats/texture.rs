@@ -1,10 +1,12 @@
 use serde::{Deserialize, Serialize};
 
 use super::Dimensions;
+use super::DXGI_FORMAT;
 
 #[derive(Serialize, Deserialize, Debug, Copy, Clone)]
 pub struct TextureFormat {
-    pub dxgi_format: u32,
+    #[serde(with = "super::dxgi::serde")]
+    pub dxgi_format: DXGI_FORMAT,
     // pub stex_format:           (u8, u8),
     pub standard: Dimensions,
     #[serde(default, skip_serializing_if = "Option::is_none")]
