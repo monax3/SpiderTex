@@ -1,0 +1,56 @@
+[package]
+name = "SpiderTex"
+description = "A texture tool for the PC version of Marvel's Spider-Man Remastered "
+version = "1.1.0-beta7"
+edition = "2021"
+authors = ["mona"]
+license = "MIT or Apache-2.0"
+default-run = "SpiderTexGUI"
+repository = "https://github.com/monax3/SpiderTex"
+categories = ["game-development"]
+keywords = ["textures", "spider-man"]
+
+[lib]
+name = "spidertexlib"
+
+[dependencies]
+serde = { version = "1.0.144", features = ["derive"] }
+serde_json = "1.0.85"
+image = { version = "0.24.3", default-features = false, features = [
+    "png",
+    "tga",
+    "bmp",
+    "webp"
+] }
+windows = { version = "0.39.0", features = [
+    "Win32_Foundation",
+    "Win32_Graphics_Dxgi_Common",
+    "Win32_Graphics_Imaging",
+    "Win32_Graphics_Imaging_D2D",
+    "Win32_System_Com",
+    "Win32_UI_Shell_Common",
+    "Win32_UI_Shell",
+    "Win32_UI_WindowsAndMessaging",
+    "Win32_System_Com_StructuredStorage",
+    "Win32_System_SystemServices",
+] }
+hex = "0.4.3"
+camino = "1.1.1"
+eframe = "0.19.0"
+tracing = "0.1.36"
+tracing-subscriber = "0.3.15"
+bytemuck = { version = "1.12.1", features = ["derive", "extern_crate_std"] }
+thiserror = "1.0.32"
+backtrace = "0.3.66"
+parking_lot = { version = "0.12.1", features = ["hardware-lock-elision"] }
+regex = "1.6.0"
+
+[build-dependencies]
+vcpkg = "0.2.15"
+winres = "0.1.12"
+
+[features]
+rebuild-registry = []
+debug-inputs = []
+debug-formats = []
+disable-wic = []

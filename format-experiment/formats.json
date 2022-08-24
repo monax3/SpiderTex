@@ -1,0 +1,522 @@
+{
+    "00021101c": {
+      "dxgi_format": 28,
+      "standard": {
+        "data_size": 2048,
+        "width": 512,
+        "height": 1,
+        "mipmaps": 1
+      }
+    },
+    "00022081c": {
+      "dxgi_format": 28,
+      "standard": {
+        "data_size": 64,
+        "width": 16,
+        "height": 1,
+        "mipmaps": 1
+      }
+    },
+    "00022081d": {
+      "dxgi_format": 29,
+      "standard": {
+        "data_size": 4096,
+        "width": 1024,
+        "height": 1,
+        "mipmaps": 1
+      }
+    },
+    "00400105c": {
+      "dxgi_format": 28,
+      "standard": {
+        "data_size": 131072,
+        "width": 32,
+        "height": 32,
+        "mipmaps": 1
+      },
+      "array_size": 32
+    },
+    "00488b262": {
+      "dxgi_format": 98,
+      "standard": {
+        "data_size": 1296,
+        "width": 36,
+        "height": 36,
+        "mipmaps": 1
+      }
+    },
+    "00489b262": {
+      "dxgi_format": 98,
+      "standard": {
+        "data_size": 2448,
+        "width": 68,
+        "height": 36,
+        "mipmaps": 1
+      }
+    },
+    "0048e1e62": {
+      "dxgi_format": 98,
+      "standard": {
+        "data_size": 2160,
+        "width": 60,
+        "height": 36,
+        "mipmaps": 1
+      }
+    },
+    "00800265f": {
+      "dxgi_format": 95,
+      "standard": {
+        "data_size": 24576,
+        "width": 64,
+        "height": 64,
+        "mipmaps": 1
+      },
+      "array_size": 6
+    },
+    "00800aa62": {
+      "dxgi_format": 98,
+      "standard": {
+        "data_size": 21760,
+        "width": 256,
+        "height": 64,
+        "mipmaps": 4
+      },
+      "highres": {
+        "data_size": 327680,
+        "width": 1024,
+        "height": 256,
+        "mipmaps": 2
+      }
+    },
+    "00800aa63": {
+      "dxgi_format": 99,
+      "standard": {
+        "data_size": 21760,
+        "width": 256,
+        "height": 64,
+        "mipmaps": 4
+      },
+      "highres": {
+        "data_size": 327680,
+        "width": 1024,
+        "height": 256,
+        "mipmaps": 2
+      }
+    },
+    "00801fe5f": {
+      "dxgi_format": 95,
+      "standard": {
+        "data_size": 32640,
+        "width": 64,
+        "height": 64,
+        "mipmaps": 4
+      },
+      "array_size": 6
+    },
+    "010015548": {
+      "dxgi_format": 72,
+      "standard": {
+        "data_size": 43648,
+        "width": 512,
+        "height": 128,
+        "mipmaps": 5
+      },
+      "highres": {
+        "data_size": 131072,
+        "width": 1024,
+        "height": 256,
+        "mipmaps": 1
+      }
+    },
+    "01002aa48": {
+      "dxgi_format": 72,
+      "standard": {
+        "data_size": 21824,
+        "width": 256,
+        "height": 128,
+        "mipmaps": 5
+      }
+    },
+    "01002ea62": {
+      "dxgi_format": 98,
+      "standard": {
+        "data_size": 21824,
+        "width": 128,
+        "height": 128,
+        "mipmaps": 5
+      },
+      "highres": {
+        "data_size": 327680,
+        "width": 512,
+        "height": 512,
+        "mipmaps": 2
+      }
+    },
+    "01002ea63": {
+      "dxgi_format": 99,
+      "standard": {
+        "data_size": 21824,
+        "width": 128,
+        "height": 128,
+        "mipmaps": 5
+      },
+      "highres": {
+        "data_size": 327680,
+        "width": 512,
+        "height": 512,
+        "mipmaps": 2
+      }
+    },
+    "01003ff62": {
+      "dxgi_format": 98,
+      "standard": {
+        "data_size": 65472,
+        "width": 128,
+        "height": 128,
+        "mipmaps": 5
+      },
+      "highres": {
+        "data_size": 983040,
+        "width": 512,
+        "height": 512,
+        "mipmaps": 2
+      },
+      "array_size": 3
+    },
+    "011866d62": {
+      "dxgi_format": 98,
+      "standard": {
+        "data_size": 173600,
+        "width": 1240,
+        "height": 140,
+        "mipmaps": 1
+      }
+    },
+    "0200100c7": {
+      "dxgi_format": 71,
+      "standard": {
+        "data_size": 65536,
+        "width": 512,
+        "height": 256,
+        "mipmaps": 1
+      }
+    },
+    "02001ffff": {
+      "dxgi_format": 95,
+      "standard": {
+        "data_size": 524160,
+        "width": 256,
+        "height": 256,
+        "mipmaps": 6
+      },
+      "highres": {
+        "data_size": 7864320,
+        "width": 1024,
+        "height": 1024,
+        "mipmaps": 2
+      },
+      "array_size": 6
+    },
+    "02002aad0": {
+      "dxgi_format": 80,
+      "standard": {
+        "data_size": 87360,
+        "width": 256,
+        "height": 256,
+        "mipmaps": 6
+      },
+      "array_size": 2
+    },
+    "02002aae2": {
+      "dxgi_format": 98,
+      "standard": {
+        "data_size": 87360,
+        "width": 256,
+        "height": 256,
+        "mipmaps": 6
+      },
+      "highres": {
+        "data_size": 1310720,
+        "width": 1024,
+        "height": 1024,
+        "mipmaps": 2
+      }
+    },
+    "02002aae3": {
+      "dxgi_format": 99,
+      "standard": {
+        "data_size": 87360,
+        "width": 256,
+        "height": 256,
+        "mipmaps": 6
+      },
+      "highres": {
+        "data_size": 1310720,
+        "width": 1024,
+        "height": 1024,
+        "mipmaps": 2
+      }
+    },
+    "02005d547": {
+      "dxgi_format": 71,
+      "standard": {
+        "data_size": 43680,
+        "width": 256,
+        "height": 256,
+        "mipmaps": 6
+      }
+    },
+    "02005d548": {
+      "dxgi_format": 72,
+      "standard": {
+        "data_size": 43680,
+        "width": 256,
+        "height": 256,
+        "mipmaps": 6
+      },
+      "highres": {
+        "data_size": 655360,
+        "width": 1024,
+        "height": 1024,
+        "mipmaps": 2
+      }
+    },
+    "0208bfd47": {
+      "dxgi_format": 71,
+      "standard": {
+        "data_size": 46800,
+        "width": 360,
+        "height": 260,
+        "mipmaps": 1
+      }
+    },
+    "03685ee47": {
+      "dxgi_format": 71,
+      "standard": {
+        "data_size": 156960,
+        "width": 720,
+        "height": 436,
+        "mipmaps": 1
+      }
+    },
+    "03980fc62": {
+      "dxgi_format": 98,
+      "standard": {
+        "data_size": 147200,
+        "width": 320,
+        "height": 460,
+        "mipmaps": 1
+      }
+    },
+    "040010150": {
+      "dxgi_format": 80,
+      "standard": {
+        "data_size": 163840,
+        "width": 512,
+        "height": 512,
+        "mipmaps": 2
+      },
+      "highres": {
+        "data_size": 2621440,
+        "width": 2048,
+        "height": 2048,
+        "mipmaps": 2
+      }
+    },
+    "040015547": {
+      "dxgi_format": 71,
+      "standard": {
+        "data_size": 43648,
+        "width": 128,
+        "height": 512,
+        "mipmaps": 5
+      },
+      "highres": {
+        "data_size": 655360,
+        "width": 512,
+        "height": 2048,
+        "mipmaps": 2
+      }
+    },
+    "040015548": {
+      "dxgi_format": 72,
+      "standard": {
+        "data_size": 43648,
+        "width": 128,
+        "height": 512,
+        "mipmaps": 5
+      },
+      "highres": {
+        "data_size": 655360,
+        "width": 512,
+        "height": 2048,
+        "mipmaps": 2
+      }
+    },
+    "04002aac8": {
+      "dxgi_format": 72,
+      "standard": {
+        "data_size": 87360,
+        "width": 256,
+        "height": 512,
+        "mipmaps": 6
+      },
+      "highres": {
+        "data_size": 1310720,
+        "width": 1024,
+        "height": 2048,
+        "mipmaps": 2
+      }
+    },
+    "04003aae2": {
+      "dxgi_format": 98,
+      "standard": {
+        "data_size": 349504,
+        "width": 512,
+        "height": 512,
+        "mipmaps": 7
+      },
+      "highres": {
+        "data_size": 5242880,
+        "width": 2048,
+        "height": 2048,
+        "mipmaps": 2
+      }
+    },
+    "04003aae3": {
+      "dxgi_format": 99,
+      "standard": {
+        "data_size": 349504,
+        "width": 512,
+        "height": 512,
+        "mipmaps": 7
+      },
+      "highres": {
+        "data_size": 5242880,
+        "width": 2048,
+        "height": 2048,
+        "mipmaps": 2
+      }
+    },
+    "040055547": {
+      "dxgi_format": 71,
+      "standard": {
+        "data_size": 174752,
+        "width": 512,
+        "height": 512,
+        "mipmaps": 7
+      },
+      "highres": {
+        "data_size": 2621440,
+        "width": 2048,
+        "height": 2048,
+        "mipmaps": 2
+      }
+    },
+    "040055548": {
+      "dxgi_format": 72,
+      "standard": {
+        "data_size": 174752,
+        "width": 512,
+        "height": 512,
+        "mipmaps": 7
+      },
+      "highres": {
+        "data_size": 2621440,
+        "width": 2048,
+        "height": 2048,
+        "mipmaps": 2
+      }
+    },
+    "040055550": {
+      "dxgi_format": 80,
+      "standard": {
+        "data_size": 174752,
+        "width": 512,
+        "height": 512,
+        "mipmaps": 7
+      },
+      "highres": {
+        "data_size": 2621440,
+        "width": 2048,
+        "height": 2048,
+        "mipmaps": 2
+      }
+    },
+    "04007ffe8": {
+      "dxgi_format": 72,
+      "standard": {
+        "data_size": 524256,
+        "width": 512,
+        "height": 512,
+        "mipmaps": 7
+      },
+      "highres": {
+        "data_size": 7864320,
+        "width": 2048,
+        "height": 2048,
+        "mipmaps": 2
+      },
+      "array_size": 3
+    },
+    "08002005f": {
+      "dxgi_format": 95,
+      "standard": {
+        "data_size": 6291456,
+        "width": 1024,
+        "height": 1024,
+        "mipmaps": 1
+      },
+      "array_size": 6
+    },
+    "080021fff": {
+      "dxgi_format": 95,
+      "standard": {
+        "data_size": 8386560,
+        "width": 1024,
+        "height": 1024,
+        "mipmaps": 6
+      },
+      "array_size": 6
+    },
+    "08003fffe": {
+      "dxgi_format": 98,
+      "standard": {
+        "data_size": 4194240,
+        "width": 1024,
+        "height": 1024,
+        "mipmaps": 8
+      },
+      "highres": {
+        "data_size": 62914560,
+        "width": 4096,
+        "height": 4096,
+        "mipmaps": 2
+      },
+      "array_size": 3
+    },
+    "08010005f": {
+      "dxgi_format": 95,
+      "standard": {
+        "data_size": 8388608,
+        "width": 8192,
+        "height": 1024,
+        "mipmaps": 1
+      }
+    },
+    "100055554": {
+      "dxgi_format": 80,
+      "standard": {
+        "data_size": 2796192,
+        "width": 2048,
+        "height": 2048,
+        "mipmaps": 9
+      },
+      "highres": {
+        "data_size": 41943040,
+        "width": 8192,
+        "height": 8192,
+        "mipmaps": 2
+      }
+    }
+}
