@@ -469,7 +469,7 @@ fn import_image(
         }
 
         let mut writer = BufWriter::new(File::create(output_file)?);
-        if output_file.as_str().ends_with(".texture") {
+        if output_file.as_str().ends_with(".custom.texture") {
             let raw_headers = registry().raw_headers.get(&format.id()).ok_or_else(|| {
                 Error::message(format!(
                     "Internal error: Missing the correct headers for format id {}",
