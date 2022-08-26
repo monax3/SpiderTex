@@ -1,3 +1,7 @@
 [workspace]
-members = [ "format-experiment" ]
+members = [
+    "format-experiment",
+    "tracing-egui-repaint",
+    "tracing-oncecell",
+]
 resolver = "2"

@@ -1,0 +1,12 @@
+[package]
+name = "tracing-egui-repaint"
+authors = ["mona <mona@goingtobeamazing.dk>"]
+version = "1.0.0-rc1"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+egui = { version = "0.19.0", default-features = false }
+tracing = { version = "0.1.36", default-features = false }
+tracing-subscriber = { version = "0.3.15", default-features = false }
