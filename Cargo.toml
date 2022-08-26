@@ -3,5 +3,6 @@ members = [
     "format-experiment",
     "tracing-egui-repaint",
     "tracing-oncecell",
+    "tracing-messagevec"
 ]
 resolver = "2"
