@@ -47,10 +47,13 @@ impl Dimensions {
     }
 
     pub fn data_size(&self, format: DXGI_FORMAT, array_size: usize) -> usize {
-        let data_size = format.planes().bpp() * self.width * self.height * array_size;
-        let mut start = data_size.next_power_of_two().trailing_zeros() as usize;
-        for i in 1 ..= array_size {
-            start += 1 << (start - 2 * i);
+        let mut data_size = format.planes().bpp() * self.width * self.height * array_size / format.compression_ratio();
+        // println!("{} * {} * {} * {} / {} = {data_size}", format.planes().bpp(), self.width, self.height, array_size, format.compression_ratio());
+        let start = data_size.next_power_of_two().trailing_zeros() as usize;
+
+        for i in 1 .. (self.mipmaps as usize) {
+            // println!("{start} {}", 2*i);
+            data_size += 1 << (start - 2 * i);
         }
         data_size
     }

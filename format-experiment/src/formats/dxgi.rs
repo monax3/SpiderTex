@@ -1,7 +1,8 @@
 use std::fmt::Display;
 
-#[allow(clippy::wildcard_imports)] use windows::Win32::Graphics::Dxgi::Common::*;
 pub use windows::Win32::Graphics::Dxgi::Common::DXGI_FORMAT;
+#[allow(clippy::wildcard_imports)]
+use windows::Win32::Graphics::Dxgi::Common::*;
 
 use super::ColorPlanes;
 
@@ -72,11 +73,14 @@ pub trait DxgiFormatExt {
     fn is_compressed(self) -> bool;
     #[must_use]
     fn is_srgb(self) -> bool;
+    fn compression_ratio(self) -> usize;
 }
 
 impl DxgiFormatExt for DXGI_FORMAT {
     #[inline]
-    fn display(self) -> DxgiFormatDisplay { DxgiFormatDisplay(self) }
+    fn display(self) -> DxgiFormatDisplay {
+        DxgiFormatDisplay(self)
+    }
 
     #[inline]
     fn compressed_format(self) -> Self {
@@ -112,35 +116,59 @@ impl DxgiFormatExt for DXGI_FORMAT {
 
     #[inline]
     #[must_use]
-    fn is_bc1(self) -> bool { BC1_FORMATS.contains(&self) }
+    fn is_bc1(self) -> bool {
+        BC1_FORMATS.contains(&self)
+    }
 
     #[inline]
     #[must_use]
-    fn is_bc4(self) -> bool { BC4_FORMATS.contains(&self) }
+    fn is_bc4(self) -> bool {
+        BC4_FORMATS.contains(&self)
+    }
 
     #[inline]
     #[must_use]
-    fn is_bc6(self) -> bool { BC6_FORMATS.contains(&self) }
+    fn is_bc6(self) -> bool {
+        BC6_FORMATS.contains(&self)
+    }
 
     #[inline]
     #[must_use]
-    fn is_bc7(self) -> bool { BC7_FORMATS.contains(&self) }
+    fn is_bc7(self) -> bool {
+        BC7_FORMATS.contains(&self)
+    }
 
     #[inline]
     #[must_use]
-    fn is_rgb(self) -> bool { self.is_bc1() }
+    fn is_rgb(self) -> bool {
+        self.is_bc1()
+    }
 
     #[inline]
     #[must_use]
-    fn is_rgba(self) -> bool { self.is_bc7() || RGBA_FORMATS.contains(&self) }
+    fn is_rgba(self) -> bool {
+        self.is_bc7() || RGBA_FORMATS.contains(&self)
+    }
 
     #[inline]
     #[must_use]
-    fn is_luma(self) -> bool { self.is_bc4() || LUMA_FORMATS.contains(&self) }
+    fn is_luma(self) -> bool {
+        self.is_bc4() || LUMA_FORMATS.contains(&self)
+    }
 
     #[inline]
     #[must_use]
-    fn is_hdr(self) -> bool { self.is_bc6() || HDR_FORMATS.contains(&self) }
+    fn is_hdr(self) -> bool {
+        self.is_bc6() || HDR_FORMATS.contains(&self)
+    }
+
+    fn compression_ratio(self) -> usize {
+        if self.is_bc1() || self.is_bc4() {
+            8
+        } else if self.is_bc6() || self.is_bc7() {
+            4
+        } else { 1 }
+    }
 
     #[inline]
     #[must_use]
@@ -158,11 +186,15 @@ impl DxgiFormatExt for DXGI_FORMAT {
 
     #[inline]
     #[must_use]
-    fn is_compressed(self) -> bool { false /* FIXME */ }
+    fn is_compressed(self) -> bool {
+        false /* FIXME */
+    }
 
     #[inline]
     #[must_use]
-    fn is_srgb(self) -> bool { false /* FIXME */ }
+    fn is_srgb(self) -> bool {
+        false /* FIXME */
+    }
 }
 
 pub struct DxgiFormatDisplay(DXGI_FORMAT);

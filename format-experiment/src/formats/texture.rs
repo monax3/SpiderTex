@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use super::Dimensions;
 use super::DXGI_FORMAT;
 
-#[derive(Serialize, Deserialize, Debug, Copy, Clone)]
+#[derive(Serialize, Deserialize, Debug, Copy, Clone, PartialEq, Eq)]
 pub struct TextureFormat {
     #[serde(with = "super::dxgi::serde")]
     pub dxgi_format: DXGI_FORMAT,
@@ -11,9 +11,11 @@ pub struct TextureFormat {
     pub standard: Dimensions,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub highres: Option<Dimensions>,
-    #[serde(default)]
+    #[serde(default = "size_1")]
     pub array_size: usize,
 }
+
+fn size_1() -> usize { 1 }
 
 impl TextureFormat {
     #[inline]
