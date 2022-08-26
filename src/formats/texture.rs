@@ -73,8 +73,10 @@ impl TextureFormat {
             ImageFormat::OpenExr
         } else if self.array_size >= 6 {
             ImageFormat::Dds
-        } else {
+        } else if self.dxgi_format.is_bc1() {
             ImageFormat::Png
+        } else {
+            ImageFormat::Tga
         }
     }
 
