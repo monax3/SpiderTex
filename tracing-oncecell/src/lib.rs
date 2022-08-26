@@ -55,7 +55,7 @@ where
     }
 
     fn max_level_hint(&self) -> Option<tracing::metadata::LevelFilter> {
-        self.0.get().map_or(None, |layer| layer.max_level_hint())
+        self.0.get().and_then(|layer| layer.max_level_hint())
     }
 
     fn on_record(&self, span: &span::Id, values: &span::Record<'_>, ctx: Context<'_, S>) {
