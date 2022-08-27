@@ -74,6 +74,7 @@ fn crashing_bug_check_formats() -> Result<()> {
 
         let mut flags_str: BTreeSet<&str> = BTreeSet::new();
         let mut flags = header.stex_format;
+        let flags_prev = flags;
         if flags & (1 << 0) != 0 { flags_str.insert("sRGB"); flags &= !(1 << 0); }
         if flags & (1 << 2) != 0 { flags_str.insert("normal"); flags &= !(1 << 2); }
         if flags & (1 << 3) != 0 { flags_str.insert("gradient"); flags &= !(1 << 3); }
@@ -81,7 +82,7 @@ fn crashing_bug_check_formats() -> Result<()> {
         if flags & (1 << 5) != 0 { flags_str.insert("LUT"); flags &= !(1 << 5); }
         if flags & (1 << 6) != 0 { flags_str.insert("skybox"); flags &= !(1 << 6); }
 
-        formats.insert(format!("{flags:08b} {flags_str:?} {} {} {:?} {format}", header.planes, header.array_size, (header.unk1, header.unk2, header.unk3, header.unk4)));
+        formats.insert(format!("{flags:08b} {flags_str:?} {flags_prev:02x} {:02x} {} {:?} {format}", header.planes, header.array_size, (header.unk1, header.unk2, header.unk3, header.unk4)));
         if flags & (1 << 2) != 0 {
             event!(DEBUG, flags = format!("{flags:08b}"), %format, planes = header.planes, unks = ?(header.unk1, header.unk2, header.unk3, header.unk4));
         }
