@@ -1,0 +1,3 @@
+use super::HRESULT;
+
+pub const E_INVALIDARG: HRESULT = HRESULT(0x8007_0057);

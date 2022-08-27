@@ -1,0 +1,17 @@
+[package]
+name = "directxtex"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+directxtex-sys = { path = "../directxtex-sys" }
+dxgi-format = { path = "../dxgi-format" }
+windows = "0.39.0"
+windows-compat = { path = "../windows-compat" }
+
+[target.'cfg(windows)'.dependencies]
+windows-imaging = { path = "../windows-imaging", optional = true }
+
+[features]

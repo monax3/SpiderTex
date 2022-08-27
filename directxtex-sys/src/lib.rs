@@ -3,18 +3,8 @@
 #![allow(non_upper_case_globals)]
 #![allow(unsafe_code)] // no FFI without unsafe
 
-#[cfg(feature = "windows")]
-mod types {
-    pub use windows::core::{HRESULT, GUID};
-    pub use windows::Win32::Graphics::Dxgi::Common::DXGI_FORMAT;
-}
-#[cfg(not(feature = "windows"))]
-mod types {
-    pub type HRESULT = u32;
-    pub type DXGI_FORMAT = u32;
-    pub type GUID = std::ffi::c_void; // FIXME    
-}
-pub use types::*;
+use dxgi_format::DXGI_FORMAT;
+use windows_compat::{HRESULT, GUID};
 
 pub type DXPtr = *mut DXOpaque;
 

@@ -60,6 +60,13 @@ impl Container {
             _ => None,
         }
     }
+
+    pub fn from_extension(ext: &str) -> Option<Self> {
+        match ext {
+            ext if ext.eq_ignore_ascii_case("png") => Some(Self::Png),
+            _ => None,
+        }
+    }
 }
 
 impl From<Container> for &'static GUID {

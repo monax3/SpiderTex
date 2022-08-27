@@ -8,7 +8,9 @@ members = [
     "tracing-oncecell",
     "tracing-messagevec",
     "dxgi-format",
+    "directxtex",
     "directxtex-sys",
     "windows-imaging",
+    "windows-compat",
 ]
 resolver = "2"
