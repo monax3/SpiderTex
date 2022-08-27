@@ -19,8 +19,8 @@ use eframe::egui::{
 use eframe::emath::Align;
 use eframe::{run_native, App, Frame as EFrame, NativeOptions};
 use image::DynamicImage;
-use spidertexlib::formats::TextureFormat;
-use spidertexlib::prelude::*;
+use texturesforspiderman::formats::TextureFormat;
+use texturesforspiderman::prelude::*;
 
 use super::preview::Preview;
 use super::{theme, widgets};

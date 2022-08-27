@@ -31,8 +31,8 @@ use eframe::epaint::{Color32, FontId};
 use eframe::{App, Frame};
 use image::{DynamicImage, ImageFormat};
 use parking_lot::Mutex;
-use spidertexlib::convert::{convert, TaskResult};
-use spidertexlib::files::{
+use texturesforspiderman::convert::{convert, TaskResult};
+use texturesforspiderman::files::{
     is_image_ext,
     is_texture_ext,
     output_files,
@@ -45,8 +45,8 @@ use spidertexlib::files::{
     OutputFormat,
     Scanned,
 };
-use spidertexlib::images::{DxImport, Image, ImageRs};
-use spidertexlib::prelude::*;
+use texturesforspiderman::images::{DxImport, Image, ImageRs};
+use texturesforspiderman::prelude::*;
 
 use super::{theme, widgets, AppWindow};
 use crate::inputs::{Action, Inputs};

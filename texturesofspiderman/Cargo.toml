@@ -43,6 +43,7 @@ thiserror = "1.0.32"
 backtrace = "0.3.66"
 parking_lot = { version = "0.12.1", features = ["hardware-lock-elision"] }
 regex = "1.6.0"
+walkdir = "2.3.2"
 
 [build-dependencies]
 vcpkg = "0.2.15"
@@ -53,3 +54,8 @@ rebuild-registry = []
 debug-inputs = []
 debug-formats = []
 disable-wic = []
+
+[dev-dependencies]
+test-log = { version = "0.2.11", features = ["trace"], default-features = false }
+# tracing = { version = "0.1.36", default-features = false, features = ["max_level_debug"] }
+tracing-subscriber = { version = "0.3.15", features = ["fmt", "env-filter"], default-features = false }

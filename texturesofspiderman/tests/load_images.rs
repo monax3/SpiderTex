@@ -1,6 +1,6 @@
 use image::ImageFormat;
-use spidertexlib::dxtex::DXImage;
-use spidertexlib::prelude::*;
+use texturesforspiderman::dxtex::DXImage;
+use texturesforspiderman::prelude::*;
 
 #[test]
 fn load_images() -> Result<()> {
@@ -12,7 +12,7 @@ fn load_images() -> Result<()> {
     const TEST_LUMA: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/testdata/luma.png");
     const TEST_LUMA_ALPHA: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/testdata/luma_alpha.png");
 
-    spidertexlib::util::log_for_tests(true);
+    texturesforspiderman::util::log_for_tests(true);
 
     {
         let span = span!(TRACE, "rgb", file = TEST_RGB);

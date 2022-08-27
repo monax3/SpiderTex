@@ -5,8 +5,8 @@ use camino::Utf8PathBuf;
 use eframe::egui::{vec2, Context, Event, Layout, Response, Sense, Ui, Widget};
 use eframe::emath::Align;
 use parking_lot::Mutex;
-use spidertexlib::prelude::*;
-use spidertexlib::util::MaybeReady;
+use texturesforspiderman::prelude::*;
+use texturesforspiderman::util::MaybeReady;
 use tracing_subscriber::prelude::*;
 
 use crate::gui::theme;

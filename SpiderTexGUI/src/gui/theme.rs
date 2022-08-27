@@ -1,7 +1,7 @@
 use eframe::egui::style::{Margin, Spacing};
 use eframe::egui::{vec2, Color32, FontId, RichText, Style, TextStyle, Vec2, Visuals, WidgetText};
 use eframe::epaint::FontFamily;
-use spidertexlib::prelude::*;
+use texturesforspiderman::prelude::*;
 
 pub const SIDEBAR_WIDTH: f32 = 300.0;
 pub const EXTRA_SPACING: f32 = 10.0;

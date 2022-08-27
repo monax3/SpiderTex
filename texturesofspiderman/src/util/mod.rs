@@ -4,7 +4,7 @@ mod panic;
 pub use panic::{catch_panics, downcast_str};
 mod walkdir;
 use camino::Utf8PathBuf;
-pub use walkdir::{walkdir, WalkArgs};
+pub use self::walkdir::{walkdir, WalkArgs};
 #[cfg(windows)]
 mod win32;
 #[cfg(windows)]

@@ -5,8 +5,8 @@ use std::fmt::Write;
 
 use backtrace::Backtrace;
 use camino::Utf8PathBuf;
-use spidertexlib::prelude::*;
-use spidertexlib::util::downcast_str;
+use texturesforspiderman::prelude::*;
+use texturesforspiderman::util::downcast_str;
 use tracing::{event, Level};
 use windows::core::{w, HSTRING, PCSTR, PCWSTR};
 use windows::Win32::Foundation::ERROR_CANCELLED;

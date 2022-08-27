@@ -1,23 +1,14 @@
-use std::collections::{BTreeMap, BTreeSet};
+use std::collections::{BTreeMap, BTreeSet, VecDeque};
+use std::path::{Path, PathBuf};
 
 use camino::{Utf8Path, Utf8PathBuf};
 
 use crate::files::{
-    base_name,
-    format_for_file,
-    is_ignored_ext,
-    is_image_ext,
-    is_texture_ext,
-    merge_file_formats,
-    Categorized,
-    FileFormat,
-    FileGroup,
-    FileType,
-    InputGroup,
-    Uncategorized,
+    base_name, format_for_file, is_ignored_ext, is_image_ext, is_texture_ext, merge_file_formats,
+    Categorized, FileFormat, FileGroup, FileType, InputGroup, Uncategorized,
 };
 use crate::prelude::*;
-use crate::util::{WalkArgs};
+use crate::util::WalkArgs;
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, Ord, PartialOrd)]
 pub enum Action {
@@ -55,7 +46,7 @@ pub enum Job {
 #[derive(Debug)]
 pub struct Inputs {
     pub textures: Vec<Categorized>,
-    pub images:   Vec<Categorized>,
+    pub images: Vec<Categorized>,
 }
 
 impl Inputs {
@@ -70,11 +61,15 @@ impl Inputs {
 
     #[inline]
     #[must_use]
-    pub fn is_empty(&self) -> bool { self.textures.is_empty() && self.images.is_empty() }
+    pub fn is_empty(&self) -> bool {
+        self.textures.is_empty() && self.images.is_empty()
+    }
 
     #[inline]
     #[must_use]
-    pub fn len(&self) -> usize { self.textures.len() + self.images.len() }
+    pub fn len(&self) -> usize {
+        self.textures.len() + self.images.len()
+    }
 
     pub fn add_pairs(&mut self) {
         for texture in &mut self.textures {
@@ -95,23 +90,23 @@ impl Inputs {
                 if !set.contains(&raw) && raw.exists() {
                     event!(DEBUG, "Adding {raw}");
                     extras.push(raw);
-                 }
-                 let hd = Utf8PathBuf::from(format!("{base_name}_hd.texture"));
-                 if !set.contains(&hd) && hd.exists() {
-                     event!(DEBUG, "Adding {hd}");
-                     extras.push(hd);
-                 }
-                 let hd2 = Utf8PathBuf::from(format!("{base_name}.hd.texture"));
-                 if !set.contains(&hd2) && hd2.exists() {
-                     event!(DEBUG, "Adding {hd2}");
-                     extras.push(hd2);
-                 }
-                 let texture = Utf8PathBuf::from(format!("{base_name}.texture"));
-                 if !set.contains(&texture) && texture.exists() {
-                     event!(DEBUG, "Adding {texture}");
-                     extras.push(texture);
-                 }
-              }
+                }
+                let hd = Utf8PathBuf::from(format!("{base_name}_hd.texture"));
+                if !set.contains(&hd) && hd.exists() {
+                    event!(DEBUG, "Adding {hd}");
+                    extras.push(hd);
+                }
+                let hd2 = Utf8PathBuf::from(format!("{base_name}.hd.texture"));
+                if !set.contains(&hd2) && hd2.exists() {
+                    event!(DEBUG, "Adding {hd2}");
+                    extras.push(hd2);
+                }
+                let texture = Utf8PathBuf::from(format!("{base_name}.texture"));
+                if !set.contains(&texture) && texture.exists() {
+                    event!(DEBUG, "Adding {texture}");
+                    extras.push(texture);
+                }
+            }
             if !extras.is_empty() {
                 texture.files.extend(extras);
             }
@@ -121,13 +116,15 @@ impl Inputs {
 
 pub struct InputsIter {
     textures: std::vec::IntoIter<Categorized>,
-    images:   std::vec::IntoIter<Categorized>,
+    images: std::vec::IntoIter<Categorized>,
 }
 
 impl Iterator for InputsIter {
     type Item = Categorized;
 
-    fn next(&mut self) -> Option<Self::Item> { self.textures.next().or_else(|| self.images.next()) }
+    fn next(&mut self) -> Option<Self::Item> {
+        self.textures.next().or_else(|| self.images.next())
+    }
 }
 
 impl From<Inputs> for InputsIter {
@@ -135,7 +132,7 @@ impl From<Inputs> for InputsIter {
         let Inputs { textures, images } = inputs;
         InputsIter {
             textures: textures.into_iter(),
-            images:   images.into_iter(),
+            images: images.into_iter(),
         }
     }
 }
@@ -144,7 +141,9 @@ impl IntoIterator for Inputs {
     type IntoIter = InputsIter;
     type Item = Categorized;
 
-    fn into_iter(self) -> Self::IntoIter { InputsIter::from(self) }
+    fn into_iter(self) -> Self::IntoIter {
+        InputsIter::from(self)
+    }
 }
 
 #[must_use]
@@ -221,34 +220,68 @@ pub fn gather_from_args() -> Inputs {
     gather_iter(args)
 }
 
-pub fn gather(from: impl Into<Utf8PathBuf>) -> Inputs { gather_iter(std::iter::once(from.into())) }
+pub fn gather(from: impl Into<Utf8PathBuf>) -> Inputs {
+    gather_iter(std::iter::once(from.into()))
+}
 
 pub fn gather_iter<'a>(iter: impl Iterator<Item = Utf8PathBuf> + 'a) -> Inputs {
     categorize(group(walk(iter)))
-    // FIXME
-    // if inputs.is_empty() {
-    //     if let Some(selected) =
-    //         open_files_dialog()?.log_failure_as("Failed to open Windows file
-    // picker")     {
-    //         inputs = selected;
-    //     } else {
-    //         return Ok(None);
-    //     }
-    // }
 }
 
 pub fn walk<'a>(
     iter: impl Iterator<Item = Utf8PathBuf> + 'a,
 ) -> impl Iterator<Item = Utf8PathBuf> + 'a {
-    let mut walker = WalkArgs::new(iter);
+    WalkArgs::new(iter)
+}
 
-    walker
-    // std::iter::from_fn(move || {
-    //     while let Some(next) = walker.next() {
-    //         if !next.as_str().contains(".custom.") {
-    //             return Some(next);
-    //         }
-    //     }
-    //     None
-    // })
+pub fn walk_new<'a>(
+    mut iter: impl Iterator<Item = PathBuf> + 'a,
+) -> impl Iterator<Item = PathBuf> + 'a {
+    let mut dirs: VecDeque<walkdir::IntoIter> = VecDeque::new();
+
+    std::iter::from_fn(move || loop {
+        while let Some(walkdir) = dirs.front_mut() {
+            while let Some(entry) = walkdir.next() {
+                match entry {
+                    Ok(entry) => {
+                        if entry.path().is_file() {
+                            return Some(entry.path().to_owned());
+                        }
+                    }
+                    Err(error) => {
+                        event!(ERROR, "Error building file list: {error}");
+                    }
+                }
+            }
+            dirs.pop_front();
+        }
+        if let Some(entry) = iter.next() {
+            if entry.is_dir() {
+                dirs.push_back(walkdir::WalkDir::new(entry).into_iter());
+                continue;
+            } else if entry.is_file() {
+                return Some(entry);
+            }
+        }
+        break None;
+    })
+}
+
+#[test]
+fn test_walk_new() {
+    use tracing_subscriber::EnvFilter;
+    tracing_subscriber::fmt().with_env_filter(EnvFilter::try_from_default_env().unwrap()).without_time().with_line_number(true).with_file(true).init();
+
+    // crate::util::log_for_tests(true);
+    let paths = ["src", "tests"]
+        .into_iter()
+        .map(|item| Path::new(env!("CARGO_MANIFEST_DIR")).join(item));
+
+    let span = span!(TRACE, "test span", hello = "world", "walking");
+    let _entered = span.enter();
+
+    for file in walk_new(paths) {
+        event!(INFO, "{}", file.display());
+    }
+    event!(TRACE, "a trace");
 }

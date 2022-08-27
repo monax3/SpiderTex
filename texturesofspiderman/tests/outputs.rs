@@ -1,28 +1,28 @@
 use camino::{Utf8Path, Utf8PathBuf};
-use spidertexlib::dxtex::{self, DXImage, TexMetadata, TEX_DIMENSION, TEX_FILTER_FLAGS};
-use spidertexlib::files::{as_images, ng_format_for_texture_file, Categorized, FileType};
-use spidertexlib::formats::{
+use texturesforspiderman::dxtex::{self, DXImage, TexMetadata, TEX_DIMENSION, TEX_FILTER_FLAGS};
+use texturesforspiderman::files::{as_images, ng_format_for_texture_file, Categorized, FileType};
+use texturesforspiderman::formats::{
     guess_dimensions_2,
     probe_textures_2,
     ColorPlanes,
     ImageFormat,
     TextureFormat,
 };
-use spidertexlib::inputs::Inputs;
-use spidertexlib::prelude::*;
-use spidertexlib::registry::Registry;
-use spidertexlib::rgb::{CONTAINER_PNG, PIXEL_FORMAT_BGR, WIC};
-use spidertexlib::util::walkdir;
+use texturesforspiderman::inputs::Inputs;
+use texturesforspiderman::prelude::*;
+use texturesforspiderman::registry::Registry;
+use texturesforspiderman::rgb::{CONTAINER_PNG, PIXEL_FORMAT_BGR, WIC};
+use texturesforspiderman::util::walkdir;
 
 #[test]
 fn outputs() -> Result<()> {
     const IMPORT_TESTDATA: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/testdata/import");
 
-    spidertexlib::util::log_for_tests(true);
+    texturesforspiderman::util::log_for_tests(true);
 
     registry::load()?;
 
-    let Inputs { textures, images } = spidertexlib::inputs::gather(IMPORT_TESTDATA);
+    let Inputs { textures, images } = texturesforspiderman::inputs::gather(IMPORT_TESTDATA);
 
     for Categorized { files, .. } in textures {
         for file in &files {

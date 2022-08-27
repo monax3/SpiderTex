@@ -1,14 +1,14 @@
 use camino::Utf8Path;
-use spidertexlib::dxtex::{self, DXImage, TexMetadata, TEX_DIMENSION, TEX_FILTER_FLAGS};
-use spidertexlib::formats::{
+use texturesforspiderman::dxtex::{self, DXImage, TexMetadata, TEX_DIMENSION, TEX_FILTER_FLAGS};
+use texturesforspiderman::formats::{
     guess_dimensions_2,
     probe_textures_2,
     ColorPlanes,
     ImageFormat,
     TextureFormat,
 };
-use spidertexlib::prelude::*;
-use spidertexlib::registry::Registry;
+use texturesforspiderman::prelude::*;
+use texturesforspiderman::registry::Registry;
 
 const TESTDATA: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/testdata");
 
@@ -173,12 +173,12 @@ fn get_block_size_ext(size: usize) -> Option<(usize, usize)> {
 
 #[test]
 fn test() -> Result<()> {
-    spidertexlib::util::log_for_tests(true);
+    texturesforspiderman::util::log_for_tests(true);
 
     let testdir = Utf8Path::new(TESTDATA);
     let mut registry = Registry::load()?;
 
-    for file in spidertexlib::util::walkdir(testdir) {
+    for file in texturesforspiderman::util::walkdir(testdir) {
         let span = tracing::error_span!("", file = file.file_name().unwrap_or_default());
         let _entered = span.enter();
 
@@ -333,8 +333,8 @@ fn test() -> Result<()> {
             //         }
 
             //         let img = match format.planes {
-            //             spidertexlib::formats::ColorPlanes::Hdr => continue,
-            //             spidertexlib::formats::ColorPlanes::Rgba => {
+            //             texturesforspiderman::formats::ColorPlanes::Hdr => continue,
+            //             texturesforspiderman::formats::ColorPlanes::Rgba => {
             //                 let img: image::ImageBuffer<image::Rgba<u8>, _> =
             //                     image::ImageBuffer::from_raw(
             //                         metadata.width as u32,
@@ -344,7 +344,7 @@ fn test() -> Result<()> {
             //                     .expect("PNG creation failed");
             //                 image::DynamicImage::from(img)
             //             }
-            //             spidertexlib::formats::ColorPlanes::Luma => {
+            //             texturesforspiderman::formats::ColorPlanes::Luma => {
             //                 let img: image::ImageBuffer<image::Luma<u8>, _> =
             //                     image::ImageBuffer::from_raw(
             //                         metadata.width as u32,
