@@ -9,5 +9,6 @@ members = [
     "tracing-messagevec",
     "dxgi-format",
     "directxtex-sys",
+    "windows-imaging",
 ]
 resolver = "2"
