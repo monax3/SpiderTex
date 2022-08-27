@@ -1,0 +1,18 @@
+[package]
+name = "directxtex-sys"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+windows = { version = "0.39.0", features = ["Win32_Graphics_Dxgi_Common"], optional = true }
+
+[build-dependencies]
+vcpkg = { version = "0.2.15", optional = true }
+
+[features]
+# default = ["dxgi-format", "hresult", "vcpkg"]
+default = ["windows"]
+# dxgi-format = ["windows/Win32_Graphics_Dxgi_Common"]
+# hresult = ["windows"]

@@ -8,5 +8,6 @@ members = [
     "tracing-oncecell",
     "tracing-messagevec",
     "dxgi-format",
+    "directxtex-sys",
 ]
 resolver = "2"
