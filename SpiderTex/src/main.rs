@@ -9,16 +9,28 @@ use std::io::prelude::*;
 use std::io::BufWriter;
 
 use camino::{Utf8Path, Utf8PathBuf};
-use spidertexlib::dxtex::{DXImage, TEX_FILTER_FLAGS};
-use spidertexlib::files::as_textures;
-use spidertexlib::files::{as_images, Categorized, FileGroup, FileStatus, OutputFormat, Scanned};
-use spidertexlib::formats::ColorPlanes;
-use spidertexlib::images::Warnings;
-use spidertexlib::inputs::Inputs;
-use spidertexlib::prelude::*;
-use spidertexlib::rgb::{CONTAINER_PNG, PIXEL_FORMAT_BGR, WIC};
-use spidertexlib::util::{log_for_tests, message_box_error, message_box_ok};
-use spidertexlib::{inputs, APP_TITLE};
+use directxtex::{DXTImage, TEX_FILTER_FLAGS};
+use texturesofspiderman::files::as_textures;
+use texturesofspiderman::files::{as_images, Categorized, FileGroup, FileStatus, OutputFormat, Scanned};
+use texturesofspiderman::formats::ColorPlanes;
+use texturesofspiderman::images::Warnings;
+use texturesofspiderman::inputs::Inputs;
+use texturesofspiderman::prelude::*;
+use texturesofspiderman::util::{log_for_tests};
+use texturesofspiderman::{inputs, APP_TITLE};
+
+#[cfg(windows)]
+use texturesofspiderman::util::{message_box_error, message_box_ok};
+
+#[cfg(not(windows))]
+fn message_box_error(text: impl Into<String>, _caption: &str) {
+    event!(ERROR, "{}", text.into())
+}
+
+#[cfg(not(windows))]
+fn message_box_ok(text: impl Into<String>, _caption: &str) {
+    event!(INFO, "{}", text.into())
+}
 
 fn run(mut inputs: Inputs) -> Result<(String, Warnings)> {
     inputs.add_pairs();
@@ -60,12 +72,25 @@ fn main() {
     }
 }
 
-fn save_rgb(image: &DXImage, file: &Utf8Path) -> Result<()> {
-    let wic = WIC::new()?;
-    let bitmap = wic.bitmap_from_directxtex(image, 0)?;
-    let from_pixel_format = bitmap.pixel_format()?;
-    let rgb = bitmap.to_pixel_format(&from_pixel_format, PIXEL_FORMAT_BGR)?;
-    rgb.save(&file, CONTAINER_PNG)
+#[cfg(feature = "directxtex/windows-imaging")]
+fn save_rgb(image: &DXTImage, file: &Utf8Path) -> Result<()> {
+    let wic = windows_imaging::wic()?;
+    // let bitmap = wic.bitmap_from_directxtex(image, 0)?;
+    // let from_pixel_format = bitmap.pixel_format()?;
+    // let rgb = bitmap.to_pixel_format(&from_pixel_format, PIXEL_FORMAT_BGR)?;
+    // rgb.save(&file, CONTAINER_PNG)
+}
+
+// FIXME: to compile on non-windows, needs image-rs here
+#[cfg(not(feature = "directxtex/windows-imaging"))]
+fn save_rgb(image: &DXTImage, file: &Utf8Path) -> Result<()> {
+    unimplemented!()
+    // image.save_wic(0, )
+    // let wic = windows_imaging::wic()?;
+    // // let bitmap = wic.bitmap_from_directxtex(image, 0)?;
+    // // let from_pixel_format = bitmap.pixel_format()?;
+    // // let rgb = bitmap.to_pixel_format(&from_pixel_format, PIXEL_FORMAT_BGR)?;
+    // // rgb.save(&file, CONTAINER_PNG)
 }
 
 fn export_texture(
@@ -82,10 +107,11 @@ fn export_texture(
     let texture_data = format.without_header(&all_data);
 
     let pixel_format = format.dxgi_format.uncompressed_format();
-    let raw_image = DXImage::with_dimensions(
+    let raw_image = DXTImage::new(
         format.dxgi_format,
-        dimensions,
+        dimensions.width, dimensions.height,
         format.array_size,
+        dimensions.mipmaps,
         texture_data,
     )
     .map_err(|error| {
@@ -112,7 +138,7 @@ fn export_texture(
             })?;
         } else {
             output_image
-                .save(array_index, format.default_image_format(), &output_file)
+                .save(array_index, &output_file)
                 .map_err(|error| {
                     Error::message(format!(
                         "Failed to save the file as {output_file} from format {}: {error}",
@@ -274,10 +300,10 @@ fn import_images(groups: impl IntoIterator<Item = Categorized>) -> Result<(Strin
 }
 
 fn bring_dx_to_format<'a>(
-    image: &'a DXImage,
+    image: &'a DXTImage,
     format: DXGI_FORMAT,
     dimensions: Dimensions,
-) -> Result<(Cow<'a, DXImage>, Warnings)> {
+) -> Result<(Cow<'a, DXTImage>, Warnings)> {
     let mut warnings = Warnings::new();
     let mut metadata = image.metadata()?;
     let image = if metadata.format == format
@@ -326,12 +352,12 @@ fn load_image_array(
     pixel_format: DXGI_FORMAT,
     dimensions: Dimensions,
     images: &[Utf8PathBuf],
-) -> Result<(DXImage, Warnings)> {
+) -> Result<(DXTImage, Warnings)> {
     let mut warnings = Warnings::new();
     let mut buffer: Vec<u8> = Vec::with_capacity(dimensions.data_size);
 
     for file in images {
-        let dx = DXImage::load(file).log_failure()?;
+        let dx = DXTImage::load(file).log_failure()?;
         let metadata = dx.metadata().log_failure()?;
 
         if images.len() == 1
@@ -355,17 +381,15 @@ fn load_image_array(
         buffer.extend(image.image(0).log_failure()?);
     }
 
-    DXImage::with_dimensions(
+    Ok(DXTImage::new(
         pixel_format,
-        Dimensions {
-            mipmaps: 1,
-            ..dimensions
-        },
+        dimensions.width, dimensions.height,
         images.len(),
+        1,
         &buffer,
     )
     .log_failure()
-    .map(|img| (img, warnings))
+    .map(|img| (img, warnings))?)
 }
 
 fn import_image(
@@ -413,19 +437,18 @@ fn import_image(
             // let expected = dxtex::expected_size_array(metadata.format, ,
             // format.array_size);
             let expected =
-                dxtex::expected_size_array(metadata.format, dimensions, format.array_size);
+                directxtex::expected_size_array(metadata.format, dimensions.width, dimensions.height, format.array_size, dimensions.mipmaps);
             if image.len() == expected {
                 image
             } else {
                 // event!(DEBUG, "expected size is {expected}, image is {}", image.len());
                 let data = image.pixels()?;
-                let stripped = DXImage::with_dimensions(
+                let stripped = DXTImage::new(
                     metadata.format,
-                    Dimensions {
-                        mipmaps: 1,
-                        ..dimensions
-                    },
+                    dimensions.width,
+                    dimensions.height,
                     format.array_size,
+                    1,
                     &data,
                 )
                 .log_failure()?;

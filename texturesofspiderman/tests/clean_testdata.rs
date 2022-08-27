@@ -1,7 +1,7 @@
 use camino::Utf8Path;
-use spidertexlib::files::Categorized;
-use spidertexlib::inputs::Inputs;
-use spidertexlib::prelude::*;
+use texturesofspiderman::files::Categorized;
+use texturesofspiderman::inputs::Inputs;
+use texturesofspiderman::prelude::*;
 
 #[test]
 fn clean_testdata() -> Result<()> {
@@ -12,9 +12,9 @@ fn clean_testdata() -> Result<()> {
     let testdata_textures = Utf8Path::new(TESTDATA_TEXTURES);
     let testdata_images = Utf8Path::new(TESTDATA_IMAGES);
 
-    spidertexlib::util::log_for_tests(true);
+    texturesofspiderman::util::log_for_tests(true);
 
-    let Inputs { textures, .. } = spidertexlib::inputs::gather(testdata_images);
+    let Inputs { textures, .. } = texturesofspiderman::inputs::gather(testdata_images);
     for Categorized { files, .. } in textures {
         for file in files {
             if file.as_str().contains(".custom.") || file.as_str().contains(".customhd.") {
@@ -25,7 +25,7 @@ fn clean_testdata() -> Result<()> {
             }
         }
     }
-    let Inputs { images, textures } = spidertexlib::inputs::gather(testdata_textures);
+    let Inputs { images, textures } = texturesofspiderman::inputs::gather(testdata_textures);
     for Categorized { files, .. } in images {
         for file in files {
             event!(TRACE, "Removing old export {file}");

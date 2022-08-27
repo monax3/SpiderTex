@@ -1,21 +1,21 @@
 use camino::Utf8Path;
-use spidertexlib::dxtex::{self, DXImage, TexMetadata, TEX_DIMENSION, TEX_FILTER_FLAGS};
-use spidertexlib::formats::{
+use directxtex::{self, DXTImage, TexMetadata, TEX_DIMENSION, TEX_FILTER_FLAGS};
+use texturesofspiderman::formats::{
     guess_dimensions_2,
     probe_textures_2,
     ColorPlanes,
     ImageFormat,
     TextureFormat,
 };
-use spidertexlib::prelude::*;
-use spidertexlib::registry::Registry;
-use spidertexlib::texture_file::read_texture;
+use texturesofspiderman::prelude::*;
+use texturesofspiderman::registry::Registry;
+use texturesofspiderman::texture_file::read_texture;
 
 const TESTDATA: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/testdata");
 
 #[test]
 fn test() -> Result<()> {
-    spidertexlib::util::log_for_tests(true);
+    texturesofspiderman::util::log_for_tests(true);
 
     let testdir = Utf8Path::new(TESTDATA);
     let mut registry = Registry::load()?;
@@ -63,7 +63,7 @@ fn test() -> Result<()> {
 
     return Ok(());
 
-    for file in spidertexlib::util::walkdir(testdir) {
+    for file in texturesofspiderman::util::walkdir(testdir) {
         let span = tracing::error_span!("", file = file.file_name().unwrap_or_default());
         let _entered = span.enter();
 
@@ -74,7 +74,7 @@ fn test() -> Result<()> {
             let (format, data) = read_texture(&file)?;
             if let Some(format) = format {
                 let format = TextureFormat::from(format);
-                let dx = DXImage::new(
+                let dx = DXTImage::new(
                     format.dxgi_format,
                     format.standard.width,
                     format.standard.height,
@@ -85,7 +85,7 @@ fn test() -> Result<()> {
                 .log_failure_as("new")?;
                 let metadata = dx.metadata().log_failure_as("metadata 1")?;
                 // event!(DEBUG, before=?DXGIFormat::from(metadata.format));
-                let dx = if dxtex::is_compressed(metadata.format) {
+                let dx = if directxtex::is_compressed(metadata.format) {
                     dx.decompress().log_failure_as("compress")?
                 } else {
                     dx
@@ -193,8 +193,8 @@ fn test() -> Result<()> {
             //         }
 
             //         let img = match format.planes {
-            //             spidertexlib::formats::ColorPlanes::Hdr => continue,
-            //             spidertexlib::formats::ColorPlanes::Rgba => {
+            //             texturesofspiderman::formats::ColorPlanes::Hdr => continue,
+            //             texturesofspiderman::formats::ColorPlanes::Rgba => {
             //                 let img: image::ImageBuffer<image::Rgba<u8>, _> =
             //                     image::ImageBuffer::from_raw(
             //                         metadata.width as u32,
@@ -204,7 +204,7 @@ fn test() -> Result<()> {
             //                     .expect("PNG creation failed");
             //                 image::DynamicImage::from(img)
             //             }
-            //             spidertexlib::formats::ColorPlanes::Luma => {
+            //             texturesofspiderman::formats::ColorPlanes::Luma => {
             //                 let img: image::ImageBuffer<image::Luma<u8>, _> =
             //                     image::ImageBuffer::from_raw(
             //                         metadata.width as u32,

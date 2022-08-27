@@ -1,18 +1,18 @@
 use camino::{Utf8Path, Utf8PathBuf};
-use spidertexlib::dxtex::{self, DXImage, TexMetadata, TEX_DIMENSION, TEX_FILTER_FLAGS};
-use spidertexlib::files::{as_images, ng_format_for_texture_file, Categorized, FileType};
-use spidertexlib::formats::{
+use directxtex::{self, DXTImage, TexMetadata, TEX_DIMENSION, TEX_FILTER_FLAGS};
+use texturesofspiderman::files::{as_images, ng_format_for_texture_file, Categorized, FileType};
+use texturesofspiderman::formats::{
     guess_dimensions_2,
     probe_textures_2,
     ColorPlanes,
     ImageFormat,
     TextureFormat,
 };
-use spidertexlib::inputs::Inputs;
-use spidertexlib::prelude::*;
-use spidertexlib::registry::Registry;
-use spidertexlib::rgb::{CONTAINER_PNG, PIXEL_FORMAT_BGR, WIC};
-use spidertexlib::util::walkdir;
+use texturesofspiderman::inputs::Inputs;
+use texturesofspiderman::prelude::*;
+use texturesofspiderman::registry::Registry;
+// use texturesofspiderman::rgb::{CONTAINER_PNG, PIXEL_FORMAT_BGR, WIC};
+use texturesofspiderman::util::walkdir;
 
 fn test_metadata(file: &Utf8Path, metadata: &TexMetadata, format: &TextureFormat) {
     let expected_formats = format.planes().expected_formats();
@@ -102,11 +102,11 @@ fn test_expected_size(dx: &DXImage, format: &TextureFormat, highres: bool) {
 fn test() -> Result<()> {
     const EXPORT_TESTDATA: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/testdata/export");
 
-    spidertexlib::util::log_for_tests(true);
+    texturesofspiderman::util::log_for_tests(true);
 
     registry::load()?;
 
-    let Inputs { textures, images } = spidertexlib::inputs::gather(EXPORT_TESTDATA);
+    let Inputs { textures, images } = texturesofspiderman::inputs::gather(EXPORT_TESTDATA);
 
     for Categorized { files, .. } in images {
         for file in files {
@@ -269,9 +269,9 @@ fn test() -> Result<()> {
     //                 }
 
     //                 let img = match format.planes() {
-    //                     spidertexlib::formats::ColorPlanes::Hdr => continue,
-    //                     spidertexlib::formats::ColorPlanes::Rgba
-    //                     | spidertexlib::formats::ColorPlanes::Rgb => {
+    //                     texturesofspiderman::formats::ColorPlanes::Hdr => continue,
+    //                     texturesofspiderman::formats::ColorPlanes::Rgba
+    //                     | texturesofspiderman::formats::ColorPlanes::Rgb => {
     //                         let img: image::ImageBuffer<image::Rgba<u8>, _> =
     //                             image::ImageBuffer::from_raw(
     //                                 metadata.width as u32,
@@ -281,7 +281,7 @@ fn test() -> Result<()> {
     //                             .expect("PNG creation failed");
     //                         image::DynamicImage::from(img)
     //                     }
-    //                     spidertexlib::formats::ColorPlanes::Luma => {
+    //                     texturesofspiderman::formats::ColorPlanes::Luma => {
     //                         let img: image::ImageBuffer<image::Luma<u8>, _> =
     //                             image::ImageBuffer::from_raw(
     //                                 metadata.width as u32,

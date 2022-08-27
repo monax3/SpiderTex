@@ -1,8 +1,8 @@
 use camino::Utf8Path;
-use spidertexlib::dxtex::DXImage;
-use spidertexlib::formats::ColorPlanes;
-use spidertexlib::prelude::*;
-use spidertexlib::registry::Registry;
+use directxtex::DXTImage;
+use texturesofspiderman::formats::ColorPlanes;
+use texturesofspiderman::prelude::*;
+use texturesofspiderman::registry::Registry;
 
 const TESTDATA: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/testdata/export");
 
@@ -10,13 +10,13 @@ fn guess_array_size(format: &TextureFormat, data_size: usize) -> Option<usize> {
     if format.array_size > 1 {
         return None;
     }
-    let expected = dxtex::expected_size(format.dxgi_format, format.standard, 1);
+    let expected = directxtex::expected_size(format.dxgi_format, format.standard.width, format.standard.height, 1, format.standard.mipmaps);
     if expected == data_size {
         return None;
     }
     if data_size % expected == 0 {
         let array_size = data_size / expected;
-        let expected = dxtex::expected_size_array(format.dxgi_format, format.standard, array_size);
+        let expected = directxtex::expected_size_array(format.dxgi_format, format.standard.width, format.standard.height, array_size, format.standard.mipmaps);
         if expected == data_size {
             event!(INFO, "Array size {array_size} looks good!");
             return Some(array_size);
@@ -48,14 +48,14 @@ fn load_overrides(registry: &mut Registry) -> Result<()> {
 }
 
 fn main() -> Result<()> {
-    spidertexlib::util::log_for_tests(true);
+    texturesofspiderman::util::log_for_tests(true);
 
     let mut registry = Registry::load()?;
     load_overrides(&mut registry)?;
 
     let testdir = Utf8Path::new(TESTDATA);
 
-    for file in spidertexlib::util::walkdir(testdir) {
+    for file in texturesofspiderman::util::walkdir(testdir) {
         let span = tracing::error_span!("", file = file.file_name().unwrap_or_default());
         let _entered = span.enter();
 
@@ -93,23 +93,26 @@ fn main() -> Result<()> {
                             format.array_size = array_size;
                         }
 
-                        let expected = dxtex::expected_size_array(
+                        let expected = directxtex::expected_size_array(
                             format.dxgi_format,
-                            format.standard,
+                            format.standard.width, format.standard.height,
                             format.array_size,
+                            format.standard.mipmaps
                         );
                         if data.len() != expected {
                             event!(ERROR, "INPUT {} != {expected}", data.len());
                         }
 
-                        let dx = DXImage::with_dimensions(
+                        let dx = DXTImage::new(
                             format.dxgi_format,
-                            format.standard,
+                            format.standard.width,
+                            format.standard.height,
                             format.array_size,
+                            format.standard.mipmaps,
                             data,
                         )
-                        .log_failure_as("DXImage::new")?
-                        .map_if(format.dxgi_format.is_compressed(), DXImage::decompress)
+                        .log_failure_as("DXTImage::new")?
+                        .map_if(format.dxgi_format.is_compressed(), DXTImage::decompress)
                         .log_failure_as("DXImage::decompress")?;
                         let image_size = dx.len();
 
