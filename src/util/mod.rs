@@ -5,8 +5,9 @@ pub use panic::{catch_panics, downcast_str};
 mod walkdir;
 use camino::Utf8PathBuf;
 pub use walkdir::{walkdir, WalkArgs};
+#[cfg_attr(not(windows), path = "win32-dummy.rs")]
 mod win32;
-pub use win32::{initialize_com, open_files_dialog, to_wstring, message_box_ok, message_box_error};
+pub use win32::{initialize_com, message_box_error, message_box_ok, open_files_dialog, to_wstring};
 
 use crate::prelude::*;
 
@@ -20,7 +21,7 @@ pub fn into_n_slices(buffer: &[u8], num_slices: usize) -> Option<impl Iterator<I
             let offset = index * slice_len;
             index += 1;
 
-            (offset < buffer.len()).then(|| &buffer[offset .. offset + slice_len])
+            (offset < buffer.len()).then(|| &buffer[offset..offset + slice_len])
         })
     })
 }

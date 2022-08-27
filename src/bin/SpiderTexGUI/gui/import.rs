@@ -1,20 +1,7 @@
 use camino::{Utf8Path, Utf8PathBuf};
 use eframe::egui::{
-    vec2,
-    Button,
-    CentralPanel,
-    Context,
-    Event,
-    Layout,
-    RadioButton,
-    Rect,
-    Response,
-    RichText,
-    Sense,
-    SidePanel,
-    TextStyle,
-    Ui,
-    Widget,
+    vec2, Button, CentralPanel, Context, Event, Layout, RadioButton, Rect, Response, RichText,
+    Sense, SidePanel, TextStyle, Ui, Widget,
 };
 use eframe::emath::Align;
 use eframe::App;
@@ -88,7 +75,7 @@ pub fn import_ui(import_files: Vec<Utf8PathBuf>, common_name: String) -> Result<
 }
 
 struct ImportUi {
-    state:   ImportState,
+    state: ImportState,
     preview: Preview,
 }
 
@@ -99,9 +86,9 @@ enum ImportState {
 }
 
 struct ImportSelections {
-    import_files:  Vec<Utf8PathBuf>,
+    import_files: Vec<Utf8PathBuf>,
     import_images: Vec<DynamicImage>,
-    common_name:   Utf8PathBuf,
+    common_name: Utf8PathBuf,
 
     registry: Registry,
 
@@ -298,12 +285,14 @@ fn preview_state(
 
     let button_size = theme::button_size();
 
-    let (rect, response) =
-        ui.allocate_exact_size(vec2(ui.available_width(), theme::BUTTON_HEIGHT), Sense {
-            click:     false,
-            drag:      false,
+    let (rect, response) = ui.allocate_exact_size(
+        vec2(ui.available_width(), theme::BUTTON_HEIGHT),
+        Sense {
+            click: false,
+            drag: false,
             focusable: false,
-        });
+        },
+    );
 
     let button_rect = Rect::from_center_size(rect.center(), button_size);
 

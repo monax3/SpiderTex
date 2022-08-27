@@ -239,9 +239,10 @@ fn import_images(groups: impl IntoIterator<Item = Categorized>) -> Result<(Strin
                     })?;
                 for warning in input_warnings
                     .into_iter()
-                    .chain(output_warnings.into_iter()).chain(std::iter::once(Cow::Owned(format!(
-                        "{first}: Guessed the file format based on file size"
-                    ).into())))
+                    .chain(output_warnings.into_iter())
+                    .chain(std::iter::once(Cow::Owned(
+                        format!("{first}: Guessed the file format based on file size").into(),
+                    )))
                 {
                     warnings.push(format!("{first}: {warning}"));
                 }

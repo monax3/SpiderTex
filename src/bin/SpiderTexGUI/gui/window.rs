@@ -1,20 +1,7 @@
 use camino::{Utf8Path, Utf8PathBuf};
 use eframe::egui::{
-    vec2,
-    Button,
-    CentralPanel,
-    Context,
-    Event,
-    Layout,
-    RadioButton,
-    Rect,
-    Response,
-    RichText,
-    Sense,
-    SidePanel,
-    TextStyle,
-    Ui,
-    Widget,
+    vec2, Button, CentralPanel, Context, Event, Layout, RadioButton, Rect, Response, RichText,
+    Sense, SidePanel, TextStyle, Ui, Widget,
 };
 use eframe::emath::Align;
 use eframe::{run_native, App, Frame as EFrame, NativeOptions};
@@ -27,7 +14,9 @@ use super::{theme, widgets};
 use crate::log;
 
 pub fn show<APP>(mut app: APP)
-where APP: AppWindow + 'static {
+where
+    APP: AppWindow + 'static,
+{
     let options = NativeOptions {
         initial_window_size: Some(theme::window_size()),
         min_window_size: Some(theme::window_size()),
@@ -56,14 +45,20 @@ pub trait AppWindow {
     fn update(&mut self);
     fn sidebar(&mut self, ui: &mut Ui);
     fn main(&mut self, ui: &mut Ui);
-    fn can_close(&mut self) -> bool { true }
-    fn constant_refresh(&mut self) -> bool { false }
+    fn can_close(&mut self) -> bool {
+        true
+    }
+    fn constant_refresh(&mut self) -> bool {
+        false
+    }
 
     // #[allow(unused)]
     // fn ctx(&mut self, ctx: &Context) {}
 
     fn run(self)
-    where Self: Sized + 'static {
+    where
+        Self: Sized + 'static,
+    {
         show(self);
     }
 }

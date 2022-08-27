@@ -22,22 +22,30 @@ pub fn load() -> Result<()> {
 
 #[inline]
 #[must_use]
-pub fn registry() -> &'static Registry { REGISTRY.get() }
+pub fn registry() -> &'static Registry {
+    REGISTRY.get()
+}
 
 pub trait FormatRef: AsRef<FormatId> + Debug {}
 impl<T> FormatRef for T where T: AsRef<FormatId> + Debug {}
 
 #[inline]
 #[must_use]
-pub fn get(id: impl FormatRef) -> &'static TextureFormat { registry().get(id) }
+pub fn get(id: impl FormatRef) -> &'static TextureFormat {
+    registry().get(id)
+}
 
 #[inline]
 #[must_use]
-pub fn get_all(ids: &[impl FormatRef]) -> Vec<&'static TextureFormat> { registry().get_all(ids) }
+pub fn get_all(ids: &[impl FormatRef]) -> Vec<&'static TextureFormat> {
+    registry().get_all(ids)
+}
 
 #[inline]
 #[must_use]
-pub fn raw_header(id: impl FormatRef) -> Option<String> { registry().raw_header(id) }
+pub fn raw_header(id: impl FormatRef) -> Option<String> {
+    registry().raw_header(id)
+}
 
 #[must_use]
 pub fn formats_for_size(size: usize) -> Vec<&'static TextureFormat> {
@@ -65,17 +73,17 @@ pub fn formats_for_sizes(sizes: &[usize]) -> Vec<&'static TextureFormat> {
 #[derive(Serialize, Deserialize, Debug, Default)]
 pub struct Registry {
     #[serde(default)]
-    pub formats:     BTreeMap<FormatId, TextureFormat>,
+    pub formats: BTreeMap<FormatId, TextureFormat>,
     #[serde(default)]
-    pub lengths:     BTreeMap<usize, BTreeSet<FormatId>>,
+    pub lengths: BTreeMap<usize, BTreeSet<FormatId>>,
     #[serde(default)]
-    pub overrides:   Vec<(String, FormatId)>,
+    pub overrides: Vec<(String, FormatId)>,
     #[serde(default)]
     pub raw_headers: BTreeMap<FormatId, String>,
     #[serde(default)]
-    pub examples:    BTreeMap<FormatId, String>,
+    pub examples: BTreeMap<FormatId, String>,
     #[serde(default)]
-    pub suffixes: BTreeMap<String, BTreeSet<FormatId>>
+    pub suffixes: BTreeMap<String, BTreeSet<FormatId>>,
 }
 
 impl Registry {
@@ -103,7 +111,9 @@ impl Registry {
 
     #[inline]
     #[must_use]
-    pub fn known(&self, id: impl FormatRef) -> bool { self.formats.contains_key(id.as_ref()) }
+    pub fn known(&self, id: impl FormatRef) -> bool {
+        self.formats.contains_key(id.as_ref())
+    }
 
     #[inline]
     #[must_use]
@@ -115,7 +125,9 @@ impl Registry {
 
     #[inline]
     #[must_use]
-    pub fn try_get(&self, id: FormatId) -> Option<&TextureFormat> { self.formats.get(&id) }
+    pub fn try_get(&self, id: FormatId) -> Option<&TextureFormat> {
+        self.formats.get(&id)
+    }
 
     #[inline]
     #[must_use]
@@ -126,13 +138,17 @@ impl Registry {
     #[inline]
     #[must_use]
     pub fn get_all<'r, ID>(&'r self, ids: impl IntoIterator<Item = ID>) -> Vec<&'r TextureFormat>
-    where ID: FormatRef {
+    where
+        ID: FormatRef,
+    {
         ids.into_iter().map(|id| self.get(id)).collect()
     }
 
     #[cfg(feature = "rebuild-registry")]
     #[inline]
-    pub fn load() -> Result<Self> { Ok(Self::default()) }
+    pub fn load() -> Result<Self> {
+        Ok(Self::default())
+    }
 
     #[cfg(disabled)]
     pub fn get_override(&self, file: &Utf8Path) -> Option<TextureFormat> {
@@ -225,12 +241,18 @@ impl Registry {
                 s if s == "g" => (),
                 s if s == "n" => (),
                 s if s == "v" => (),
-                s if s ==  "damagemask" => return,
+                s if s == "damagemask" => return,
                 s if s.len() > 1 => return,
-                _ => { event!(DEBUG, %suffix, %id); return; }
+                _ => {
+                    event!(DEBUG, %suffix, %id);
+                    return;
+                }
             }
-        self.suffixes.entry(suffix.to_string()).or_default().insert(id);
-    }
+            self.suffixes
+                .entry(suffix.to_string())
+                .or_default()
+                .insert(id);
+        }
     }
 
     pub fn update_format(
@@ -302,7 +324,9 @@ fn try_format_file_name(dir: impl AsRef<Utf8Path>) -> Option<Utf8PathBuf> {
 pub struct FormatId(u64);
 
 impl AsRef<Self> for FormatId {
-    fn as_ref(&self) -> &Self { self }
+    fn as_ref(&self) -> &Self {
+        self
+    }
 }
 
 impl Display for FormatId {
@@ -313,14 +337,18 @@ impl Display for FormatId {
 
 impl Serialize for FormatId {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where S: serde::Serializer {
+    where
+        S: serde::Serializer,
+    {
         serializer.serialize_str(&format!("{:09x}", self.0))
     }
 }
 
 impl<'de> Deserialize<'de> for FormatId {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-    where D: serde::Deserializer<'de> {
+    where
+        D: serde::Deserializer<'de>,
+    {
         <&str>::deserialize(deserializer).and_then(|s| {
             u64::from_str_radix(s, 16)
                 .map_err(serde::de::Error::custom)

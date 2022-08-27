@@ -5,7 +5,7 @@ use std::cell::UnsafeCell;
 use std::sync::atomic::{AtomicBool, Ordering};
 
 pub struct MaybeReady<T> {
-    inner:    UnsafeCell<Option<T>>,
+    inner: UnsafeCell<Option<T>>,
     is_ready: AtomicBool,
 }
 
@@ -15,7 +15,7 @@ impl<T> MaybeReady<T> {
     #[must_use]
     pub const fn new() -> Self {
         Self {
-            inner:    UnsafeCell::new(None),
+            inner: UnsafeCell::new(None),
             is_ready: AtomicBool::new(false),
         }
     }
@@ -23,7 +23,7 @@ impl<T> MaybeReady<T> {
     #[must_use]
     pub const fn const_ready(inner: T) -> Self {
         Self {
-            inner:    UnsafeCell::new(Some(inner)),
+            inner: UnsafeCell::new(Some(inner)),
             is_ready: AtomicBool::new(true),
         }
     }
@@ -52,7 +52,9 @@ impl<T> MaybeReady<T> {
         }
     }
 
-    pub fn is_ready(&self) -> bool { self.is_ready.load(Ordering::SeqCst) }
+    pub fn is_ready(&self) -> bool {
+        self.is_ready.load(Ordering::SeqCst)
+    }
 
     pub fn ready(&self, value: T) {
         let is_ready = self.is_ready.load(Ordering::Acquire);
@@ -66,5 +68,7 @@ impl<T> MaybeReady<T> {
 }
 
 impl<T> Default for MaybeReady<T> {
-    fn default() -> Self { Self::new() }
+    fn default() -> Self {
+        Self::new()
+    }
 }

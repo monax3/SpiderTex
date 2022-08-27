@@ -11,28 +11,15 @@ use tracing::{event, Level};
 use windows::core::{w, HSTRING, PCSTR, PCWSTR};
 use windows::Win32::Foundation::ERROR_CANCELLED;
 use windows::Win32::System::Com::{
-    CoCreateInstance,
-    CoInitializeEx,
-    CLSCTX_INPROC_SERVER,
-    COINIT_MULTITHREADED,
+    CoCreateInstance, CoInitializeEx, CLSCTX_INPROC_SERVER, COINIT_MULTITHREADED,
 };
 use windows::Win32::UI::Shell::Common::COMDLG_FILTERSPEC;
 use windows::Win32::UI::Shell::{
-    FileOpenDialog,
-    IFileOpenDialog,
-    IShellItem,
-    IShellItemArray,
-    SHCreateItemFromParsingName,
-    FILEOPENDIALOGOPTIONS,
-    FOS_ALLOWMULTISELECT,
-    FOS_FORCEFILESYSTEM,
-    SIGDN_FILESYSPATH,
+    FileOpenDialog, IFileOpenDialog, IShellItem, IShellItemArray, SHCreateItemFromParsingName,
+    FILEOPENDIALOGOPTIONS, FOS_ALLOWMULTISELECT, FOS_FORCEFILESYSTEM, SIGDN_FILESYSPATH,
 };
 use windows::Win32::UI::WindowsAndMessaging::{
-    MessageBoxA,
-    MB_ICONERROR,
-    MB_TASKMODAL,
-    MESSAGEBOX_STYLE,
+    MessageBoxA, MB_ICONERROR, MB_TASKMODAL, MESSAGEBOX_STYLE,
 };
 
 use crate::log;
@@ -202,7 +189,7 @@ pub fn select_files_dialog() -> Result<Option<Vec<Utf8PathBuf>>> {
 }
 
 unsafe fn shell_items_to_paths(items: &IShellItemArray) -> Result<Vec<Utf8PathBuf>> {
-    Ok((0 .. items.GetCount()?)
+    Ok((0..items.GetCount()?)
         .into_iter()
         .filter_map(|i| {
             items

@@ -46,15 +46,15 @@ impl TEX_DIMENSION {
 #[derive(Debug, Copy, Clone, Default, PartialEq, Eq)]
 #[repr(C)]
 pub struct TexMetadata {
-    pub width:      usize,
-    pub height:     usize,
-    pub depth:      usize,
-    pub arraySize:  usize,
-    pub mipLevels:  usize,
-    pub miscFlags:  u32,
+    pub width: usize,
+    pub height: usize,
+    pub depth: usize,
+    pub arraySize: usize,
+    pub mipLevels: usize,
+    pub miscFlags: u32,
     pub miscFlags2: u32,
-    pub format:     DXGI_FORMAT,
-    pub dimension:  TEX_DIMENSION,
+    pub format: DXGI_FORMAT,
+    pub dimension: TEX_DIMENSION,
 }
 
 extern "C" {
@@ -198,11 +198,11 @@ fn test_dxtex_sizes() {
     #[repr(C)]
     #[derive(Default)]
     struct DirectXTexFfi {
-        TexMetadata:      usize,
-        TEX_DIMENSION:    usize,
-        DDS_FLAGS:        usize,
-        TGA_FLAGS:        usize,
-        DXGI_FORMAT:      usize,
+        TexMetadata: usize,
+        TEX_DIMENSION: usize,
+        DDS_FLAGS: usize,
+        TGA_FLAGS: usize,
+        DXGI_FORMAT: usize,
         TEX_FILTER_FLAGS: usize,
     }
 

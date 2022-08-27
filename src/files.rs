@@ -12,13 +12,14 @@ const GROUP_SEP: char = '#';
 #[must_use]
 #[cfg_attr(feature = "debug-inputs", instrument(level = "trace", ret))]
 pub fn base_name(file: &Utf8Path) -> &str {
-    let path_sep = file.as_str()
-        .rfind(|c| std::path::is_separator(c)).unwrap_or_default();
+    let path_sep = file
+        .as_str()
+        .rfind(|c| std::path::is_separator(c))
+        .unwrap_or_default();
 
-    let without_ext = file
-        .as_str()[path_sep..]
+    let without_ext = file.as_str()[path_sep..]
         .find('.')
-        .map_or(file.as_str(), |pos| &file.as_str()[.. path_sep + pos]);
+        .map_or(file.as_str(), |pos| &file.as_str()[..path_sep + pos]);
 
     event!(TRACE, f = file.as_str(), without_ext);
 
@@ -29,7 +30,7 @@ pub fn base_name(file: &Utf8Path) -> &str {
 
     let without_seps = without_ext
         .rfind(|c| c == GROUP_SEP)
-        .map_or(without_ext, |sep| &without_ext[.. sep]);
+        .map_or(without_ext, |sep| &without_ext[..sep]);
     // let without_custom = without_seps.strip_suffix(".custom").or_else(|| without_seps.strip_suffix(".customhd")).unwrap_or(without_seps);
     // let without_suffix = without_custom.strip_suffix("_hd").unwrap_or(without_custom);
     let without_suffix = without_seps.strip_suffix("_hd").unwrap_or(without_seps);
@@ -87,7 +88,9 @@ where
     T: Into<Self>,
     F: FnOnce() -> T,
 {
-    fn from(closure: F) -> Self { closure().into() }
+    fn from(closure: F) -> Self {
+        closure().into()
+    }
 }
 
 impl<T, E> From<Result<T, E>> for FileStatus
@@ -104,11 +107,15 @@ where
 }
 
 impl From<(Warnings, Vec<Utf8PathBuf>)> for FileStatus {
-    fn from((warnings, files): (Warnings, Vec<Utf8PathBuf>)) -> Self { Self::Ok(warnings, files) }
+    fn from((warnings, files): (Warnings, Vec<Utf8PathBuf>)) -> Self {
+        Self::Ok(warnings, files)
+    }
 }
 
 impl From<Vec<Utf8PathBuf>> for FileStatus {
-    fn from(files: Vec<Utf8PathBuf>) -> Self { Self::Ok(Warnings::new(), files) }
+    fn from(files: Vec<Utf8PathBuf>) -> Self {
+        Self::Ok(Warnings::new(), files)
+    }
 }
 
 #[derive(Debug, PartialEq, Eq, Hash, Copy, Clone)]
@@ -130,11 +137,15 @@ impl Ord for FileType {
 }
 
 impl PartialOrd for FileType {
-    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> { Some(self.cmp(other)) }
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        Some(self.cmp(other))
+    }
 }
 
 impl From<ImageFormat> for FileType {
-    fn from(format: ImageFormat) -> Self { Self::Image(format) }
+    fn from(format: ImageFormat) -> Self {
+        Self::Image(format)
+    }
 }
 impl TryFrom<&Utf8Path> for FileType {
     type Error = Error;
@@ -155,7 +166,9 @@ impl TryFrom<&Utf8Path> for FileType {
 }
 
 pub trait FileGroupInfo {
-    fn file_type(&self) -> Option<&FileType> { None }
+    fn file_type(&self) -> Option<&FileType> {
+        None
+    }
     fn iter_inputs<'a>(&'a self) -> Box<dyn Iterator<Item = Cow<'a, FileStatus>> + 'a> {
         Box::new(std::iter::empty())
     }
@@ -163,15 +176,23 @@ pub trait FileGroupInfo {
         Box::new(std::iter::empty())
     }
 
-    fn input(&self) -> Cow<'_, FileStatus> { Cow::Owned(FileStatus::Unknown) }
-    fn output(&self) -> Cow<'_, FileStatus> { Cow::Owned(FileStatus::Unknown) }
-    fn output_format(&self) -> Option<&OutputFormat> { None }
+    fn input(&self) -> Cow<'_, FileStatus> {
+        Cow::Owned(FileStatus::Unknown)
+    }
+    fn output(&self) -> Cow<'_, FileStatus> {
+        Cow::Owned(FileStatus::Unknown)
+    }
+    fn output_format(&self) -> Option<&OutputFormat> {
+        None
+    }
 }
 
 impl<GROUP> std::ops::Deref for FileGroup<GROUP> {
     type Target = GROUP;
 
-    fn deref(&self) -> &Self::Target { &self.0 }
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
 }
 
 // impl<GROUP> FileGroupInfo for FileGroupNg<GROUP> where GROUP: FileGroupInfo {
@@ -197,7 +218,9 @@ impl FileGroupInfo for Uncategorized {
 fn make_filestatus_iter<'a, FILE>(
     iter: impl IntoIterator<Item = FILE> + 'a,
 ) -> Box<dyn Iterator<Item = Cow<'a, FileStatus>> + 'a>
-where FILE: Into<Utf8PathBuf> + 'a {
+where
+    FILE: Into<Utf8PathBuf> + 'a,
+{
     Box::new(
         iter.into_iter()
             .map(|file| Cow::Owned(FileStatus::from(vec![file.into()]))),
@@ -211,9 +234,13 @@ impl FileGroupInfo for Categorized {
 }
 
 impl FileGroupInfo for Scanned {
-    fn file_type(&self) -> Option<&FileType> { Some(&self.file_type) }
+    fn file_type(&self) -> Option<&FileType> {
+        Some(&self.file_type)
+    }
 
-    fn input(&self) -> Cow<'_, FileStatus> { Cow::Borrowed(&self.input) }
+    fn input(&self) -> Cow<'_, FileStatus> {
+        Cow::Borrowed(&self.input)
+    }
 
     fn output(&self) -> Cow<'_, FileStatus> {
         Cow::Owned(match self.output {
@@ -229,7 +256,9 @@ impl FileGroupInfo for Scanned {
         })
     }
 
-    fn output_format(&self) -> Option<&OutputFormat> { Some(&self.output) }
+    fn output_format(&self) -> Option<&OutputFormat> {
+        Some(&self.output)
+    }
 }
 
 #[derive(Debug)]
@@ -241,20 +270,20 @@ pub struct Uncategorized(pub Vec<Utf8PathBuf>);
 #[derive(Debug)]
 pub struct Categorized {
     pub file_type: FileType,
-    pub files:     Vec<Utf8PathBuf>,
+    pub files: Vec<Utf8PathBuf>,
 }
 
 #[derive(Debug)]
 pub struct Scanned {
     pub file_type: FileType,
-    pub input:     FileStatus,
-    pub output:    OutputFormat,
+    pub input: FileStatus,
+    pub output: OutputFormat,
 }
 
 #[derive(Debug)]
 pub enum OutputFormat {
     Exact {
-        format:  TextureFormat,
+        format: TextureFormat,
         outputs: Vec<Utf8PathBuf>,
     },
     Candidates(Vec<TextureFormat>),
@@ -384,25 +413,26 @@ pub fn ng_format_for_texture_file(texture_file: &Utf8Path) -> Option<TextureForm
     // FIXME
     let texture_file = texture_file.with_extension("texture");
 
-        if texture_file.exists() {
-            texture_file::read_header(&texture_file)
-                .log_failure_with(|| format!("Failed to read header of {texture_file}"))
-                .ok()
-                .and_then(|(header, _)| header.map(|header| header.to()))
-        } else {
-            None
-        }
+    if texture_file.exists() {
+        texture_file::read_header(&texture_file)
+            .log_failure_with(|| format!("Failed to read header of {texture_file}"))
+            .ok()
+            .and_then(|(header, _)| header.map(|header| header.to()))
+    } else {
+        None
+    }
 }
 
 #[derive(Debug, Clone)]
 pub struct InputGroup {
     pub file_type: FileType,
-    pub inputs:    BTreeSet<Utf8PathBuf>,
+    pub inputs: BTreeSet<Utf8PathBuf>,
 }
 
 #[cfg(disabled)]
 impl<FILE> FromIterator<FILE> for InputGroup
-where FILE: Into<Utf8PathBuf>
+where
+    FILE: Into<Utf8PathBuf>,
 {
     // fn from_iter<T: IntoIterator<Item = FILE>>(iter: T) -> Self { todo!() }
 
@@ -493,7 +523,7 @@ pub fn as_images(texture_format: &TextureFormat, files: &[Utf8PathBuf]) -> Vec<U
 
         if num_images > 1 && !image_format.can_save_array() {
             let mut out = Vec::with_capacity(num_images);
-            for i in 1 ..= num_images {
+            for i in 1..=num_images {
                 let mut name = base.to_string();
                 name.push_str(&format!("#{i:02}.{ext}"));
                 out.push(Utf8PathBuf::from(name));
@@ -516,8 +546,12 @@ pub fn as_textures(format: &TextureFormat, files: &[Utf8PathBuf]) -> Vec<Utf8Pat
         // panic!("{files:?} ---- {texture} ---- {base_name}");
 
         if format.has_highres() {
-            let raw = first.with_file_name(&base_name).with_extension("customhd.texture");
-            let texture = first.with_file_name(&base_name).with_extension("custom.texture");
+            let raw = first
+                .with_file_name(&base_name)
+                .with_extension("customhd.texture");
+            let texture = first
+                .with_file_name(&base_name)
+                .with_extension("custom.texture");
             vec![raw, texture]
         } else {
             base_name.push_str(".custom.texture");
@@ -576,7 +610,8 @@ pub fn format_for_texture_file(file: &Utf8Path) -> FileFormat {
 
     /*if let Some(format) = registry.get_override(file) {
         FileFormat::MetaOverride(format)
-    } else*/ if !file.exists() {
+    } else*/
+    if !file.exists() {
         FileFormat::Unknown
     } else if let Ok((Some(format), _)) = texture_file::read_header(file).log_failure() {
         FileFormat::FromHeader(format.into())
@@ -636,7 +671,9 @@ pub fn format_for_file<'r>(file: &Utf8Path) -> FileFormat {
 
 #[inline]
 #[must_use]
-pub fn is_image_ext(ext: &str) -> bool { SUPPORTED_IMAGE_EXTENSIONS.contains(&ext) }
+pub fn is_image_ext(ext: &str) -> bool {
+    SUPPORTED_IMAGE_EXTENSIONS.contains(&ext)
+}
 
 #[inline]
 #[must_use]
@@ -646,4 +683,6 @@ pub fn is_ignored_ext(ext: &str) -> bool {
 
 #[inline]
 #[must_use]
-pub fn is_texture_ext(ext: &str) -> bool { SUPPORTED_TEXTURE_EXTENSIONS.contains(&ext) }
+pub fn is_texture_ext(ext: &str) -> bool {
+    SUPPORTED_TEXTURE_EXTENSIONS.contains(&ext)
+}

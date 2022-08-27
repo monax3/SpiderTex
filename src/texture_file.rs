@@ -25,6 +25,8 @@ pub fn texture_format_overrides(format: &mut TextureFormat) {
 
     let expected =
         dxtex::expected_size_array(format.dxgi_format, format.standard, format.array_size);
+
+    #[cfg(windows)]
     if format.standard.data_size != expected {
         if format.standard.data_size % expected == 0 {
             format.array_size = format.standard.data_size / expected;
@@ -50,22 +52,22 @@ pub struct Header(FileHeader, TextureHeader, [u8; 20], FormatHeader);
 #[derive(Debug, Copy, Clone, Pod, Zeroable)]
 #[repr(C)]
 pub struct FileHeader {
-    magic:      [u8; 4],
+    magic: [u8; 4],
     header_len: u32,
     data_len_1: u32,
-    unk1:       [u32; 2],
+    unk1: [u32; 2],
     data_len_2: u32,
-    unk2:       [u32; 3],
+    unk2: [u32; 3],
 }
 
 #[derive(Debug, Copy, Clone, Pod, Zeroable, Default)]
 #[repr(C)]
 pub struct TextureHeader {
-    magic_1:    [u8; 4],
-    magic_2:    [u8; 4],
+    magic_1: [u8; 4],
+    magic_2: [u8; 4],
     header_len: u32,
-    version:    u32,
-    magic_3:    [u8; 4],
+    version: u32,
+    magic_3: [u8; 4],
     len_plus_4: u32,
     format_len: u32,
 }
@@ -73,21 +75,26 @@ pub struct TextureHeader {
 #[derive(Debug, Copy, Clone, Pod, Zeroable)]
 #[repr(C)]
 pub struct FormatHeader {
-    pub sd_len:      u32,
-    pub hd_len:      u32,
-    pub hd_width:    u16,
-    pub hd_height:   u16,
-    pub sd_width:    u16,
-    pub sd_height:   u16,
-    pub array_size:  u16,
+    pub sd_len: u32,
+    pub hd_len: u32,
+    pub hd_width: u16,
+    pub hd_height: u16,
+    pub sd_width: u16,
+    pub sd_height: u16,
+    pub array_size: u16,
     pub stex_format: u8,
-    pub planes:      u8,
-    pub format:      u16,
-    unk2:            [u8; 8],
-    pub sd_mipmaps:  u8,
-    unk3:            u8,
-    pub hd_mipmaps:  u8,
-    unk4:            [u8; 11],
+    pub planes: u8,
+    pub format: u16,
+    pub zeroes1: [u8; 5],
+    pub unk1: u8,
+    pub unk2: u8,
+    pub sd_mipmaps_high: u8,
+    pub sd_mipmaps: u8,
+    pub hd_mipmaps_high: u8,
+    pub hd_mipmaps: u8,
+    pub unk3: u8,
+    pub unk4: u8,
+    pub zeroes2: [u8; 9],
 }
 
 impl FileHeader {
@@ -101,18 +108,20 @@ impl FileHeader {
         let data_len: u32 = data_len as u32;
 
         Self {
-            magic:      Self::MAGIC,
+            magic: Self::MAGIC,
             header_len: Header::MAIN_HEADER_SIZE as u32,
             data_len_1: data_len,
             data_len_2: data_len,
-            unk1:       Default::default(),
-            unk2:       Default::default(),
+            unk1: Default::default(),
+            unk2: Default::default(),
         }
     }
 
     #[inline]
     #[must_use]
-    pub fn has_magic(&self) -> bool { self.magic == Self::MAGIC }
+    pub fn has_magic(&self) -> bool {
+        self.magic == Self::MAGIC
+    }
 
     pub fn check(&self, format: Option<&TextureFormat>) {
         expected("FILE_MAGIC", self.magic, Self::MAGIC, fmt_array_hex);
@@ -156,20 +165,28 @@ fn expected<T: PartialEq>(name: &str, value: T, expected: T, formatter: impl Fn(
     }
 }
 
-fn fmt_array_hex<const LEN: usize>(array: [u8; LEN]) -> String { hex::encode(array) }
+fn fmt_array_hex<const LEN: usize>(array: [u8; LEN]) -> String {
+    hex::encode(array)
+}
 
 fn fmt_array_string<const LEN: usize>(array: [u8; LEN]) -> String {
     String::from_utf8_lossy(&array).to_string()
 }
 
-fn fmt_generic<T: std::fmt::Display>(value: T) -> String { value.to_string() }
+fn fmt_generic<T: std::fmt::Display>(value: T) -> String {
+    value.to_string()
+}
 
-fn fmt_debug<T: std::fmt::Debug>(value: T) -> String { format!("{value:?}") }
+fn fmt_debug<T: std::fmt::Debug>(value: T) -> String {
+    format!("{value:?}")
+}
 
 impl TextureHeader {
-    const MAGIC: [[u8; 4]; 3] = [[0x31, 0x54, 0x41, 0x44], [0xb9, 0x80, 0x45, 0x5c], [
-        0x93, 0x35, 0xde, 0x4e,
-    ]];
+    const MAGIC: [[u8; 4]; 3] = [
+        [0x31, 0x54, 0x41, 0x44],
+        [0xb9, 0x80, 0x45, 0x5c],
+        [0x93, 0x35, 0xde, 0x4e],
+    ];
     #[allow(unused)]
     const SIZE: usize = 0x1c;
     const VERSION: u32 = 1;
@@ -178,10 +195,10 @@ impl TextureHeader {
     pub const fn new() -> Self {
         Self {
             header_len: Header::MAIN_HEADER_SIZE as u32,
-            magic_1:    Self::MAGIC[0],
-            magic_2:    Self::MAGIC[1],
-            magic_3:    Self::MAGIC[2],
-            version:    1,
+            magic_1: Self::MAGIC[0],
+            magic_2: Self::MAGIC[1],
+            magic_3: Self::MAGIC[2],
+            version: 1,
             len_plus_4: (FormatHeader::SIZE + 4) as u32,
             format_len: FormatHeader::SIZE as u32,
         }
@@ -217,7 +234,7 @@ impl FormatHeader {
         format
     }
 
-    fn check(&self, format: Option<&TextureFormat>) {
+    pub fn check(&self, format: Option<&TextureFormat>) {
         if let Some(format) = format {
             expected(
                 "FMT_SD_LEN",
@@ -283,22 +300,30 @@ impl FormatHeader {
                 format.dxgi_format,
                 fmt_debug,
             );
+            expected(
+                "FMT_SD_MM_HIGH",
+                self.sd_mipmaps_high,
+                0,
+                fmt_debug,
+            );
+            expected(
+                "FMT_HD_MM_HIGH",
+                self.hd_mipmaps_high,
+                0,
+                fmt_debug,
+            );
         }
 
-        let unks = self
-            .unk2
+        let zeroes = self
+            .zeroes1
             .into_iter()
-            .chain(std::iter::once(self.unk3))
-            .chain(self.unk4)
+            .chain(self.zeroes2)
             .enumerate();
 
-        for (i, unk) in unks {
-            let exp = match i + 1 {
-                7 | 10 | 11 | 12 => 1,
-                _ => 0,
-            };
-
-            expected(&format!("FMT_UNK{}", i + 1), unk, exp, fmt_generic);
+        for (i, zero) in zeroes {
+            if zero != 0 {
+            expected(&format!("FMT_ZERO{}", i + 1), zero, 0, fmt_generic);
+            }
         }
     }
 
@@ -314,7 +339,7 @@ impl FormatHeader {
     pub fn as_hexstring(&self) -> String {
         let bytes = bytemuck::bytes_of(self);
         let pos = bytes.iter().rposition(|b| *b != 0).unwrap_or_default();
-        hex::encode(&bytes[.. pos])
+        hex::encode(&bytes[..pos])
     }
 }
 
@@ -322,15 +347,25 @@ impl Header {
     const MAIN_HEADER_SIZE: usize = Self::SIZE - FileHeader::SIZE;
     const SIZE: usize = 0x80;
 
-    pub const fn file(&self) -> &FileHeader { &self.0 }
+    pub const fn file(&self) -> &FileHeader {
+        &self.0
+    }
 
-    pub const fn hdr(&self) -> &TextureHeader { &self.1 }
+    pub const fn hdr(&self) -> &TextureHeader {
+        &self.1
+    }
 
-    pub const fn tag(&self) -> &[u8; 20] { &self.2 }
+    pub const fn tag(&self) -> &[u8; 20] {
+        &self.2
+    }
 
-    pub const fn fmt(&self) -> &FormatHeader { &self.3 }
+    pub const fn fmt(&self) -> &FormatHeader {
+        &self.3
+    }
 
-    pub fn has_magic(&self) -> bool { self.file().has_magic() }
+    pub fn has_magic(&self) -> bool {
+        self.file().has_magic()
+    }
 
     fn check(&self, format: Option<&TextureFormat>) {
         expected("TAG", *self.tag(), *TEXTURE_TAG, fmt_array_string);
@@ -382,5 +417,7 @@ fn test_header_sizes() {
 impl TryFrom<&TextureFormat> for FormatHeader {
     type Error = Error;
 
-    fn try_from(format: &TextureFormat) -> Result<Self> { todo!() }
+    fn try_from(format: &TextureFormat) -> Result<Self> {
+        todo!()
+    }
 }

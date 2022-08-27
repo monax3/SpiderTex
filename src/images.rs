@@ -25,9 +25,13 @@ pub trait Image: Sized {
 #[derive(Default, Debug, Clone)]
 pub struct Warnings(Vec<Cow<'static, str>>);
 impl Warnings {
-    pub fn new() -> Self { Self::default() }
+    pub fn new() -> Self {
+        Self::default()
+    }
 
-    pub fn push(&mut self, warning: impl Into<Cow<'static, str>>) { self.0.push(warning.into()); }
+    pub fn push(&mut self, warning: impl Into<Cow<'static, str>>) {
+        self.0.push(warning.into());
+    }
 
     pub fn iter(&self) -> impl Iterator<Item = &str> {
         let mut iter = self.0.iter();
@@ -36,23 +40,31 @@ impl Warnings {
     }
 
     pub fn extend<W>(&mut self, iter: impl IntoIterator<Item = W>)
-    where W: Into<Cow<'static, str>> {
+    where
+        W: Into<Cow<'static, str>>,
+    {
         for warning in iter {
             self.push(warning);
         }
     }
 
-    pub fn is_empty(&self) -> bool { self.0.is_empty() }
+    pub fn is_empty(&self) -> bool {
+        self.0.is_empty()
+    }
 }
 
 impl std::ops::DerefMut for Warnings {
-    fn deref_mut(&mut self) -> &mut Self::Target { &mut self.0 }
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.0
+    }
 }
 
 impl std::ops::Deref for Warnings {
     type Target = Vec<Cow<'static, str>>;
 
-    fn deref(&self) -> &Self::Target { &self.0 }
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
 }
 
 impl FromIterator<Warnings> for Warnings {
@@ -66,7 +78,8 @@ impl FromIterator<Warnings> for Warnings {
 }
 
 impl<A> FromIterator<A> for Warnings
-where A: Into<Cow<'static, str>>
+where
+    A: Into<Cow<'static, str>>,
 {
     fn from_iter<T: IntoIterator<Item = A>>(iter: T) -> Self {
         Warnings(iter.into_iter().map(|w| w.into()).collect())
@@ -77,7 +90,9 @@ impl IntoIterator for Warnings {
     type IntoIter = std::vec::IntoIter<Self::Item>;
     type Item = Cow<'static, str>;
 
-    fn into_iter(self) -> Self::IntoIter { self.0.into_iter() }
+    fn into_iter(self) -> Self::IntoIter {
+        self.0.into_iter()
+    }
 }
 
 pub struct DxImport;
@@ -97,9 +112,9 @@ impl Image for DxImport {
 
         let dimensions = Dimensions {
             data_size: 0,
-            width:     metadata.width,
-            height:    metadata.height,
-            mipmaps:   metadata.mipLevels as u8,
+            width: metadata.width,
+            height: metadata.height,
+            mipmaps: metadata.mipLevels as u8,
         };
 
         let dxgi_format = metadata.format;
@@ -132,7 +147,9 @@ impl Image for DxImport {
         Ok(warnings)
     }
 
-    fn load(file: impl AsRef<Utf8Path>) -> Result<Self::Buffer> { todo!() }
+    fn load(file: impl AsRef<Utf8Path>) -> Result<Self::Buffer> {
+        todo!()
+    }
 }
 
 pub struct ImageRs;
@@ -140,7 +157,9 @@ pub struct ImageRs;
 impl Image for ImageRs {
     type Buffer = DynamicImage;
 
-    fn supports_format(image_format: ImageFormat) -> bool { true }
+    fn supports_format(image_format: ImageFormat) -> bool {
+        true
+    }
 
     // FIXME: image_rs will only read the dimensions
     // TODO: add header scanning for supported formats
@@ -184,9 +203,9 @@ impl ImageRs {
 
         Ok(Dimensions {
             data_size: file_size,
-            width:     width as usize,
-            height:    height as usize,
-            mipmaps:   1,
+            width: width as usize,
+            height: height as usize,
+            mipmaps: 1,
         })
     }
 }

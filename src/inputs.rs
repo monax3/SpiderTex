@@ -3,18 +3,8 @@ use std::collections::{BTreeMap, BTreeSet};
 use camino::{Utf8Path, Utf8PathBuf};
 
 use crate::files::{
-    base_name,
-    format_for_file,
-    is_ignored_ext,
-    is_image_ext,
-    is_texture_ext,
-    merge_file_formats,
-    Categorized,
-    FileFormat,
-    FileGroup,
-    FileType,
-    InputGroup,
-    Uncategorized,
+    base_name, format_for_file, is_ignored_ext, is_image_ext, is_texture_ext, merge_file_formats,
+    Categorized, FileFormat, FileGroup, FileType, InputGroup, Uncategorized,
 };
 use crate::prelude::*;
 use crate::util::{open_files_dialog, WalkArgs};
@@ -55,7 +45,7 @@ pub enum Job {
 #[derive(Debug)]
 pub struct Inputs {
     pub textures: Vec<Categorized>,
-    pub images:   Vec<Categorized>,
+    pub images: Vec<Categorized>,
 }
 
 impl Inputs {
@@ -70,11 +60,15 @@ impl Inputs {
 
     #[inline]
     #[must_use]
-    pub fn is_empty(&self) -> bool { self.textures.is_empty() && self.images.is_empty() }
+    pub fn is_empty(&self) -> bool {
+        self.textures.is_empty() && self.images.is_empty()
+    }
 
     #[inline]
     #[must_use]
-    pub fn len(&self) -> usize { self.textures.len() + self.images.len() }
+    pub fn len(&self) -> usize {
+        self.textures.len() + self.images.len()
+    }
 
     pub fn add_pairs(&mut self) {
         for texture in &mut self.textures {
@@ -95,23 +89,23 @@ impl Inputs {
                 if !set.contains(&raw) && raw.exists() {
                     event!(DEBUG, "Adding {raw}");
                     extras.push(raw);
-                 }
-                 let hd = Utf8PathBuf::from(format!("{base_name}_hd.texture"));
-                 if !set.contains(&hd) && hd.exists() {
-                     event!(DEBUG, "Adding {hd}");
-                     extras.push(hd);
-                 }
-                 let hd2 = Utf8PathBuf::from(format!("{base_name}.hd.texture"));
-                 if !set.contains(&hd2) && hd2.exists() {
-                     event!(DEBUG, "Adding {hd2}");
-                     extras.push(hd2);
-                 }
-                 let texture = Utf8PathBuf::from(format!("{base_name}.texture"));
-                 if !set.contains(&texture) && texture.exists() {
-                     event!(DEBUG, "Adding {texture}");
-                     extras.push(texture);
-                 }
-              }
+                }
+                let hd = Utf8PathBuf::from(format!("{base_name}_hd.texture"));
+                if !set.contains(&hd) && hd.exists() {
+                    event!(DEBUG, "Adding {hd}");
+                    extras.push(hd);
+                }
+                let hd2 = Utf8PathBuf::from(format!("{base_name}.hd.texture"));
+                if !set.contains(&hd2) && hd2.exists() {
+                    event!(DEBUG, "Adding {hd2}");
+                    extras.push(hd2);
+                }
+                let texture = Utf8PathBuf::from(format!("{base_name}.texture"));
+                if !set.contains(&texture) && texture.exists() {
+                    event!(DEBUG, "Adding {texture}");
+                    extras.push(texture);
+                }
+            }
             if !extras.is_empty() {
                 texture.files.extend(extras);
             }
@@ -121,13 +115,15 @@ impl Inputs {
 
 pub struct InputsIter {
     textures: std::vec::IntoIter<Categorized>,
-    images:   std::vec::IntoIter<Categorized>,
+    images: std::vec::IntoIter<Categorized>,
 }
 
 impl Iterator for InputsIter {
     type Item = Categorized;
 
-    fn next(&mut self) -> Option<Self::Item> { self.textures.next().or_else(|| self.images.next()) }
+    fn next(&mut self) -> Option<Self::Item> {
+        self.textures.next().or_else(|| self.images.next())
+    }
 }
 
 impl From<Inputs> for InputsIter {
@@ -135,7 +131,7 @@ impl From<Inputs> for InputsIter {
         let Inputs { textures, images } = inputs;
         InputsIter {
             textures: textures.into_iter(),
-            images:   images.into_iter(),
+            images: images.into_iter(),
         }
     }
 }
@@ -144,7 +140,9 @@ impl IntoIterator for Inputs {
     type IntoIter = InputsIter;
     type Item = Categorized;
 
-    fn into_iter(self) -> Self::IntoIter { InputsIter::from(self) }
+    fn into_iter(self) -> Self::IntoIter {
+        InputsIter::from(self)
+    }
 }
 
 #[must_use]
@@ -221,7 +219,9 @@ pub fn gather_from_args() -> Inputs {
     gather_iter(args)
 }
 
-pub fn gather(from: impl Into<Utf8PathBuf>) -> Inputs { gather_iter(std::iter::once(from.into())) }
+pub fn gather(from: impl Into<Utf8PathBuf>) -> Inputs {
+    gather_iter(std::iter::once(from.into()))
+}
 
 pub fn gather_iter<'a>(iter: impl Iterator<Item = Utf8PathBuf> + 'a) -> Inputs {
     categorize(group(walk(iter)))

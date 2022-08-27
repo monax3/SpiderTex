@@ -23,21 +23,23 @@ pub struct TextureFormat {
     #[serde(with = "dxgi::serde")]
     pub dxgi_format: DXGI_FORMAT,
     // pub stex_format:           (u8, u8),
-    pub standard:    Dimensions,
+    pub standard: Dimensions,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub highres:     Option<Dimensions>,
+    pub highres: Option<Dimensions>,
     #[serde(
         default = "default_array_size",
         skip_serializing_if = "is_default_array_size"
     )]
-    pub array_size:  usize,
+    pub array_size: usize,
     #[serde(default, skip)]
-    pub source:      Source,
+    pub source: Source,
 }
 
 impl Hash for TextureFormat {
     fn hash<H>(&self, state: &mut H)
-    where H: Hasher {
+    where
+        H: Hasher,
+    {
         self.id().hash(state);
     }
 }
@@ -45,27 +47,32 @@ impl Hash for TextureFormat {
 impl TextureFormat {
     #[inline]
     #[must_use]
-    pub fn id(&self) -> FormatId { FormatId::from(self) }
+    pub fn id(&self) -> FormatId {
+        FormatId::from(self)
+    }
 
     #[inline]
     #[must_use]
-    pub const fn is_1d(&self) -> bool { self.standard.height == 1 }
+    pub const fn is_1d(&self) -> bool {
+        self.standard.height == 1
+    }
 
     #[inline]
     #[must_use]
-    pub const fn has_highres(&self) -> bool { self.highres.is_some() }
+    pub const fn has_highres(&self) -> bool {
+        self.highres.is_some()
+    }
 
     #[inline]
     #[must_use]
     pub fn without_header<'buf>(&self, buffer: &'buf [u8]) -> &'buf [u8] {
         if buffer.len() == self.standard.data_size + TEXTURE_HEADER_SIZE {
-            &buffer[TEXTURE_HEADER_SIZE ..]
+            &buffer[TEXTURE_HEADER_SIZE..]
         } else {
             buffer
         }
     }
 
-    // FIXME: look into this
     #[inline]
     #[must_use]
     pub fn default_image_format(&self) -> ImageFormat {
@@ -82,11 +89,15 @@ impl TextureFormat {
 
     #[inline]
     #[must_use]
-    pub const fn is_lut(&self) -> bool { self.is_1d_lut() || self.is_2d_lut() }
+    pub const fn is_lut(&self) -> bool {
+        self.is_1d_lut() || self.is_2d_lut()
+    }
 
     #[inline]
     #[must_use]
-    pub const fn is_1d_lut(&self) -> bool { self.standard.width == 16 && self.standard.height == 1 }
+    pub const fn is_1d_lut(&self) -> bool {
+        self.standard.width == 16 && self.standard.height == 1
+    }
 
     #[inline]
     #[must_use]
@@ -96,24 +107,38 @@ impl TextureFormat {
 
     #[inline]
     #[must_use]
-    pub const fn num_images(&self) -> usize { self.array_size }
+    pub const fn num_images(&self) -> usize {
+        self.array_size
+    }
 
     #[inline]
     #[must_use]
-    pub const fn num_textures(&self) -> usize { if self.has_highres() { 2 } else { 1 } }
+    pub const fn num_textures(&self) -> usize {
+        if self.has_highres() {
+            2
+        } else {
+            1
+        }
+    }
 
     #[inline]
     #[must_use]
-    pub const fn sd_file_len(&self) -> usize { self.standard.data_size + TEXTURE_HEADER_SIZE }
+    pub const fn sd_file_len(&self) -> usize {
+        self.standard.data_size + TEXTURE_HEADER_SIZE
+    }
 
     #[inline]
     #[must_use]
     #[allow(unused)]
-    pub const fn sd_len(&self) -> usize { self.standard.data_size }
+    pub const fn sd_len(&self) -> usize {
+        self.standard.data_size
+    }
 
     #[inline]
     #[must_use]
-    pub fn hd_len(&self) -> Option<usize> { self.highres.map(|dims| dims.data_size) }
+    pub fn hd_len(&self) -> Option<usize> {
+        self.highres.map(|dims| dims.data_size)
+    }
 
     #[inline]
     pub fn to_header(&self) -> Result<texture_file::FormatHeader> {
@@ -137,7 +162,7 @@ impl TextureFormat {
     pub fn expected_standard_buffer_size_with_mips(&self) -> usize {
         let mut start = self.expected_standard_buffer_size() / self.array_size;
         let pow = start.trailing_zeros();
-        for i in 1 .. (self.standard.mipmaps as u32) {
+        for i in 1..(self.standard.mipmaps as u32) {
             start += 1 << (pow - 2 * i);
         }
         start * self.array_size
@@ -153,7 +178,9 @@ impl TextureFormat {
 
     #[inline]
     #[must_use]
-    pub fn aspect_ratio(&self) -> f32 { self.standard.aspect_ratio() }
+    pub fn aspect_ratio(&self) -> f32 {
+        self.standard.aspect_ratio()
+    }
 
     #[inline]
     #[must_use]
@@ -163,11 +190,15 @@ impl TextureFormat {
 
     #[inline]
     #[must_use]
-    pub const fn preferred_width(&self) -> usize { self.dimensions().width }
+    pub const fn preferred_width(&self) -> usize {
+        self.dimensions().width
+    }
 
     #[inline]
     #[must_use]
-    pub const fn preferred_height(&self) -> usize { self.dimensions().height }
+    pub const fn preferred_height(&self) -> usize {
+        self.dimensions().height
+    }
 
     #[inline]
     #[must_use]
@@ -185,7 +216,13 @@ impl TextureFormat {
 
     #[inline]
     #[must_use]
-    pub fn best_texture<FILE>(&self, files: impl IntoIterator<Item = FILE>) -> Option<(Dimensions, FILE)> where FILE: AsRef<Path> + std::fmt::Display {
+    pub fn best_texture<FILE>(
+        &self,
+        files: impl IntoIterator<Item = FILE>,
+    ) -> Option<(Dimensions, FILE)>
+    where
+        FILE: AsRef<Path> + std::fmt::Display,
+    {
         let (best, other) = self.all_dimensions();
         let mut fallback = None;
         for file in files {
@@ -193,9 +230,15 @@ impl TextureFormat {
             if let Ok(size) = std::fs::metadata(file.as_ref()).map(|file| file.len() as usize) {
                 // event!(TRACE, name="best_texture", %file, %size);
                 // event!(TRACE, size, ?best, ?other);
-                if size == best.data_size || size == best.data_size + texture_file::TEXTURE_HEADER_SIZE {return Some((best, file)); }
+                if size == best.data_size
+                    || size == best.data_size + texture_file::TEXTURE_HEADER_SIZE
+                {
+                    return Some((best, file));
+                }
                 if let Some(other) = other {
-                    if size == other.data_size || size == other.data_size  + texture_file::TEXTURE_HEADER_SIZE{
+                    if size == other.data_size
+                        || size == other.data_size + texture_file::TEXTURE_HEADER_SIZE
+                    {
                         fallback = Some((other, file));
                     }
                 }
@@ -249,15 +292,21 @@ impl TextureFormat {
 
     #[inline]
     #[must_use]
-    pub fn planes(&self) -> ColorPlanes { self.dxgi_format.planes() }
+    pub fn planes(&self) -> ColorPlanes {
+        self.dxgi_format.planes()
+    }
 }
 
 impl PartialEq for TextureFormat {
-    fn eq(&self, other: &Self) -> bool { self.id() == other.id() }
+    fn eq(&self, other: &Self) -> bool {
+        self.id() == other.id()
+    }
 }
 
 impl From<texture_file::FormatHeader> for TextureFormat {
-    fn from(header: texture_file::FormatHeader) -> Self { Self::from(&header) }
+    fn from(header: texture_file::FormatHeader) -> Self {
+        Self::from(&header)
+    }
 }
 
 impl From<&texture_file::FormatHeader> for TextureFormat {
@@ -267,17 +316,17 @@ impl From<&texture_file::FormatHeader> for TextureFormat {
 
         let standard = Dimensions {
             data_size: header.sd_len as usize,
-            width:     header.sd_width as usize,
-            height:    header.sd_height as usize,
-            mipmaps:   header.sd_mipmaps,
+            width: header.sd_width as usize,
+            height: header.sd_height as usize,
+            mipmaps: header.sd_mipmaps,
         };
 
         let highres =
             (header.hd_len != header.sd_len && header.hd_len != 0).then_some(Dimensions {
                 data_size: header.hd_len as usize,
-                width:     header.hd_width as usize,
-                height:    header.hd_height as usize,
-                mipmaps:   header.hd_mipmaps,
+                width: header.hd_width as usize,
+                height: header.hd_height as usize,
+                mipmaps: header.hd_mipmaps,
             });
 
         Self {
@@ -307,7 +356,9 @@ impl Display for TextureFormat {
 
 #[inline]
 #[must_use]
-pub const fn default_array_size() -> usize { 1 }
+pub const fn default_array_size() -> usize {
+    1
+}
 
 #[inline]
 #[must_use]

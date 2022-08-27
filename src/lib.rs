@@ -5,6 +5,7 @@ use std::io::prelude::*;
 use camino::{Utf8Path, Utf8PathBuf};
 use image::{DynamicImage, ImageFormat};
 
+#[cfg_attr(not(windows), path = "dxtex-dummy/mod.rs")]
 pub mod dxtex;
 mod error;
 pub mod formats;
@@ -300,9 +301,9 @@ pub fn convert_texture_to_png(texture_file: &Utf8Path) -> Result<()> {
         assert_eq!(decompressed.len() % texture_info.array_size, 0);
 
         let mut start = 0;
-        let slices: Vec<&[u8]> = (0 .. texture_info.array_size)
+        let slices: Vec<&[u8]> = (0..texture_info.array_size)
             .map(|_| {
-                let slice = &decompressed[start .. start + slice_len];
+                let slice = &decompressed[start..start + slice_len];
                 start += slice_len;
                 slice
             })
@@ -348,7 +349,7 @@ pub fn convert_texture_to_png(texture_file: &Utf8Path) -> Result<()> {
 }
 
 fn find_size(metadata: &TextureFormat, have_2d: usize, have_3d: usize) {
-    for i in 0 .. 10 {
+    for i in 0..10 {
         let sizes = (
             expected_size(metadata.dxgi_format, metadata.standard, 1),
             expected_size_array(metadata.dxgi_format, metadata.standard, i),
@@ -364,7 +365,9 @@ fn find_size(metadata: &TextureFormat, have_2d: usize, have_3d: usize) {
     }
 }
 
-fn generic_failure<T>() -> Result<T> { Err(Error::message("Failed.")) }
+fn generic_failure<T>() -> Result<T> {
+    Err(Error::message("Failed."))
+}
 
 pub fn convert_to_texture(
     format: &TextureFormat,

@@ -48,11 +48,11 @@ fn run() -> Result<()> {
     match job {
         Job::Import(group) => gui::batch(Inputs {
             textures: vec![],
-            images:   vec![group.0],
+            images: vec![group.0],
         }),
         Job::Export(group) => gui::batch(Inputs {
             textures: vec![group.0],
-            images:   vec![],
+            images: vec![],
         }),
         Job::Batch(inputs) => {
             gui::batch(inputs);

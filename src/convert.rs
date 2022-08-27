@@ -6,7 +6,7 @@ use image::ImageBuffer;
 use windows::Win32::Graphics::Dxgi::Common::*;
 
 use crate::dxtex::DXImage;
-use crate::files::{FileFormat, FileGroup, FileStatus, FileType, Categorized};
+use crate::files::{Categorized, FileFormat, FileGroup, FileStatus, FileType};
 use crate::formats::ColorPlanes;
 use crate::images::{DxImport, ImageRs};
 use crate::prelude::*;

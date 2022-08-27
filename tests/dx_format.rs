@@ -1,11 +1,7 @@
 use camino::Utf8Path;
 use spidertexlib::dxtex::{self, DXImage, TexMetadata, TEX_DIMENSION, TEX_FILTER_FLAGS};
 use spidertexlib::formats::{
-    guess_dimensions_2,
-    probe_textures_2,
-    ColorPlanes,
-    ImageFormat,
-    TextureFormat,
+    guess_dimensions_2, probe_textures_2, ColorPlanes, ImageFormat, TextureFormat,
 };
 use spidertexlib::prelude::*;
 use spidertexlib::registry::Registry;

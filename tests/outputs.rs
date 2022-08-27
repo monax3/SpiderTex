@@ -2,16 +2,12 @@ use camino::{Utf8Path, Utf8PathBuf};
 use spidertexlib::dxtex::{self, DXImage, TexMetadata, TEX_DIMENSION, TEX_FILTER_FLAGS};
 use spidertexlib::files::{as_images, ng_format_for_texture_file, Categorized, FileType};
 use spidertexlib::formats::{
-    guess_dimensions_2,
-    probe_textures_2,
-    ColorPlanes,
-    ImageFormat,
-    TextureFormat,
+    guess_dimensions_2, probe_textures_2, ColorPlanes, ImageFormat, TextureFormat,
 };
 use spidertexlib::inputs::Inputs;
 use spidertexlib::prelude::*;
 use spidertexlib::registry::Registry;
-use spidertexlib::rgb::{CONTAINER_PNG, PIXEL_FORMAT_BGR, WIC};
+// use spidertexlib::rgb::{CONTAINER_PNG, PIXEL_FORMAT_BGR, WIC};
 use spidertexlib::util::walkdir;
 
 #[test]

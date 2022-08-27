@@ -8,24 +8,8 @@ use std::time::{Duration, Instant};
 
 use camino::{Utf8Path, Utf8PathBuf};
 use eframe::egui::{
-    vec2,
-    Button,
-    CentralPanel,
-    Context,
-    Event,
-    Label,
-    Layout,
-    ProgressBar,
-    RadioButton,
-    Rect,
-    Response,
-    RichText,
-    ScrollArea,
-    Sense,
-    SidePanel,
-    TextStyle,
-    Ui,
-    Widget,
+    vec2, Button, CentralPanel, Context, Event, Label, Layout, ProgressBar, RadioButton, Rect,
+    Response, RichText, ScrollArea, Sense, SidePanel, TextStyle, Ui, Widget,
 };
 use eframe::epaint::{Color32, FontId};
 use eframe::{App, Frame};
@@ -33,17 +17,8 @@ use image::{DynamicImage, ImageFormat};
 use parking_lot::Mutex;
 use spidertexlib::convert::{convert, TaskResult};
 use spidertexlib::files::{
-    is_image_ext,
-    is_texture_ext,
-    output_files,
-    FileFormat,
-    FileGroupInfo,
-    FileGroup,
-    FileStatus,
-    FileType,
-    InputGroup,
-    OutputFormat,
-    Scanned,
+    is_image_ext, is_texture_ext, output_files, FileFormat, FileGroup, FileGroupInfo, FileStatus,
+    FileType, InputGroup, OutputFormat, Scanned,
 };
 use spidertexlib::images::{DxImport, Image, ImageRs};
 use spidertexlib::prelude::*;
@@ -70,17 +45,17 @@ pub fn batch(inputs: Inputs) {
 
 enum Batch {
     Setup {
-        action:         Action,
-        imports:        Vec<FileGroup<Scanned>>,
-        exports:        Vec<FileGroup<Scanned>>,
-        progress:       f32,
-        progress_rx:    Receiver<(f32, FileGroup<Scanned>)>,
+        action: Action,
+        imports: Vec<FileGroup<Scanned>>,
+        exports: Vec<FileGroup<Scanned>>,
+        progress: f32,
+        progress_rx: Receiver<(f32, FileGroup<Scanned>)>,
         action_changed: bool,
     },
     Running {
-        num_tasks:  usize,
+        num_tasks: usize,
         results_rx: Receiver<TaskResult>,
-        results:    Vec<TaskResult>,
+        results: Vec<TaskResult>,
     },
     Complete {
         results: Vec<TaskResult>,
@@ -89,9 +64,13 @@ enum Batch {
 }
 
 impl Batch {
-    const fn in_progress(&self) -> bool { matches!(self, Self::Running { .. }) }
+    const fn in_progress(&self) -> bool {
+        matches!(self, Self::Running { .. })
+    }
 
-    const fn in_setup(&self) -> bool { matches!(self, Self::Setup { .. }) }
+    const fn in_setup(&self) -> bool {
+        matches!(self, Self::Setup { .. })
+    }
 
     fn set_action(&mut self, new_action: Action) {
         if let Self::Setup { action, .. } = self {
@@ -160,9 +139,9 @@ impl Batch {
     fn start_work(&mut self) {
         let (tx, rx) = channel::<TaskResult>();
         let new = Self::Running {
-            num_tasks:  0,
+            num_tasks: 0,
             results_rx: rx,
-            results:    Vec::new(),
+            results: Vec::new(),
         };
 
         if let Self::Setup {
@@ -357,7 +336,9 @@ impl AppWindow for Batch {
         }
     }
 
-    fn can_close(&mut self) -> bool { !self.in_progress() }
+    fn can_close(&mut self) -> bool {
+        !self.in_progress()
+    }
 }
 
 fn scan_thread(inputs: Inputs) -> Receiver<(f32, FileGroup<Scanned>)> {
@@ -383,7 +364,9 @@ fn scan_thread(inputs: Inputs) -> Receiver<(f32, FileGroup<Scanned>)> {
 }
 
 fn inputs_and_outputs<G>(ui: &mut Ui, group: &FileGroup<G>)
-where G: FileGroupInfo {
+where
+    G: FileGroupInfo,
+{
     let output_format = group.output_format().unwrap_or(&OutputFormat::Unknown);
     match group.input().as_ref() {
         FileStatus::Unknown => return,

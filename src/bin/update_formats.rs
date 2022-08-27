@@ -29,7 +29,7 @@ fn guess_array_size(format: &TextureFormat, data_size: usize) -> Option<usize> {
 #[derive(serde::Deserialize)]
 struct Override {
     pattern: String,
-    header:  String,
+    header: String,
 }
 
 fn load_overrides(registry: &mut Registry) -> Result<()> {
@@ -66,7 +66,9 @@ fn main() -> Result<()> {
         {
             let len = std::fs::metadata(&file).map(|m| m.len())? as usize;
 
-            if file.extension().unwrap() == "raw" && file.with_extension("texture").exists() { continue; }
+            if file.extension().unwrap() == "raw" && file.with_extension("texture").exists() {
+                continue;
+            }
             // FIXME: this should be read_header except we're now gonna do luma detection
             match texture_file::read_texture(&file) {
                 Err(error) => event!(ERROR, %error),

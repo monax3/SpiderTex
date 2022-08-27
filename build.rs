@@ -1,6 +1,7 @@
 use std::env;
 
-fn main() {
+#[cfg(windows)]
+fn windows() {
     const LCID_EN_US: u16 = 0x0409;
 
     let _library = vcpkg::find_package("directxtex").unwrap();
@@ -23,4 +24,9 @@ fn main() {
     res.set_icon("SpiderTex.ico");
 
     res.compile().expect("Failed to compile resources");
+}
+
+fn main() {
+    #[cfg(windows)]
+    windows();
 }

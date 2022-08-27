@@ -1,14 +1,5 @@
 use eframe::egui::{
-    ColorImage,
-    Context,
-    Image,
-    Rect,
-    Response,
-    Rounding,
-    Sense,
-    TextureHandle,
-    Ui,
-    Widget,
+    ColorImage, Context, Image, Rect, Response, Rounding, Sense, TextureHandle, Ui, Widget,
 };
 use eframe::epaint::{vec2, Vec2};
 use image::DynamicImage;
@@ -40,8 +31,8 @@ fn to_texturehandle(ctx: &Context, image: ColorImage, name: impl Into<String>) -
 }
 
 pub struct Preview {
-    images:      Vec<TextureHandle>,
-    current:     usize,
+    images: Vec<TextureHandle>,
+    current: usize,
     placeholder: TextureHandle,
 }
 
@@ -62,7 +53,7 @@ fn compressed_to_texturehandles(
     // FIXME: handle multiple formats
     let (dimensions, strip_header) = guess_dimensions(data.len(), &[format.clone()])?;
     if strip_header {
-        data = &data[TEXTURE_HEADER_SIZE ..];
+        data = &data[TEXTURE_HEADER_SIZE..];
     }
 
     spidertexlib::dxtex::decompress_texture(
@@ -96,7 +87,9 @@ fn rgba_to_texturehandles<'a>(
 }
 
 impl Preview {
-    pub fn replace_images(&mut self, ctx: &Context, images: &[DynamicImage]) { todo!() }
+    pub fn replace_images(&mut self, ctx: &Context, images: &[DynamicImage]) {
+        todo!()
+    }
 
     pub fn from_images(ctx: &Context, images: &[DynamicImage]) -> Self {
         let images: Vec<TextureHandle> = images
@@ -123,7 +116,9 @@ impl Preview {
         }
     }
 
-    fn num_images(&self) -> usize { self.images.len() }
+    fn num_images(&self) -> usize {
+        self.images.len()
+    }
 
     fn current_image(&self) -> &TextureHandle {
         self.images.get(self.current).unwrap_or(&self.placeholder)

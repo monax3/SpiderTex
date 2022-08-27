@@ -1,20 +1,7 @@
 use camino::{Utf8Path, Utf8PathBuf};
 use eframe::egui::{
-    vec2,
-    Button,
-    CentralPanel,
-    Context,
-    Event,
-    Layout,
-    RadioButton,
-    Rect,
-    Response,
-    RichText,
-    Sense,
-    SidePanel,
-    TextStyle,
-    Ui,
-    Widget,
+    vec2, Button, CentralPanel, Context, Event, Layout, RadioButton, Rect, Response, RichText,
+    Sense, SidePanel, TextStyle, Ui, Widget,
 };
 use eframe::emath::Align;
 use eframe::{App, Frame};
@@ -93,7 +80,7 @@ pub fn export_ui(export_files: Vec<Utf8PathBuf>, common_name: String) -> Result<
 }
 
 struct ExportUi {
-    state:   ExportState,
+    state: ExportState,
     preview: Preview,
 }
 
@@ -112,7 +99,7 @@ struct ExportSelections {
     registry: Registry,
 
     detected_formats: Vec<TextureFormat>,
-    selected_format:  TextureFormat,
+    selected_format: TextureFormat,
 }
 
 impl App for ExportUi {

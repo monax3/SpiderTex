@@ -9,23 +9,29 @@ use crate::texture_file;
 #[derive(Serialize, Deserialize, Debug, Copy, Clone, Eq)]
 pub struct Dimensions {
     pub data_size: usize,
-    pub width:     usize,
-    pub height:    usize,
-    pub mipmaps:   u8,
+    pub width: usize,
+    pub height: usize,
+    pub mipmaps: u8,
 }
 
 impl PartialEq for Dimensions {
-    fn eq(&self, other: &Self) -> bool { self.wh() == other.wh() }
+    fn eq(&self, other: &Self) -> bool {
+        self.wh() == other.wh()
+    }
 }
 
 impl Dimensions {
     #[inline]
     #[must_use]
-    pub const fn wh(&self) -> (usize, usize) { (self.width, self.height) }
+    pub const fn wh(&self) -> (usize, usize) {
+        (self.width, self.height)
+    }
 
     #[inline]
     #[must_use]
-    pub fn aspect_ratio(&self) -> f32 { self.width as f32 / self.height as f32 }
+    pub fn aspect_ratio(&self) -> f32 {
+        self.width as f32 / self.height as f32
+    }
 
     #[inline]
     #[must_use]
@@ -44,7 +50,11 @@ impl Dimensions {
             2
         } else {
             let pow2 = std::cmp::min(self.width, self.height).trailing_zeros();
-            if pow2 <= 5 { 1 } else { (pow2 - 2) as u8 }
+            if pow2 <= 5 {
+                1
+            } else {
+                (pow2 - 2) as u8
+            }
         }
     }
 

@@ -13,6 +13,18 @@ keywords = ["textures", "spider-man"]
 [lib]
 name = "spidertexlib"
 
+[[bin]]
+name = "SpiderTexGUI"
+required-features = ["build-binaries", "eframe"]
+
+[[bin]]
+name = "SpiderTex"
+required-features = ["build-binaries"]
+
+[[bin]]
+name = "update_formats"
+required-features = ["build-binaries"]
+
 [dependencies]
 serde = { version = "1.0.144", features = ["derive"] }
 serde_json = "1.0.85"
@@ -25,6 +37,22 @@ image = { version = "0.24.3", default-features = false, features = [
 windows = { version = "0.39.0", features = [
     "Win32_Foundation",
     "Win32_Graphics_Dxgi_Common",
+] }
+hex = "0.4.3"
+camino = "1.1.1"
+eframe = { version = "0.19.0", optional = true }
+tracing = "0.1.36"
+tracing-subscriber = "0.3.15"
+bytemuck = { version = "1.12.1", features = ["derive", "extern_crate_std"] }
+thiserror = "1.0.32"
+backtrace = "0.3.66"
+parking_lot = { version = "0.12.1", features = ["hardware-lock-elision"] }
+regex = "1.6.0"
+
+[target.'cfg(windows)'.dependencies]
+windows = { version = "0.39.0", features = [
+    "Win32_Foundation",
+    "Win32_Graphics_Dxgi_Common",
     "Win32_Graphics_Imaging",
     "Win32_Graphics_Imaging_D2D",
     "Win32_System_Com",
@@ -34,16 +62,6 @@ windows = { version = "0.39.0", features = [
     "Win32_System_Com_StructuredStorage",
     "Win32_System_SystemServices",
 ] }
-hex = "0.4.3"
-camino = "1.1.1"
-eframe = "0.19.0"
-tracing = "0.1.36"
-tracing-subscriber = "0.3.15"
-bytemuck = { version = "1.12.1", features = ["derive", "extern_crate_std"] }
-thiserror = "1.0.32"
-backtrace = "0.3.66"
-parking_lot = { version = "0.12.1", features = ["hardware-lock-elision"] }
-regex = "1.6.0"
 
 [build-dependencies]
 vcpkg = "0.2.15"
@@ -54,3 +72,5 @@ rebuild-registry = []
 debug-inputs = []
 debug-formats = []
 disable-wic = []
+build-binaries = ["eframe"]
+default = ["build-binaries"]

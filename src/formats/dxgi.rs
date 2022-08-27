@@ -1,6 +1,7 @@
 use std::fmt::Display;
 
-#[allow(clippy::wildcard_imports)] use windows::Win32::Graphics::Dxgi::Common::*;
+#[allow(clippy::wildcard_imports)]
+use windows::Win32::Graphics::Dxgi::Common::*;
 
 use super::ColorPlanes;
 use crate::dxtex;
@@ -76,7 +77,9 @@ pub trait DxgiFormatExt {
 
 impl DxgiFormatExt for DXGI_FORMAT {
     #[inline]
-    fn display(self) -> DxgiFormatDisplay { DxgiFormatDisplay(self) }
+    fn display(self) -> DxgiFormatDisplay {
+        DxgiFormatDisplay(self)
+    }
 
     #[inline]
     fn compressed_format(self) -> Self {
@@ -112,35 +115,51 @@ impl DxgiFormatExt for DXGI_FORMAT {
 
     #[inline]
     #[must_use]
-    fn is_bc1(self) -> bool { BC1_FORMATS.contains(&self) }
+    fn is_bc1(self) -> bool {
+        BC1_FORMATS.contains(&self)
+    }
 
     #[inline]
     #[must_use]
-    fn is_bc4(self) -> bool { BC4_FORMATS.contains(&self) }
+    fn is_bc4(self) -> bool {
+        BC4_FORMATS.contains(&self)
+    }
 
     #[inline]
     #[must_use]
-    fn is_bc6(self) -> bool { BC6_FORMATS.contains(&self) }
+    fn is_bc6(self) -> bool {
+        BC6_FORMATS.contains(&self)
+    }
 
     #[inline]
     #[must_use]
-    fn is_bc7(self) -> bool { BC7_FORMATS.contains(&self) }
+    fn is_bc7(self) -> bool {
+        BC7_FORMATS.contains(&self)
+    }
 
     #[inline]
     #[must_use]
-    fn is_rgb(self) -> bool { self.is_bc1() }
+    fn is_rgb(self) -> bool {
+        self.is_bc1()
+    }
 
     #[inline]
     #[must_use]
-    fn is_rgba(self) -> bool { self.is_bc7() || RGBA_FORMATS.contains(&self) }
+    fn is_rgba(self) -> bool {
+        self.is_bc7() || RGBA_FORMATS.contains(&self)
+    }
 
     #[inline]
     #[must_use]
-    fn is_luma(self) -> bool { self.is_bc4() || LUMA_FORMATS.contains(&self) }
+    fn is_luma(self) -> bool {
+        self.is_bc4() || LUMA_FORMATS.contains(&self)
+    }
 
     #[inline]
     #[must_use]
-    fn is_hdr(self) -> bool { self.is_bc6() || HDR_FORMATS.contains(&self) }
+    fn is_hdr(self) -> bool {
+        self.is_bc6() || HDR_FORMATS.contains(&self)
+    }
 
     #[inline]
     #[must_use]
@@ -158,11 +177,15 @@ impl DxgiFormatExt for DXGI_FORMAT {
 
     #[inline]
     #[must_use]
-    fn is_compressed(self) -> bool { dxtex::is_compressed(self) }
+    fn is_compressed(self) -> bool {
+        dxtex::is_compressed(self)
+    }
 
     #[inline]
     #[must_use]
-    fn is_srgb(self) -> bool { dxtex::is_srgb(self) }
+    fn is_srgb(self) -> bool {
+        dxtex::is_srgb(self)
+    }
 }
 
 pub struct DxgiFormatDisplay(DXGI_FORMAT);

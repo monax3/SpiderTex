@@ -66,11 +66,17 @@ pub mod text {
     }
 }
 
-pub fn button_size() -> Vec2 { vec2(120.0, BUTTON_HEIGHT) }
+pub fn button_size() -> Vec2 {
+    vec2(120.0, BUTTON_HEIGHT)
+}
 
-pub fn nav_button_size() -> Vec2 { vec2(30.0, 30.0) }
+pub fn nav_button_size() -> Vec2 {
+    vec2(30.0, 30.0)
+}
 
-pub fn visuals() -> Visuals { Visuals::dark() }
+pub fn visuals() -> Visuals {
+    Visuals::dark()
+}
 
 pub fn button_text(text: impl Into<String>) -> impl Into<WidgetText> {
     RichText::new(text).strong().size(20.0)
@@ -94,7 +100,9 @@ pub fn log_text(text: impl Into<String>, level: tracing::Level) -> impl Into<Wid
         .color(color)
 }
 
-pub fn spacing() -> Spacing { Spacing::default() }
+pub fn spacing() -> Spacing {
+    Spacing::default()
+}
 
 pub fn window_size() -> Vec2 {
     let spacing = spacing();
@@ -104,7 +112,9 @@ pub fn window_size() -> Vec2 {
     size + spacing.window_margin.sum() + preview_size_with_frame()
 }
 
-pub fn preview_size() -> Vec2 { Vec2::splat(PREVIEW_SIZE) }
+pub fn preview_size() -> Vec2 {
+    Vec2::splat(PREVIEW_SIZE)
+}
 
 pub fn preview_size_with_frame() -> Vec2 {
     Vec2::splat(PREVIEW_SIZE) + Vec2::splat(PREVIEW_FRAME_SIZE * 2.0)
@@ -117,4 +127,6 @@ pub fn style() -> Style {
     }
 }
 
-pub fn text_font() -> FontId { FontId::proportional(16.0) }
+pub fn text_font() -> FontId {
+    FontId::proportional(16.0)
+}

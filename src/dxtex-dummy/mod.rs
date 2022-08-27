@@ -20,13 +20,13 @@ use crate::prelude::*;
 #[must_use]
 #[inline]
 pub fn is_compressed(format: DXGI_FORMAT) -> bool {
-    unsafe { IsCompressed(format) > 0 }
+    unimplemented!()
 }
 
 #[must_use]
 #[inline]
 pub fn is_srgb(format: DXGI_FORMAT) -> bool {
-    unsafe { IsSRGB(format) > 0 }
+    unimplemented!()
 }
 
 #[repr(transparent)]
@@ -34,7 +34,7 @@ pub struct DXImage(DXPtr);
 
 impl Drop for DXImage {
     fn drop(&mut self) {
-        let _ignore = unsafe { V2_FreeImage(self.0) };
+        unimplemented!()
     }
 }
 
@@ -95,21 +95,7 @@ impl DXImage {
         mipmaps: u8,
         data: &[u8],
     ) -> Result<Self> {
-        let mut handle = MaybeUninit::uninit();
-
-        Ok(unsafe {
-            V2_New1D(
-                format,
-                size,
-                array_size,
-                mipmaps,
-                data.as_ptr(),
-                data.len(),
-                handle.as_mut_ptr(),
-            )
-            .ok()?;
-            handle.assume_init()
-        })
+        unimplemented!()
     }
 
     #[inline]
@@ -121,22 +107,7 @@ impl DXImage {
         mipmaps: u8,
         data: &[u8],
     ) -> Result<Self> {
-        let mut handle = MaybeUninit::uninit();
-
-        Ok(unsafe {
-            V2_New2D(
-                format,
-                width,
-                height,
-                array_size,
-                mipmaps,
-                data.as_ptr(),
-                data.len(),
-                handle.as_mut_ptr(),
-            )
-            .ok()?;
-            handle.assume_init()
-        })
+        unimplemented!()
     }
 
     // Helper for extracting intermediaries when chaining actions
@@ -158,127 +129,68 @@ impl DXImage {
 
     #[inline]
     pub fn generate_mipmaps(&self, mipmaps: u8) -> Result<Self> {
-        let mut out = MaybeUninit::uninit();
-
-        #[cfg(not(feature = "disable-wic"))]
-        let flags = TEX_FILTER_FLAGS::default();
-        #[cfg(feature = "disable-wic")]
-        let flags = TEX_FILTER_FLAGS::TEX_FILTER_FORCE_NON_WIC;
-
-        Ok(unsafe {
-            GenerateMipmaps(self.0, flags, usize::from(mipmaps), out.as_mut_ptr()).ok()?;
-            out.assume_init()
-        })
+        unimplemented!()
     }
 
     #[inline]
     pub fn override_format(&self, format: DXGI_FORMAT) -> Result<()> {
-        unsafe {
-            OverrideFormat(self.0, format).ok()?;
-        }
-
         Ok(())
     }
 
     #[inline]
     pub fn compress(&self, to_format: DXGI_FORMAT) -> Result<Self> {
-        let mut out = MaybeUninit::uninit();
-
-        Ok(unsafe {
-            V2_Compress(self.0, to_format, out.as_mut_ptr()).ok()?;
-            out.assume_init()
-        })
+        unimplemented!()
     }
 
     #[inline]
     pub fn resize(&self, width: usize, height: usize) -> Result<Self> {
-        let mut out = MaybeUninit::uninit();
-
-        Ok(unsafe {
-            Resize(self.0, width, height, TEX_FILTER_FLAGS(0), out.as_mut_ptr()).ok()?;
-            out.assume_init()
-        })
+        unimplemented!()
     }
 
     #[inline]
     pub fn decompress(&self) -> Result<Self> {
-        let mut out = MaybeUninit::uninit();
-
-        Ok(unsafe {
-            V2_Decompress(self.0, out.as_mut_ptr()).ok()?;
-            out.assume_init()
-        })
+        unimplemented!()
     }
 
     #[inline]
     pub fn convert(&self, to_format: DXGI_FORMAT, flags: TEX_FILTER_FLAGS) -> Result<Self> {
-        let mut out = MaybeUninit::uninit();
-
-        Ok(unsafe {
-            V2_Convert(self.0, to_format, flags, out.as_mut_ptr()).ok()?;
-            out.assume_init()
-        })
+        unimplemented!()
     }
 
     #[inline]
     pub fn premultiply_alpha(&self, reverse: bool) -> Result<Self> {
-        let mut out = MaybeUninit::uninit();
-
-        Ok(unsafe {
-            V2_PremultiplyAlpha(self.0, reverse, out.as_mut_ptr()).ok()?;
-            out.assume_init()
-        })
+        unimplemented!()
     }
 
     #[inline]
     pub fn metadata(&self) -> Result<TexMetadata> {
         let mut metadata = TexMetadata::default();
 
-        unsafe {
-            V2_GetMetadata(self.0, &mut metadata).ok()?;
-        }
-
-        Ok(metadata)
+        unimplemented!()
     }
 
     #[allow(clippy::len_without_is_empty)]
     #[must_use]
     #[inline]
     pub fn len(&self) -> usize {
-        unsafe { BufferSize(self.0) }
+        unimplemented!()
     }
 
     // FIXME: rename to buffer
     pub fn pixels(&self) -> Result<Vec<u8>> {
-        let len = unsafe { BufferSize(self.0) };
-
-        let mut data = Vec::with_capacity(len);
-        unsafe {
-            Buffer(self.0, data.as_mut_ptr(), data.capacity()).ok()?;
-            data.set_len(data.capacity());
-        }
-
-        Ok(data)
+        unimplemented!()
     }
 
     pub fn num_images(&self) -> Result<usize> {
-        Ok(unsafe { ImageCount(self.0) })
+        unimplemented!()
     }
 
     pub fn image_len(&self, array_index: usize) -> Result<usize> {
-        Ok(unsafe { ImageSize(self.0, array_index) })
+        unimplemented!()
     }
 
     pub fn image(&self, array_index: usize) -> Result<Vec<u8>> {
-        let len = unsafe { ImageSize(self.0, array_index) };
-
-        let mut data = Vec::with_capacity(len);
-        unsafe {
-            ImageData(self.0, array_index, data.as_mut_ptr(), data.capacity()).ok()?;
-            data.set_len(data.capacity());
-        }
-
-        Ok(data)
+        unimplemented!()
     }
 
     pub fn save(
@@ -296,7 +208,7 @@ impl DXImage {
             ImageFormat::Tga => self.save_tga(array_index, file),
             ImageFormat::Hdr => self.save_hdr(array_index, file),
             ImageFormat::OpenExr => self.save_exr(array_index, file),
-            #[cfg(not(feature = "disable-wic"))]
+            #[cfg(all(windows, not(feature = "disable-wic")))]
             image_format if is_wic_format(image_format) => {
                 self.save_wic(array_index, image_format, file)
             }
@@ -312,10 +224,7 @@ impl DXImage {
             .chain(std::iter::once(0))
             .collect();
 
-        unsafe {
-            V2_SaveDDS(self.0, file_utf16.as_ptr(), 0).ok()?;
-        }
-        Ok(())
+        unimplemented!()
     }
 
     pub fn save_tga(&self, array_index: usize, file: impl AsRef<Utf8Path>) -> Result<()> {
@@ -326,32 +235,23 @@ impl DXImage {
             .chain(std::iter::once(0))
             .collect();
 
-        unsafe {
-            V2_SaveTGA(self.0, array_index, file_utf16.as_ptr(), 0).ok()?;
-        }
-        Ok(())
+        unimplemented!()
     }
 
     pub fn save_hdr(&self, array_index: usize, file: impl AsRef<Utf8Path>) -> Result<()> {
         let file_utf16 = to_wstring(file);
 
-        unsafe {
-            V2_SaveHDR(self.0, array_index, file_utf16.as_ptr()).ok()?;
-        }
-        Ok(())
+        unimplemented!()
     }
 
     pub fn save_exr(&self, array_index: usize, file: impl AsRef<Utf8Path>) -> Result<()> {
         let file_utf16 = to_wstring(file);
 
-        unsafe {
-            V2_SaveEXR(self.0, array_index, file_utf16.as_ptr()).ok()?;
-        }
-        Ok(())
+        unimplemented!()
     }
 
     // TODO: Maybe pass ImageFormat
-    #[cfg(not(feature = "disable-wic"))]
+    #[cfg(all(windows, not(feature = "disable-wic")))]
     pub fn save_wic(
         &self,
         array_index: usize,
@@ -371,19 +271,7 @@ impl DXImage {
 
         let file_utf16 = to_wstring(file);
 
-        initialize_com()?;
-        unsafe {
-            SaveToWICFile(
-                self.0,
-                array_index,
-                0,
-                container,
-                file_utf16.as_ptr(),
-                std::ptr::null(),
-            )
-            .ok()?;
-        }
-        Ok(())
+        unimplemented!()
     }
 
     pub fn to_rgba<'image>(&'image self) -> Result<Cow<'image, Self>> {
@@ -424,28 +312,14 @@ impl DXImage {
 
 impl Clone for DXImage {
     fn clone(&self) -> Self {
-        let mut handle = MaybeUninit::uninit();
-
-        if let Err(error) = unsafe { Clone(self.0, handle.as_mut_ptr()) }.ok() {
-            panic!("DXImage::Clone failed: {error}");
-        } else {
-            unsafe { handle.assume_init() }
-        }
+        unimplemented!()
     }
 }
 
 #[inline]
 #[must_use]
 pub fn expected_size(format: DXGI_FORMAT, dimensions: Dimensions, depth: usize) -> usize {
-    unsafe {
-        ExpectedSize(
-            format,
-            dimensions.width,
-            dimensions.height,
-            depth,
-            dimensions.mipmaps,
-        )
-    }
+    unimplemented!()
 }
 
 #[inline]
@@ -455,15 +329,7 @@ pub fn expected_size_array(
     dimensions: Dimensions,
     array_size: usize,
 ) -> usize {
-    unsafe {
-        ExpectedSizeArray(
-            format,
-            dimensions.width,
-            dimensions.height,
-            array_size,
-            dimensions.mipmaps,
-        )
-    }
+    1
 }
 
 pub fn compress_texture(
@@ -537,56 +403,26 @@ pub fn load(file: impl AsRef<Utf8Path>) -> Result<DXImage> {
 }
 
 pub fn load_dds(file: impl AsRef<Utf8Path>) -> Result<DXImage> {
-    let file = to_wstring(file);
-    let mut handle = MaybeUninit::uninit();
-
-    Ok(unsafe {
-        LoadFromDDSFile(file.as_ptr(), 0, std::ptr::null_mut(), handle.as_mut_ptr()).ok()?;
-        handle.assume_init()
-    })
+    unimplemented!()
 }
 
 pub fn load_tga(file: impl AsRef<Utf8Path>) -> Result<DXImage> {
-    let file = to_wstring(file);
-    let mut handle = MaybeUninit::uninit();
-
-    Ok(unsafe {
-        LoadFromTGAFile(file.as_ptr(), 0, std::ptr::null_mut(), handle.as_mut_ptr()).ok()?;
-        handle.assume_init()
-    })
+    unimplemented!()
 }
 
 pub fn load_hdr(file: impl AsRef<Utf8Path>) -> Result<DXImage> {
-    let file = to_wstring(file);
-    let mut handle = MaybeUninit::uninit();
-
-    Ok(unsafe {
-        LoadFromHDRFile(file.as_ptr(), std::ptr::null_mut(), handle.as_mut_ptr()).ok()?;
-        handle.assume_init()
-    })
+    unimplemented!()
 }
 
 pub fn load_exr(file: impl AsRef<Utf8Path>) -> Result<DXImage> {
-    let file = to_wstring(file);
-    let mut handle = MaybeUninit::uninit();
-
-    Ok(unsafe {
-        LoadFromEXRFile(file.as_ptr(), std::ptr::null_mut(), handle.as_mut_ptr()).ok()?;
-        handle.assume_init()
-    })
+    unimplemented!()
 }
 
 #[cfg(not(feature = "disable-wic"))]
 pub fn load_wic(file: impl AsRef<Utf8Path>) -> Result<DXImage> {
-    let file = to_wstring(file);
-    let mut handle = MaybeUninit::uninit();
-
     initialize_com()?;
 
-    Ok(unsafe {
-        LoadFromWICFile(file.as_ptr(), 0, std::ptr::null_mut(), handle.as_mut_ptr()).ok()?;
-        handle.assume_init()
-    })
+    unimplemented!()
 }
 
 pub fn metadata(file: impl AsRef<Utf8Path>) -> Result<TexMetadata> {
@@ -612,29 +448,25 @@ pub fn metadata(file: impl AsRef<Utf8Path>) -> Result<TexMetadata> {
 pub fn metadata_from_dds(file: impl AsRef<Utf8Path>) -> Result<TexMetadata> {
     let file = to_wstring(file);
     let mut metadata = TexMetadata::default();
-    unsafe { GetMetadataFromDDSFile(file.as_ptr(), 0, &mut metadata) }.ok()?;
-    Ok(metadata)
+    unimplemented!()
 }
 
 pub fn metadata_from_tga(file: impl AsRef<Utf8Path>) -> Result<TexMetadata> {
     let file = to_wstring(file);
     let mut metadata = TexMetadata::default();
-    unsafe { GetMetadataFromTGAFile(file.as_ptr(), 0, &mut metadata) }.ok()?;
-    Ok(metadata)
+    unimplemented!()
 }
 
 pub fn metadata_from_hdr(file: impl AsRef<Utf8Path>) -> Result<TexMetadata> {
     let file = to_wstring(file);
     let mut metadata = TexMetadata::default();
-    unsafe { GetMetadataFromHDRFile(file.as_ptr(), &mut metadata) }.ok()?;
-    Ok(metadata)
+    unimplemented!()
 }
 
 pub fn metadata_from_exr(file: impl AsRef<Utf8Path>) -> Result<TexMetadata> {
     let file = to_wstring(file);
     let mut metadata = TexMetadata::default();
-    unsafe { GetMetadataFromEXRFile(file.as_ptr(), &mut metadata) }.ok()?;
-    Ok(metadata)
+    unimplemented!()
 }
 
 pub fn metadata_from_wic(file: impl AsRef<Utf8Path>) -> Result<TexMetadata> {
@@ -642,6 +474,5 @@ pub fn metadata_from_wic(file: impl AsRef<Utf8Path>) -> Result<TexMetadata> {
 
     let file = to_wstring(file);
     let mut metadata = TexMetadata::default();
-    unsafe { GetMetadataFromWICFile(file.as_ptr(), 0, &mut metadata) }.ok()?;
-    Ok(metadata)
+    unimplemented!()
 }

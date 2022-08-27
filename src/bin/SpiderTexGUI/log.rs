@@ -19,7 +19,9 @@ pub static UI_CONTEXT: MaybeReady<Context> = MaybeReady::new();
 #[derive(Copy, Clone)]
 pub struct Logger;
 
-pub fn set_ui_context(ctx: &Context) { UI_CONTEXT.ready(ctx.clone()); }
+pub fn set_ui_context(ctx: &Context) {
+    UI_CONTEXT.ready(ctx.clone());
+}
 
 // FIXME: move the global UI stuff to widgets
 pub fn request_repaint() {
@@ -66,11 +68,14 @@ pub fn save() -> Result<Utf8PathBuf, std::io::Error> {
 
 #[must_use]
 pub const fn is_debug_toggle(event: &Event) -> bool {
-    matches!(event, Event::Key {
-        key: eframe::egui::Key::D,
-        pressed: false,
-        ..
-    })
+    matches!(
+        event,
+        Event::Key {
+            key: eframe::egui::Key::D,
+            pressed: false,
+            ..
+        }
+    )
 }
 
 pub fn toggle_debug() {
@@ -79,7 +84,9 @@ pub fn toggle_debug() {
     DEBUG_FLAG.store(!flag, Ordering::Release);
 }
 
-pub fn debug_enabled() -> bool { DEBUG_FLAG.load(Ordering::Relaxed) }
+pub fn debug_enabled() -> bool {
+    DEBUG_FLAG.load(Ordering::Relaxed)
+}
 
 impl<S> tracing_subscriber::layer::Filter<S> for DebugFilter {
     fn enabled(
@@ -110,11 +117,13 @@ impl io::Write for Logger {
         Ok(buf.len())
     }
 
-    fn flush(&mut self) -> std::io::Result<()> { Ok(()) }
+    fn flush(&mut self) -> std::io::Result<()> {
+        Ok(())
+    }
 }
 
 fn parse_log_level(line: &str) -> tracing::Level {
-    match &line[.. 5] {
+    match &line[..5] {
         level if level == "ERROR" => ERROR,
         level if level == " WARN" => WARN,
         level if level == " INFO" => INFO,

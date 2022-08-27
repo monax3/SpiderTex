@@ -1,25 +1,19 @@
 //! FIXME: Assumes stride = width * bpp
 #![allow(unsafe_code)]
-
+#![cfg(all(windows, not(feature = "disable-wic")))]
 use std::ffi::OsStr;
 use std::mem::MaybeUninit;
 
 use windows::core::{Interface, GUID, HSTRING};
+use windows::Win32::Com::{CoCreateInstance, CLSCTX_INPROC_SERVER};
 use windows::Win32::Graphics::Imaging::D2D::IWICImagingFactory2;
 use windows::Win32::Graphics::Imaging::{
-    CLSID_WICImagingFactory2,
-    GUID_ContainerFormatPng,
-    GUID_WICPixelFormat24bppBGR,
-    GUID_WICPixelFormat32bppRGBA,
-    IWICBitmap,
-    IWICBitmapSource,
-    WICBitmapDitherTypeNone,
-    WICBitmapEncoderNoCache,
-    WICBitmapPaletteTypeMedianCut,
-    WICRect,
+    CLSID_WICImagingFactory2, GUID_ContainerFormatPng, GUID_WICPixelFormat24bppBGR,
+    GUID_WICPixelFormat32bppRGBA, IWICBitmap, IWICBitmapSource, WICBitmapDitherTypeNone,
+    WICBitmapEncoderNoCache, WICBitmapPaletteTypeMedianCut, WICRect,
 };
-use windows::Win32::System::Com::{CoCreateInstance, CLSCTX_INPROC_SERVER};
-use windows::Win32::System::SystemServices::GENERIC_WRITE;
+// use windows::Win32::System::Com::{CoCreateInstance, CLSCTX_INPROC_SERVER};
+// use windows::Win32::System::SystemServices::GENERIC_WRITE;
 
 use crate::dxtex::DXImage;
 use crate::prelude::*;
@@ -68,14 +62,14 @@ impl WIC {
         }?;
 
         Ok(WICSource {
-            wic:   self.0.clone(),
+            wic: self.0.clone(),
             inner: bitmap.cast()?,
         })
     }
 }
 
 pub struct WICSource {
-    wic:   IWICImagingFactory2,
+    wic: IWICImagingFactory2,
     inner: IWICBitmapSource,
 }
 
@@ -108,7 +102,7 @@ impl WICSource {
         }?;
 
         Ok(Self {
-            wic:   self.wic.clone(),
+            wic: self.wic.clone(),
             inner: converter.cast()?,
         })
     }
@@ -120,15 +114,18 @@ impl WICSource {
         unsafe { self.inner.GetSize(&mut width, &mut height) }?;
 
         Ok(WICRect {
-            X:      0,
-            Y:      0,
-            Width:  width.try_into().unwrap(),
+            X: 0,
+            Y: 0,
+            Width: width.try_into().unwrap(),
             Height: height.try_into().unwrap(),
         })
     }
 
     pub fn save(&self, file: impl AsRef<OsStr>, container: &GUID) -> Result<()> {
+        #[cfg(windows)]
         let file_name = HSTRING::from(file.as_ref());
+        #[cfg(not(windows))]
+        let file_name = unimplemented!();
 
         let stream = unsafe {
             let stream = self.wic.CreateStream()?;

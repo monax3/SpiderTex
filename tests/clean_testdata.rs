@@ -35,9 +35,7 @@ fn clean_testdata() -> Result<()> {
     for Categorized { files, .. } in textures {
         for file in files {
             let in_images = testdata_images.join(file.file_name().unwrap());
-            if !in_images.exists() {
-
-            }
+            if !in_images.exists() {}
             event!(TRACE, "Copying {file} to {testdata_images}");
             std::fs::copy(&file, &in_images)?;
         }

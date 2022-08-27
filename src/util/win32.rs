@@ -1,3 +1,5 @@
+#![cfg(windows)]
+
 use camino::Utf8Path;
 use windows::core::PCSTR;
 use windows::Win32::System::Com::{CoInitializeEx, COINIT_MULTITHREADED};
@@ -8,15 +10,13 @@ use std::ffi::CString;
 use std::sync::atomic::{AtomicBool, Ordering};
 
 use windows::Win32::UI::WindowsAndMessaging::{
-    MessageBoxA,
-    MB_ICONERROR,
-    MB_TASKMODAL,
-    MESSAGEBOX_STYLE,
+    MessageBoxA, MB_ICONERROR, MB_TASKMODAL, MESSAGEBOX_STYLE,
 };
 
 mod open_files;
 pub use open_files::open_files_dialog;
 
+#[cfg(windows)]
 pub fn initialize_com() -> Result<()> {
     if !COM_INITIALIZED.load(Ordering::Acquire) {
         #[allow(unsafe_code)]
@@ -25,6 +25,11 @@ pub fn initialize_com() -> Result<()> {
         }
         COM_INITIALIZED.store(true, Ordering::Release);
     }
+    Ok(())
+}
+
+#[cfg(not(windows))]
+pub fn initialize_com() -> Result<()> {
     Ok(())
 }
 

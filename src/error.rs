@@ -19,6 +19,7 @@ pub enum Error {
     #[error("Format JSON: {0}")]
     Bytemuck(#[from] bytemuck::PodCastError),
 
+    #[cfg(windows)]
     #[error(transparent)]
     Windows(#[from] windows::core::Error),
 
@@ -37,15 +38,21 @@ pub fn error_message<T>(message: impl Into<Cow<'static, str>>) -> Result<T> {
 }
 
 impl Error {
-    pub fn message(message: impl Into<Cow<'static, str>>) -> Self { Self::Message(message.into()) }
+    pub fn message(message: impl Into<Cow<'static, str>>) -> Self {
+        Self::Message(message.into())
+    }
 }
 
 impl From<&'static str> for Error {
-    fn from(message: &'static str) -> Self { Self::message(message) }
+    fn from(message: &'static str) -> Self {
+        Self::message(message)
+    }
 }
 
 impl From<String> for Error {
-    fn from(message: String) -> Self { Self::message(message) }
+    fn from(message: String) -> Self {
+        Self::message(message)
+    }
 }
 
 #[track_caller]
@@ -97,7 +104,9 @@ pub trait LogFailure: Sized {
 
     #[must_use]
     #[track_caller]
-    fn log_failure_as(self, context: &str) -> Self { self.log_failure_with(|| context) }
+    fn log_failure_as(self, context: &str) -> Self {
+        self.log_failure_with(|| context)
+    }
 
     #[must_use]
     #[track_caller]
@@ -130,7 +139,8 @@ impl<T: Sized, E: Display> LogFailure for std::result::Result<T, E> {
 }
 
 impl<T> LogFailure for Option<T>
-where T: Sized
+where
+    T: Sized,
 {
     type Failed = &'static str;
 
@@ -149,5 +159,7 @@ impl LogFailure for bool {
 
     #[inline]
     #[track_caller]
-    fn as_failed(&self) -> Option<&Self::Failed> { (!self).then_some(&"Call returned false") }
+    fn as_failed(&self) -> Option<&Self::Failed> {
+        (!self).then_some(&"Call returned false")
+    }
 }
