@@ -213,9 +213,30 @@ pub mod serde {
 }
 
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[derive(Copy, Clone, PartialEq, Eq, Hash)]
 pub enum ColorPlanes {
     Rgb,
     Rgba,
     Luma,
     Hdr,
+}
+
+impl ColorPlanes {
+    pub fn buf_bpp(self) -> usize {
+        match self {
+            ColorPlanes::Rgb => 3,
+            ColorPlanes::Rgba => 4,
+            ColorPlanes::Luma => 1,
+            ColorPlanes::Hdr => 12,
+        }
+    }
+
+    pub fn dxgi_bpp(self) -> usize {
+        match self {
+            ColorPlanes::Rgb => 3,
+            ColorPlanes::Rgba => 4,
+            ColorPlanes::Luma => 1,
+            ColorPlanes::Hdr => 12,
+        }
+    }
 }

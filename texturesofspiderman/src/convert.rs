@@ -5,7 +5,7 @@ use camino::{Utf8Path, Utf8PathBuf};
 use image::ImageBuffer;
 use windows::Win32::Graphics::Dxgi::Common::*;
 
-use crate::dxtex::DXImage;
+use directxtex::DXTImage;
 use crate::files::{FileFormat, FileGroup, FileStatus, FileType, Categorized};
 use crate::formats::ColorPlanes;
 use crate::images::{DxImport, ImageRs};
@@ -119,7 +119,7 @@ pub fn export_texture(group: FileGroup<Categorized>) -> TaskResult {
 }
 
 pub fn save_image(
-    image: &DXImage,
+    image: &DXTImage,
     format: &TextureFormat,
     file: &Utf8Path,
     array_index: usize,
@@ -130,10 +130,10 @@ pub fn save_image(
 
     let ext = file.extension().unwrap();
     match ext {
-        ext if ext.eq_ignore_ascii_case("dds") => image.save_dds(file),
-        ext if ext.eq_ignore_ascii_case("hdr") => image.save_hdr(array_index, file),
-        ext if ext.eq_ignore_ascii_case("exr") => image.save_exr(array_index, file),
-        ext if ext.eq_ignore_ascii_case("tga") => image.save_tga(array_index, file),
+        ext if ext.eq_ignore_ascii_case("dds") => Ok(image.save_dds(file.as_str())?),
+        ext if ext.eq_ignore_ascii_case("hdr") => Ok(image.save_hdr(array_index, file.as_str())?),
+        ext if ext.eq_ignore_ascii_case("exr") => Ok(image.save_exr(array_index, file.as_str())?),
+        ext if ext.eq_ignore_ascii_case("tga") => Ok(image.save_tga(array_index, file.as_str())?),
         ext if ext.eq_ignore_ascii_case("png") => {
             let data = image.image(array_index)?;
 
@@ -233,7 +233,7 @@ fn pipeline_dx<FILE: AsRef<Utf8Path> + std::fmt::Display>(
             let span = span!(TRACE, "pipeline_dx", %input);
             let _entered = span.enter();
 
-            match DXImage::load(input.as_ref()) {
+            match DXTImage::load(input.as_ref()) {
                 Err(error) => Some(Err(error.into())),
                 Ok(image) => {
                     let metadata = image.metadata().unwrap();
@@ -281,18 +281,18 @@ pub fn load_image(file: &Utf8Path, dimensions: Dimensions) -> Result<Vec<u8>> {
 
     let ext = file.extension().unwrap();
     match ext {
-        ext if ext.eq_ignore_ascii_case("dds") => dxtex::load_dds(file)
+        ext if ext.eq_ignore_ascii_case("dds") => Ok(directxtex::load_dds(file.as_str())
             .and_then(|dx| dx.resize(dimensions.width, dimensions.height))
-            .and_then(|dx| dx.pixels()),
-        ext if ext.eq_ignore_ascii_case("hdr") => dxtex::load_hdr(file)
+            .and_then(|dx| dx.pixels())?),
+        ext if ext.eq_ignore_ascii_case("hdr") => Ok(directxtex::load_hdr(file.as_str())
             .and_then(|dx| dx.resize(dimensions.width, dimensions.height))
-            .and_then(|dx| dx.pixels()),
-        ext if ext.eq_ignore_ascii_case("exr") => dxtex::load_exr(file)
+            .and_then(|dx| dx.pixels())?),
+        ext if ext.eq_ignore_ascii_case("exr") => Ok(directxtex::load_exr(file.as_str())
             .and_then(|dx| dx.resize(dimensions.width, dimensions.height))
-            .and_then(|dx| dx.pixels()),
-        ext if ext.eq_ignore_ascii_case("tga") => dxtex::load_tga(file)
+            .and_then(|dx| dx.pixels())?),
+        ext if ext.eq_ignore_ascii_case("tga") => Ok(directxtex::load_tga(file.as_str())
             .and_then(|dx| dx.resize(dimensions.width, dimensions.height))
-            .and_then(|dx| dx.pixels()),
+            .and_then(|dx| dx.pixels())?),
         ext if ext.eq_ignore_ascii_case("png") => {
             let image = image::open(file)?;
             Ok(image

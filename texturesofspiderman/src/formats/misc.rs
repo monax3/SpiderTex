@@ -1,9 +1,8 @@
 use std::fmt::Display;
 
 use serde::{Deserialize, Serialize};
-use windows::Win32::Graphics::Dxgi::Common::DXGI_FORMAT;
 
-use super::{dxgi, DxgiFormatExt};
+use super::{DXGI_FORMAT, DxgiFormatExt};
 use crate::texture_file;
 
 #[derive(Serialize, Deserialize, Debug, Copy, Clone, Eq)]
@@ -96,9 +95,9 @@ impl ColorPlanes {
     #[must_use]
     pub const fn expected_formats(self) -> &'static [DXGI_FORMAT] {
         match self {
-            Self::Rgb | Self::Rgba => dxgi::RGBA_FORMATS,
-            Self::Hdr => dxgi::HDR_FORMATS,
-            Self::Luma => dxgi::LUMA_FORMATS,
+            Self::Rgb | Self::Rgba => dxgi_format::RGBA_FORMATS,
+            Self::Hdr => dxgi_format::HDR_FORMATS,
+            Self::Luma => dxgi_format::LUMA_FORMATS,
         }
     }
 

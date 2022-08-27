@@ -17,7 +17,7 @@ use crate::files::{
     Uncategorized,
 };
 use crate::prelude::*;
-use crate::util::{open_files_dialog, WalkArgs};
+use crate::util::{WalkArgs};
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash, Ord, PartialOrd)]
 pub enum Action {

@@ -21,7 +21,7 @@ use windows::Win32::Graphics::Imaging::{
 use windows::Win32::System::Com::{CoCreateInstance, CLSCTX_INPROC_SERVER};
 use windows::Win32::System::SystemServices::GENERIC_WRITE;
 
-use crate::dxtex::DXImage;
+use directxtex::DXTImage;
 use crate::prelude::*;
 use crate::util::initialize_com;
 

@@ -3,9 +3,9 @@ use std::hash::{Hash, Hasher};
 use std::path::Path;
 
 use serde::{Deserialize, Serialize};
-use windows::Win32::Graphics::Dxgi::Common::DXGI_FORMAT;
 
-use super::{dxgi, ColorPlanes, Dimensions, ImageFormat};
+use dxgi_format::{DXGI_FORMAT, DxgiFormatExt};
+use super::{ColorPlanes, Dimensions, ImageFormat};
 use crate::prelude::*;
 
 #[derive(Debug, Default, Copy, Clone, PartialEq, Eq)]
@@ -20,7 +20,7 @@ pub enum Source {
 
 #[derive(Serialize, Deserialize, Debug, Copy, Clone, Eq)]
 pub struct TextureFormat {
-    #[serde(with = "dxgi::serde")]
+    #[serde(with = "dxgi_format::serde")]
     pub dxgi_format: DXGI_FORMAT,
     // pub stex_format:           (u8, u8),
     pub standard:    Dimensions,
@@ -127,7 +127,7 @@ impl TextureFormat {
         self.standard.width
             * self.standard.height
             * self.array_size
-            * self.dxgi_format.planes().bpp_dxgi()
+            * self.dxgi_format.planes().dxgi_bpp()
     }
 
     #[inline]
@@ -145,7 +145,7 @@ impl TextureFormat {
     #[must_use]
     pub fn expected_highres_buffer_size(&self) -> Option<usize> {
         self.highres.map(|highres| {
-            highres.width * highres.height * self.array_size * self.dxgi_format.planes().bpp_dxgi()
+            highres.width * highres.height * self.array_size * self.dxgi_format.planes().dxgi_bpp()
         })
     }
 

@@ -14,6 +14,8 @@ pub struct GUID {
 #[repr(transparent)]
 pub struct Error(pub u32);
 
+impl std::error::Error for Error {}
+
 impl From<HRESULT> for Error {
     fn from(value: HRESULT) -> Self {
         Error(value.0)
@@ -47,10 +49,20 @@ impl HSTRING {
     pub fn as_ptr(&self) -> *const u16 {
         self.0.as_ptr()
     }
+
+    fn from_str(string: impl AsRef<str>) -> Self {
+        Self(string.as_ref().encode_utf16().chain(std::iter::once(0)).collect())
+    }
 }
 
 impl From<&OsStr> for HSTRING {
     fn from(from: &OsStr) -> HSTRING {
         Self(from.to_string_lossy().encode_utf16().chain(std::iter::once(0)).collect())
+    }
+}
+
+impl From<&str> for HSTRING {
+    fn from(value: &str) -> HSTRING {
+        HSTRING::from_str(value)
     }
 }

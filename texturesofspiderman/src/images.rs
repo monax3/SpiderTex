@@ -5,7 +5,7 @@ use std::io::BufReader;
 use camino::Utf8Path;
 use image::{DynamicImage, ImageFormat};
 
-use crate::dxtex;
+
 use crate::files::FileStatus;
 use crate::prelude::*;
 
@@ -82,17 +82,19 @@ impl IntoIterator for Warnings {
 
 pub struct DxImport;
 impl Image for DxImport {
-    type Buffer = crate::dxtex::DXImage;
+    type Buffer = directxtex::DXTImage;
 
     fn supports_format(image_format: ImageFormat) -> bool {
-        dxtex::is_supported_format(image_format)
+        // FIXME:
+        true
+        // directxtex::is_supported_format(image_format)
     }
 
     fn quick_check(format: &TextureFormat, file: impl AsRef<Utf8Path>) -> Result<Warnings> {
         #[cfg(feature = "debug-formats")]
         event!(TRACE, "Reading metadata for {}", file.as_ref());
 
-        let metadata = dxtex::metadata(file.as_ref())?;
+        let metadata = directxtex::metadata(file.as_ref().as_str())?;
         let mut warnings = Warnings::new();
 
         let dimensions = Dimensions {

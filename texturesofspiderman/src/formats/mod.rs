@@ -5,12 +5,13 @@ use tracing::{debug, error, info, warn};
 use crate::prelude::*;
 use crate::registry::FormatId;
 use crate::texture_file::{self, TEXTURE_HEADER_SIZE};
-pub(crate) mod dxgi;
-pub use dxgi::DxgiFormatExt;
+// pub(crate) mod dxgi;
+// pub use dxgi::DxgiFormatExt;
+pub use dxgi_format::{DXGI_FORMAT, DxgiFormatExt, ColorPlanes};
 mod texture;
 pub use texture::{Source, TextureFormat};
 mod misc;
-pub use misc::{ColorPlanes, Dimensions, ImageFormatExt};
+pub use misc::{Dimensions, ImageFormatExt};
 
 pub fn print_formats<'a>(iter: impl Iterator<Item = &'a FormatId>) {
     for id in iter {

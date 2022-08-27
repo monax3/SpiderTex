@@ -3,9 +3,7 @@ use windows::core::PCSTR;
 use windows::Win32::System::Com::{CoInitializeEx, COINIT_MULTITHREADED};
 
 use crate::Result;
-static COM_INITIALIZED: AtomicBool = AtomicBool::new(false);
 use std::ffi::CString;
-use std::sync::atomic::{AtomicBool, Ordering};
 
 use windows::Win32::UI::WindowsAndMessaging::{
     MessageBoxA,
@@ -16,27 +14,6 @@ use windows::Win32::UI::WindowsAndMessaging::{
 
 mod open_files;
 pub use open_files::open_files_dialog;
-
-pub fn initialize_com() -> Result<()> {
-    if !COM_INITIALIZED.load(Ordering::Acquire) {
-        #[allow(unsafe_code)]
-        unsafe {
-            CoInitializeEx(std::ptr::null(), COINIT_MULTITHREADED)?;
-        }
-        COM_INITIALIZED.store(true, Ordering::Release);
-    }
-    Ok(())
-}
-
-#[inline]
-#[must_use]
-pub fn to_wstring(path: impl AsRef<Utf8Path>) -> Vec<u16> {
-    path.as_ref()
-        .as_str()
-        .encode_utf16()
-        .chain(std::iter::once(0))
-        .collect()
-}
 
 pub fn message_box_ok(text: impl Into<String>, caption: &str) {
     message_box(text, caption, MB_TASKMODAL);

@@ -24,7 +24,7 @@ pub fn texture_format_overrides(format: &mut TextureFormat) {
     event!(TRACE, ?format, "crc={:08x}", header_crc);
 
     let expected =
-        dxtex::expected_size_array(format.dxgi_format, format.standard, format.array_size);
+        directxtex::expected_size_array(format.dxgi_format, format.standard.width, format.standard.height, format.array_size, format.standard.mipmaps);
     if format.standard.data_size != expected {
         if format.standard.data_size % expected == 0 {
             format.array_size = format.standard.data_size / expected;

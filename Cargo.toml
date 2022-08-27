@@ -3,7 +3,7 @@ members = [
     "texturesofspiderman",
     "SpiderTex",
     "SpiderTexGUI",
-    "format-experiment",
+    # "format-experiment",
     "tracing-egui-repaint",
     "tracing-oncecell",
     "tracing-messagevec",
@@ -12,5 +12,6 @@ members = [
     "directxtex-sys",
     "windows-imaging",
     "windows-compat",
+    "initialize-com",
 ]
 resolver = "2"

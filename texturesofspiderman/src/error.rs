@@ -20,7 +20,7 @@ pub enum Error {
     Bytemuck(#[from] bytemuck::PodCastError),
 
     #[error(transparent)]
-    Windows(#[from] windows::core::Error),
+    Windows(#[from] windows_compat::Error),
 
     #[error(transparent)]
     Image(#[from] image::ImageError),

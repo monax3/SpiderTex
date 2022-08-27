@@ -5,17 +5,16 @@ use std::io::prelude::*;
 use camino::{Utf8Path, Utf8PathBuf};
 use image::{DynamicImage, ImageFormat};
 
-pub mod dxtex;
 mod error;
 pub mod formats;
 pub mod registry;
 pub mod util;
-use dxtex::{compress_texture, decompress_texture};
+use directxtex::{compress_texture, decompress_texture};
 pub mod convert;
 pub mod files;
 pub mod images;
 pub mod inputs;
-pub mod rgb;
+// pub mod rgb;
 pub mod texture_file;
 
 pub const APP_TITLE: &str = concat!("Spider-Man Texture Converter v", env!("CARGO_PKG_VERSION"));
@@ -44,12 +43,12 @@ pub mod prelude {
     pub use crate::formats::{Dimensions, DxgiFormatExt, ImageFormatExt, TextureFormat};
     pub use crate::registry::{self, registry, FormatId, Registry};
     pub use crate::texture_file::{self, TEXTURE_HEADER_SIZE};
-    pub use crate::{dxtex, SUPPORTED_IMAGE_EXTENSIONS, SUPPORTED_TEXTURE_EXTENSIONS};
+    pub use crate::{SUPPORTED_IMAGE_EXTENSIONS, SUPPORTED_TEXTURE_EXTENSIONS};
 }
 
 use prelude::*;
 
-use crate::dxtex::{expected_size, expected_size_array};
+use directxtex::{expected_size, expected_size_array};
 
 fn read_metadata_from_json(input_file: &Utf8Path) -> Result<TextureFormat> {
     let metadata_file = input_file.with_extension("metadata.json");
@@ -252,11 +251,13 @@ pub fn convert_texture_to_png(texture_file: &Utf8Path) -> Result<()> {
     println!(
         "expected SD sizes are {:?}, I have {}",
         (
-            expected_size(texture_info.dxgi_format, texture_info.standard, 1),
+            expected_size(texture_info.dxgi_format, texture_info.standard.width, texture_info.standard.height, 1, texture_info.standard.mipmaps),
             expected_size_array(
                 texture_info.dxgi_format,
-                texture_info.standard,
-                texture_info.array_size
+                texture_info.standard.width,
+                texture_info.standard.height,
+                texture_info.array_size,
+                texture_info.standard.mipmaps,
             )
         ),
         texture_info.standard.data_size
@@ -265,8 +266,8 @@ pub fn convert_texture_to_png(texture_file: &Utf8Path) -> Result<()> {
         println!(
             "expected HD size are {:?}, I have {}",
             (
-                expected_size(texture_info.dxgi_format, highres, 1),
-                expected_size_array(texture_info.dxgi_format, highres, texture_info.array_size)
+                expected_size(texture_info.dxgi_format, highres.width, highres.height, 1, highres.mipmaps),
+                expected_size_array(texture_info.dxgi_format, highres.width, highres.height, texture_info.array_size, highres.mipmaps)
             ),
             texture_data.len()
         );
@@ -350,15 +351,15 @@ pub fn convert_texture_to_png(texture_file: &Utf8Path) -> Result<()> {
 fn find_size(metadata: &TextureFormat, have_2d: usize, have_3d: usize) {
     for i in 0 .. 10 {
         let sizes = (
-            expected_size(metadata.dxgi_format, metadata.standard, 1),
-            expected_size_array(metadata.dxgi_format, metadata.standard, i),
+            expected_size(metadata.dxgi_format, metadata.standard.width, metadata.standard.height, i, metadata.standard.mipmaps),
+            expected_size_array(metadata.dxgi_format, metadata.standard.width, metadata.standard.height, i, metadata.standard.mipmaps),
         );
         println!("SD {i}: {have_2d} {sizes:?}");
         if let Some(highres) = metadata.highres {
             let sizes = (
-                expected_size(metadata.dxgi_format, highres, i),
-                expected_size_array(metadata.dxgi_format, highres, i),
-            );
+                expected_size(metadata.dxgi_format, highres.width, highres.height, 1, highres.mipmaps),
+                expected_size_array(metadata.dxgi_format, highres.width, highres.height, i, highres.mipmaps),
+                );
             println!("HD {i}: {have_3d} {sizes:?}");
         }
     }
