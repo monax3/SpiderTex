@@ -7,5 +7,6 @@ members = [
     "tracing-egui-repaint",
     "tracing-oncecell",
     "tracing-messagevec",
+    "dxgi-format",
 ]
 resolver = "2"
