@@ -1,8 +1,11 @@
 [workspace]
 members = [
+    "texturesofspiderman",
+    "SpiderTex",
+    "SpiderTexGUI",
     "format-experiment",
     "tracing-egui-repaint",
     "tracing-oncecell",
-    "tracing-messagevec"
+    "tracing-messagevec",
 ]
 resolver = "2"
