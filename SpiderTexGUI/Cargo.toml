@@ -8,3 +8,6 @@ edition = "2021"
 [dependencies]
 eframe = "0.19.0"
 texturesofspiderman = { version = "1.1.0-beta7", path = "../texturesofspiderman" }
+
+[target.'cfg(windows)'.build-dependencies]
+winres = "0.1.12"

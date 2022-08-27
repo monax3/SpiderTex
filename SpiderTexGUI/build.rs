@@ -1,9 +1,8 @@
-use std::env;
+#[cfg(windows)]
+fn windows() {
+    use std::env;
 
-fn main() {
     const LCID_EN_US: u16 = 0x0409;
-
-    let _library = vcpkg::find_package("directxtex").unwrap();
 
     println!(r"cargo:rustc-link-search={}", env!("CARGO_MANIFEST_DIR"));
     println!(r"cargo:rustc-link-lib=static=DXTexWrapper");
@@ -23,4 +22,9 @@ fn main() {
     res.set_icon("SpiderTex.ico");
 
     res.compile().expect("Failed to compile resources");
+}
+
+fn main() {
+    #[cfg(windows)]
+    windows();
 }
