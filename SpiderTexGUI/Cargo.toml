@@ -6,8 +6,16 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+backtrace = "0.3.66"
+camino = "1.1.1"
+directxtex = { version = "0.1.0", path = "../directxtex" }
 eframe = "0.19.0"
-texturesofspiderman = { version = "1.1.0-beta7", path = "../texturesofspiderman" }
+image = "0.24.3"
+parking_lot = "0.12.1"
+texturesofspiderman = { path = "../texturesofspiderman" }
+tracing = { version = "0.1.36", default-features = false }
+tracing-subscriber = { version = "0.3.15", default-features = false, features = ["fmt", "std"] }
+windows = "0.39.0"
 
 [target.'cfg(windows)'.build-dependencies]
 winres = "0.1.12"

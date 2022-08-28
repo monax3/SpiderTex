@@ -21,7 +21,7 @@ fn clean_testdata() -> Result<()> {
                 event!(TRACE, "Removing old import {file}");
                 std::fs::remove_file(file)?;
             } else {
-                event!(TRACE, file = %file.as_str())
+                event!(TRACE, file = %file.as_str());
             }
         }
     }

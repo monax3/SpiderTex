@@ -16,9 +16,9 @@ impl ImageInfo {
         let mut image = image::open(file)?;
 
         let correct_format = match format.planes {
-            texturesforspiderman::formats::ColorPlanes::Rgba => image::ColorType::Rgba8,
-            texturesforspiderman::formats::ColorPlanes::Luma => image::ColorType::L8,
-            texturesforspiderman::formats::ColorPlanes::Hdr => image::ColorType::Rgba32F,
+            texturesofspiderman::formats::ColorPlanes::Rgba => image::ColorType::Rgba8,
+            texturesofspiderman::formats::ColorPlanes::Luma => image::ColorType::L8,
+            texturesofspiderman::formats::ColorPlanes::Hdr => image::ColorType::Rgba32F,
         };
 
         let current_format = image.color();
@@ -58,7 +58,7 @@ impl ImageInfo {
             image = image.resize_exact(
                 format.preferred_width() as u32,
                 format.preferred_height() as u32,
-                texturesforspiderman::IMAGERS_RESIZE_FILTER,
+                texturesofspiderman::IMAGERS_RESIZE_FILTER,
             );
         }
 

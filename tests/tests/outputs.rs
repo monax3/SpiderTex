@@ -1,28 +1,27 @@
 use camino::{Utf8Path, Utf8PathBuf};
-use texturesforspiderman::dxtex::{self, DXImage, TexMetadata, TEX_DIMENSION, TEX_FILTER_FLAGS};
-use texturesforspiderman::files::{as_images, ng_format_for_texture_file, Categorized, FileType};
-use texturesforspiderman::formats::{
+use directxtex::{DXTImage, TexMetadata, TEX_DIMENSION, TEX_FILTER_FLAGS};
+use texturesofspiderman::files::{as_images, ng_format_for_texture_file, Categorized, FileType};
+use texturesofspiderman::formats::{
     guess_dimensions_2,
     probe_textures_2,
     ColorPlanes,
     ImageFormat,
     TextureFormat,
 };
-use texturesforspiderman::inputs::Inputs;
-use texturesforspiderman::prelude::*;
-use texturesforspiderman::registry::Registry;
-use texturesforspiderman::rgb::{CONTAINER_PNG, PIXEL_FORMAT_BGR, WIC};
-use texturesforspiderman::util::walkdir;
+use texturesofspiderman::inputs::Inputs;
+use texturesofspiderman::prelude::*;
+use texturesofspiderman::registry::Registry;
+use texturesofspiderman::util::walkdir;
 
 #[test]
 fn outputs() -> Result<()> {
     const IMPORT_TESTDATA: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/testdata/import");
 
-    texturesforspiderman::util::log_for_tests(true);
+    texturesofspiderman::util::log_for_tests(true);
 
     registry::load()?;
 
-    let Inputs { textures, images } = texturesforspiderman::inputs::gather(IMPORT_TESTDATA);
+    let Inputs { textures, images } = texturesofspiderman::inputs::gather(IMPORT_TESTDATA);
 
     for Categorized { files, .. } in textures {
         for file in &files {

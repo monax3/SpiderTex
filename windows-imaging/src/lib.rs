@@ -1,15 +1,19 @@
 //! FIXME: Assumes stride = width * bpp
 //! TODO: test what happens if the factory gets dropped
 //! TODO: use enums instead of GUIDs
+#![allow(unsafe_code)]
 
 use std::mem::MaybeUninit;
 
-use windows::core::{Result, HSTRING};
+pub use windows::core::Result;
+use windows::core::HSTRING;
 use windows::Win32::Graphics::Imaging::D2D::IWICImagingFactory2;
 use windows::Win32::Graphics::Imaging::{
-    CLSID_WICImagingFactory, CLSID_WICImagingFactory2, IWICBitmap, IWICBitmapSource,
-    IWICFormatConverter, IWICImagingFactory, WICBitmapDitherTypeNone, WICBitmapEncoderNoCache,
-    WICBitmapPaletteTypeMedianCut, WICRect,
+    CLSID_WICImagingFactory, CLSID_WICImagingFactory2, WICBitmapDitherTypeNone,
+    WICBitmapEncoderNoCache, WICBitmapPaletteTypeMedianCut,
+};
+pub use windows::Win32::Graphics::Imaging::{
+    IWICBitmap, IWICBitmapSource, IWICFormatConverter, IWICImagingFactory, WICRect,
 };
 use windows::Win32::System::Com::{CoCreateInstance, CLSCTX_INPROC_SERVER};
 use windows::Win32::System::SystemServices::GENERIC_WRITE;
@@ -18,6 +22,12 @@ mod guid;
 pub use guid::{Container, PixelFormat};
 pub mod prelude {
     pub use super::Bitmap;
+    pub use super::BitmapSource;
+    pub use super::{
+        IWICBitmap, IWICBitmapSource, IWICFormatConverter, IWICImagingFactory, WICRect,
+    };
+    pub use super::Container as WICContainer;
+    pub use super::PixelFormat as WICPixelFormat;
 }
 
 pub fn wic() -> Result<IWICImagingFactory> {
@@ -28,28 +38,28 @@ pub fn wic2() -> Result<IWICImagingFactory2> {
     unsafe { CoCreateInstance(&CLSID_WICImagingFactory2, None, CLSCTX_INPROC_SERVER) }
 }
 
-pub trait AsWICImagingFactory {
-    fn as_wic_factory<'a>(&'a self) -> &'a IWICImagingFactory;
-}
+// pub trait AsWICImagingFactory {
+//     fn as_wic_factory<'a>(&'a self) -> &'a IWICImagingFactory;
+// }
 
-impl<T> AsWICImagingFactory for T
-where
-    for<'a> &'a IWICImagingFactory: From<&'a T>,
-{
-    fn as_wic_factory<'a>(&'a self) -> &'a IWICImagingFactory {
-        self.into()
-    }
-}
+// impl<T> AsWICImagingFactory for T
+// where
+//     for<'a> &'a IWICImagingFactory: From<&'a T>,
+// {
+//     fn as_wic_factory<'a>(&'a self) -> &'a IWICImagingFactory {
+//         self.into()
+//     }
+// }
 
-pub fn bitmap_from_memory(
-    factory: impl AsWICImagingFactory,
+pub fn bitmap_from_memory<'wic, WIC> (
+    factory: WIC,
     format: PixelFormat,
     width: u32,
     height: u32,
     stride: u32,
     data: &[u8],
-) -> Result<IWICBitmap> {
-    let factory = factory.as_wic_factory();
+) -> Result<IWICBitmap> where &'wic IWICImagingFactory: From<WIC> {
+    let factory: &IWICImagingFactory = factory.into();
 
     unsafe {
         factory.CreateBitmapFromMemory(width as u32, height as u32, format.as_guid(), stride, data)
@@ -88,12 +98,20 @@ pub trait Bitmap {
     }
 }
 
-impl<T> Bitmap for T
-where
-    for<'a> &'a IWICBitmap: From<&'a T>,
+// compiler bug workaround
+// impl<T> Bitmap for T
+// where
+//     for<'a> &'a IWICBitmap: From<&'a T>,
+// {
+//     fn as_wic_bitmap(&self) -> &IWICBitmap {
+//         self.into()
+//     }
+// }
+
+impl Bitmap for IWICBitmap
 {
     fn as_wic_bitmap(&self) -> &IWICBitmap {
-        self.into()
+        self
     }
 }
 
@@ -115,12 +133,13 @@ pub trait BitmapSource {
         })
     }
 
-    fn convert_to_pixel_format(
+    fn convert_to_pixel_format<'wic, WIC>(
         &self,
-        factory: impl AsWICImagingFactory,
+        factory: WIC,
         to: PixelFormat,
-    ) -> Result<IWICFormatConverter> {
-        let converter = unsafe { factory.as_wic_factory().CreateFormatConverter() }?;
+    ) -> Result<IWICFormatConverter> where &'wic IWICImagingFactory: From<WIC> {
+        let factory: &IWICImagingFactory = factory.into();
+        let converter = unsafe { factory.CreateFormatConverter() }?;
 
         // FIXME: options?
         unsafe {
@@ -137,13 +156,13 @@ pub trait BitmapSource {
         Ok(converter)
     }
 
-    fn save<'a>(
+    fn save<'wic, WIC>(
         &self,
-        factory: impl AsWICImagingFactory,
+        factory: WIC,
         file_name: impl Into<HSTRING>,
         container: Container,
-    ) -> Result<()> {
-        let factory = factory.as_wic_factory();
+    ) -> Result<()>  where &'wic IWICImagingFactory: From<WIC> {
+        let factory: &IWICImagingFactory = factory.into();
         let file_name = file_name.into();
 
         let stream = unsafe {
@@ -175,12 +194,31 @@ pub trait BitmapSource {
         }
         Ok(())
     }
-    }
+}
 
-impl<T> BitmapSource for T
-where
-    for<'a> &'a IWICBitmapSource: From<&'a T>,
-{
+// compiler bug workaround
+// impl<T> BitmapSource for T
+// where
+//     for<'a> &'a IWICBitmapSource: From<&'a T>,
+// {
+//     fn as_wic_bitmap_source(&self) -> &IWICBitmapSource {
+//         self.into()
+//     }
+// }
+
+impl BitmapSource for IWICBitmap {
+    fn as_wic_bitmap_source(&self) -> &IWICBitmapSource {
+        self.into()
+    }
+}
+
+impl BitmapSource for IWICBitmapSource {
+    fn as_wic_bitmap_source(&self) -> &IWICBitmapSource {
+        self.into()
+    }
+}
+
+impl BitmapSource for IWICFormatConverter {
     fn as_wic_bitmap_source(&self) -> &IWICBitmapSource {
         self.into()
     }

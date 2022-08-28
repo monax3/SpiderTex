@@ -1,3 +1,5 @@
+#![allow(unsafe_code)]
+
 use windows::Win32::System::Com::{CoInitializeEx, COINIT_MULTITHREADED, CoUninitialize};
 
 use windows::core::Result;

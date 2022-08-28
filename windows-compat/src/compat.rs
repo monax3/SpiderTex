@@ -12,7 +12,7 @@ pub struct GUID {
 
 #[derive(Debug)]
 #[repr(transparent)]
-pub struct Error(pub u32);
+pub struct Error(pub i32);
 
 impl std::error::Error for Error {}
 
@@ -29,10 +29,10 @@ impl Display for Error {
 }
 
 #[repr(transparent)]
-pub struct HRESULT(pub u32);
+pub struct HRESULT(pub i32);
 
 impl HRESULT {
-    pub const S_OK: u32 = 0;
+    pub const S_OK: i32 = 0;
 
     pub fn ok(self) -> Result<()> {
         if self.0 == Self::S_OK {

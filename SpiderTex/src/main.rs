@@ -22,6 +22,8 @@ use texturesofspiderman::{inputs, APP_TITLE};
 #[cfg(windows)]
 use texturesofspiderman::util::{message_box_error, message_box_ok};
 
+mod egui;
+
 #[cfg(not(windows))]
 fn message_box_error(text: impl Into<String>, _caption: &str) {
     event!(ERROR, "{}", text.into())
@@ -72,17 +74,22 @@ fn main() {
     }
 }
 
-#[cfg(feature = "directxtex/windows-imaging")]
-fn save_rgb(image: &DXTImage, file: &Utf8Path) -> Result<()> {
+#[cfg(windows)]
+fn save_rgb(image: &DXTImage, array_index: usize, file: &Utf8Path) -> Result<()> {
+    use windows_imaging::prelude::*;
+
+    // FIXME: create globally
     let wic = windows_imaging::wic()?;
-    // let bitmap = wic.bitmap_from_directxtex(image, 0)?;
-    // let from_pixel_format = bitmap.pixel_format()?;
-    // let rgb = bitmap.to_pixel_format(&from_pixel_format, PIXEL_FORMAT_BGR)?;
-    // rgb.save(&file, CONTAINER_PNG)
+    let metadata = image.metadata()?;
+
+    let vec = image.image(array_index)?;
+    let bitmap = windows_imaging::bitmap_from_memory(&wic, WICPixelFormat::RGBA32bpp, metadata.width as u32, metadata.height as u32, (metadata.width as u32) * WICPixelFormat::RGBA32bpp.bpp(), &vec)?;
+    let converted = bitmap.convert_to_pixel_format(&wic, WICPixelFormat::BGR24bpp)?;
+    Ok(converted.save(&wic, file.as_str(), WICContainer::Png)?)
 }
 
 // FIXME: to compile on non-windows, needs image-rs here
-#[cfg(not(feature = "directxtex/windows-imaging"))]
+#[cfg(not(windows))]
 fn save_rgb(image: &DXTImage, file: &Utf8Path) -> Result<()> {
     unimplemented!()
     // image.save_wic(0, )
@@ -131,7 +138,7 @@ fn export_texture(
     let metadata = output_image.metadata()?;
     for (array_index, output_file) in outputs.iter().enumerate() {
         if format.planes() == ColorPlanes::Rgb {
-            save_rgb(&output_image, output_file).map_err(|error| {
+            save_rgb(&output_image, array_index, output_file).map_err(|error| {
                 Error::message(format!(
                     "Windows Imaging Component returned an error while saving PNG: {error}"
                 ))

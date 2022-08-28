@@ -1,7 +1,8 @@
 use eframe::egui::style::{Margin, Spacing};
 use eframe::egui::{vec2, Color32, FontId, RichText, Style, TextStyle, Vec2, Visuals, WidgetText};
 use eframe::epaint::FontFamily;
-use texturesforspiderman::prelude::*;
+use texturesofspiderman::prelude::*;
+use tracing::Level;
 
 pub const SIDEBAR_WIDTH: f32 = 300.0;
 pub const EXTRA_SPACING: f32 = 10.0;
@@ -80,7 +81,7 @@ pub fn highlight_text(text: impl Into<String>) -> impl Into<WidgetText> {
     RichText::new(text).strong().color(TEXT_HIGHLIGHT_COLOR)
 }
 
-pub fn log_text(text: impl Into<String>, level: tracing::Level) -> impl Into<WidgetText> {
+pub fn log_text(text: impl Into<String>, level: Level) -> impl Into<WidgetText> {
     let color = match level {
         // TODO: add other log levels
         level if level == ERROR => Color32::RED,

@@ -1,11 +1,5 @@
-#[cfg(windows)]
-mod windows;
-#[cfg(windows)]
-pub use windows::{Result, Error, HRESULT, HSTRING, GUID};
-
-#[cfg(not(windows))]
+#[cfg_attr(windows, path = "windows.rs")]
 mod compat;
-#[cfg(not(windows))]
-pub use compat::{Result, Error, HRESULT, HSTRING, GUID};
 
+pub use compat::{Result, Error, HRESULT, HSTRING, GUID};
 pub mod errors;

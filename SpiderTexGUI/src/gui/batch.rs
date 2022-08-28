@@ -31,8 +31,8 @@ use eframe::epaint::{Color32, FontId};
 use eframe::{App, Frame};
 use image::{DynamicImage, ImageFormat};
 use parking_lot::Mutex;
-use texturesforspiderman::convert::{convert, TaskResult};
-use texturesforspiderman::files::{
+use texturesofspiderman::convert::{convert, TaskResult};
+use texturesofspiderman::files::{
     is_image_ext,
     is_texture_ext,
     output_files,
@@ -45,8 +45,8 @@ use texturesforspiderman::files::{
     OutputFormat,
     Scanned,
 };
-use texturesforspiderman::images::{DxImport, Image, ImageRs};
-use texturesforspiderman::prelude::*;
+use texturesofspiderman::images::{DxImport, Image, ImageRs};
+use texturesofspiderman::prelude::*;
 
 use super::{theme, widgets, AppWindow};
 use crate::inputs::{Action, Inputs};

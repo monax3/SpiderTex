@@ -12,9 +12,9 @@ use eframe::egui::{
 };
 use eframe::epaint::{vec2, Vec2};
 use image::DynamicImage;
-use texturesforspiderman::formats::{guess_dimensions, ColorPlanes, TextureFormat};
-use texturesforspiderman::prelude::*;
-use texturesforspiderman::util::into_n_slices;
+use texturesofspiderman::formats::{guess_dimensions, ColorPlanes, TextureFormat};
+use texturesofspiderman::prelude::*;
+use texturesofspiderman::util::into_n_slices;
 
 use super::theme;
 
@@ -65,7 +65,7 @@ fn compressed_to_texturehandles(
         data = &data[TEXTURE_HEADER_SIZE ..];
     }
 
-    texturesforspiderman::dxtex::decompress_texture(
+    directxtex::decompress_texture(
         format.dxgi_format,
         dimensions.width,
         dimensions.height,

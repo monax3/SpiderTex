@@ -19,8 +19,8 @@ use eframe::egui::{
 use eframe::emath::Align;
 use eframe::{App, Frame};
 use image::DynamicImage;
-use texturesforspiderman::formats::{probe_textures_2, TextureFormat};
-use texturesforspiderman::prelude::*;
+use texturesofspiderman::formats::{probe_textures_2, TextureFormat};
+use texturesofspiderman::prelude::*;
 
 use super::preview::Preview;
 use super::{theme, widgets};

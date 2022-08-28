@@ -13,5 +13,6 @@ windows-compat = { path = "../windows-compat" }
 
 [target.'cfg(windows)'.dependencies]
 windows-imaging = { path = "../windows-imaging", optional = true }
+# directxtex-sys = { path = "../directxtex-sys", features = ["vcpkg"] }
 
 [features]

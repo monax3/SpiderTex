@@ -1,28 +1,28 @@
 use camino::Utf8Path;
-use texturesforspiderman::dxtex::{self, DXImage, TexMetadata, TEX_DIMENSION, TEX_FILTER_FLAGS};
-use texturesforspiderman::formats::{
+use directxtex::{DXTImage, TexMetadata, TEX_DIMENSION, TEX_FILTER_FLAGS};
+use texturesofspiderman::formats::{
     guess_dimensions_2,
     probe_textures_2,
     ColorPlanes,
     ImageFormat,
     TextureFormat,
 };
-use texturesforspiderman::prelude::*;
-use texturesforspiderman::registry::Registry;
+use texturesofspiderman::prelude::*;
+use texturesofspiderman::registry::Registry;
 
 const TESTDATA: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/testdata");
 
 fn test_metadata(file: &Utf8Path, metadata: &TexMetadata, format: &TextureFormat) {
-    let expected_formats = format.planes().expected_formats();
+    // let expected_formats = format.planes().expected_formats();
 
-    if !expected_formats.contains(&metadata.format) {
-        event!(
-            WARN,
-            "Output format is {}, container expects {:?}",
-            metadata.format.display(),
-            expected_formats
-        );
-    }
+    // if !expected_formats.contains(&metadata.format) {
+    //     event!(
+    //         WARN,
+    //         "Output format is {}, container expects {:?}",
+    //         metadata.format.display(),
+    //         expected_formats
+    //     );
+    // }
 
     if metadata.width != format.standard.width
         || metadata.height != format.standard.height
@@ -79,7 +79,7 @@ fn test_metadata(file: &Utf8Path, metadata: &TexMetadata, format: &TextureFormat
     }
 }
 
-fn test_expected_size(dx: &DXImage, format: &TextureFormat, highres: bool) {
+fn test_expected_size(dx: &DXTImage, format: &TextureFormat, highres: bool) {
     let expected = if highres {
         format.expected_highres_buffer_size().unwrap()
     } else {
@@ -173,12 +173,12 @@ fn get_block_size_ext(size: usize) -> Option<(usize, usize)> {
 
 #[test]
 fn test() -> Result<()> {
-    texturesforspiderman::util::log_for_tests(true);
+    texturesofspiderman::util::log_for_tests(true);
 
     let testdir = Utf8Path::new(TESTDATA);
     let mut registry = Registry::load()?;
 
-    for file in texturesforspiderman::util::walkdir(testdir) {
+    for file in texturesofspiderman::util::walkdir(testdir) {
         let span = tracing::error_span!("", file = file.file_name().unwrap_or_default());
         let _entered = span.enter();
 
@@ -333,8 +333,8 @@ fn test() -> Result<()> {
             //         }
 
             //         let img = match format.planes {
-            //             texturesforspiderman::formats::ColorPlanes::Hdr => continue,
-            //             texturesforspiderman::formats::ColorPlanes::Rgba => {
+            //             texturesofspiderman::formats::ColorPlanes::Hdr => continue,
+            //             texturesofspiderman::formats::ColorPlanes::Rgba => {
             //                 let img: image::ImageBuffer<image::Rgba<u8>, _> =
             //                     image::ImageBuffer::from_raw(
             //                         metadata.width as u32,
@@ -344,7 +344,7 @@ fn test() -> Result<()> {
             //                     .expect("PNG creation failed");
             //                 image::DynamicImage::from(img)
             //             }
-            //             texturesforspiderman::formats::ColorPlanes::Luma => {
+            //             texturesofspiderman::formats::ColorPlanes::Luma => {
             //                 let img: image::ImageBuffer<image::Luma<u8>, _> =
             //                     image::ImageBuffer::from_raw(
             //                         metadata.width as u32,

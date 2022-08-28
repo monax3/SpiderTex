@@ -19,9 +19,9 @@ use eframe::egui::{
 use eframe::emath::Align;
 use eframe::App;
 use image::DynamicImage;
-use texturesforspiderman::formats::TextureFormat;
-use texturesforspiderman::prelude::*;
-use texturesforspiderman::util;
+use texturesofspiderman::formats::TextureFormat;
+use texturesofspiderman::prelude::*;
+use texturesofspiderman::util;
 
 use super::preview::Preview;
 use super::{theme, widgets};
@@ -362,7 +362,7 @@ fn launch_import(ctx: &Context, selections: Box<ImportSelections>) -> Receiver<R
 
             // let [sd_name, hd_name] = name_output_files(&selections.import_file);
 
-            texturesforspiderman::convert_to_texture(
+            texturesofspiderman::convert_to_texture(
                 format,
                 &selections.import_images,
                 name_output_files(&selections.common_name),

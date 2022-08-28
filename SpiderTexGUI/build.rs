@@ -4,10 +4,6 @@ fn windows() {
 
     const LCID_EN_US: u16 = 0x0409;
 
-    println!(r"cargo:rustc-link-search={}", env!("CARGO_MANIFEST_DIR"));
-    println!(r"cargo:rustc-link-lib=static=DXTexWrapper");
-    println!("cargo:rerun-if-changed=DXTexWrapper.lib");
-
     let mut res = winres::WindowsResource::new();
 
     res.set("CompanyName", &env::var("CARGO_PKG_AUTHORS").unwrap())
@@ -19,7 +15,7 @@ fn windows() {
         "/app_manifest.xml"
     )));
 
-    res.set_icon("SpiderTex.ico");
+    res.set_icon("../SpiderTex.ico");
 
     res.compile().expect("Failed to compile resources");
 }

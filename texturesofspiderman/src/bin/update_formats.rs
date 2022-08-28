@@ -81,7 +81,7 @@ fn main() -> Result<()> {
                 }
                 Ok((Some(header), data)) => {
                     let mut format = header.to();
-                    if registry.known(format.id()) && false {
+                    if registry.known(format.id()) {
                         event!(INFO, "Known {format}");
                         registry.replace_format(format);
                     } else {

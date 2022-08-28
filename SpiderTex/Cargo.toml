@@ -9,7 +9,13 @@ edition = "2021"
 bytemuck = "1.12.1"
 camino = "1.1.1"
 directxtex = { path = "../directxtex" }
+eframe = "0.19.0"
 texturesofspiderman = { path = "../texturesofspiderman" }
+tracing = "0.1.36"
+tracing-egui-repaint = { version = "1.0.0-rc1", path = "../tracing-egui-repaint" }
+tracing-messagevec = { version = "0.1.0", path = "../tracing-messagevec" }
+tracing-oncecell = { version = "1.0.0-beta1", path = "../tracing-oncecell" }
+tracing-subscriber = { version = "0.3.15", features = ["registry"] }
 
 [target.'cfg(windows)'.dependencies]
 directxtex = { path = "../directxtex", features = ["windows-imaging"] }

@@ -16,10 +16,10 @@
 
 const APP_TITLE: &str = "Spider-Man Texture Converter";
 
-use texturesforspiderman::files::FileGroup;
-use texturesforspiderman::inputs;
-use texturesforspiderman::inputs::{Inputs, Job};
-use texturesforspiderman::prelude::*;
+use texturesofspiderman::files::FileGroup;
+use texturesofspiderman::inputs;
+use texturesofspiderman::inputs::{Inputs, Job};
+use texturesofspiderman::prelude::*;
 
 pub mod gui;
 pub mod log;

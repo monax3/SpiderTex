@@ -13,18 +13,20 @@ use texturesofspiderman::prelude::*;
 use texturesofspiderman::registry::Registry;
 // use texturesofspiderman::rgb::{CONTAINER_PNG, PIXEL_FORMAT_BGR, WIC};
 use texturesofspiderman::util::walkdir;
+use windows_imaging::prelude::*;
 
 fn test_metadata(file: &Utf8Path, metadata: &TexMetadata, format: &TextureFormat) {
-    let expected_formats = format.planes().expected_formats();
+    // FIXME
+    // let expected_formats = format.planes().expected_formats();
 
-    if !expected_formats.contains(&metadata.format) {
-        event!(
-            WARN,
-            "Output format is {}, container expects {:?}",
-            metadata.format.display(),
-            expected_formats
-        );
-    }
+    // if !expected_formats.contains(&metadata.format) {
+    //     event!(
+    //         WARN,
+    //         "Output format is {}, container expects {:?}",
+    //         metadata.format.display(),
+    //         expected_formats
+    //     );
+    // }
 
     if metadata.width != format.standard.width
         || metadata.height != format.standard.height
@@ -81,7 +83,7 @@ fn test_metadata(file: &Utf8Path, metadata: &TexMetadata, format: &TextureFormat
     }
 }
 
-fn test_expected_size(dx: &DXImage, format: &TextureFormat, highres: bool) {
+fn test_expected_size(dx: &DXTImage, format: &TextureFormat, highres: bool) {
     let expected = if highres {
         format.expected_highres_buffer_size().unwrap()
     } else {
@@ -102,7 +104,7 @@ fn test_expected_size(dx: &DXImage, format: &TextureFormat, highres: bool) {
 fn test() -> Result<()> {
     const EXPORT_TESTDATA: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/testdata/export");
 
-    texturesofspiderman::util::log_for_tests(true);
+    tests::log();
 
     registry::load()?;
 
@@ -155,7 +157,7 @@ fn test() -> Result<()> {
         let pixel_format = format.dxgi_format.uncompressed_format();
 
         let raw_image =
-            DXImage::with_dimensions(format.dxgi_format, dimensions, format.array_size, data)
+            DXTImage::new(format.dxgi_format, dimensions.width, dimensions.height, format.array_size, dimensions.mipmaps, data)
                 .log_failure_as("DXImage::with_dimensions")?;
         let output_image = raw_image.to_format(pixel_format).log_failure_with(|| {
             format!(
@@ -168,18 +170,14 @@ fn test() -> Result<()> {
         let metadata = output_image.metadata()?;
         for (array_index, output) in outputs.into_iter().enumerate() {
             if format.planes() == ColorPlanes::Rgb {
-                let wic = WIC::new().expect("WIC::new");
-                let bitmap = wic
-                    .bitmap_from_directxtex(&output_image, 0)
-                    .expect("WIC::bitmap_from_directxtex");
-                let from_pixel_format = bitmap.pixel_format().expect("WICSource::pixel_format");
-                let rgb = bitmap
-                    .to_pixel_format(&from_pixel_format, PIXEL_FORMAT_BGR)
-                    .expect("WICSource::to_pixel_format");
-                rgb.save(&output, CONTAINER_PNG).expect("WICBitmap::save");
+                let wic = windows_imaging::wic()?;
+                let bitmap = output_image.image(0)?;
+                let bitmap = windows_imaging::bitmap_from_memory(&wic, WICPixelFormat::RGBA32bpp, metadata.width as u32, metadata.width as u32, (metadata.width as u32) * WICPixelFormat::RGBA32bpp.bpp(), &bitmap)?;
+                let bgr = bitmap.convert_to_pixel_format(&wic, WICPixelFormat::BGR24bpp)?;
+                bgr.save(&wic, output.as_str(), WICContainer::Png)?;
             } else {
                 output_image
-                    .save(array_index, format.default_image_format(), &output)
+                    .save(array_index, &output)
                     .log_failure_with(|| {
                         format!(
                             "dx.save failed with {} => {} to {output}",

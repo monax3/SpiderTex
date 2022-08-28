@@ -1,3 +1,5 @@
+#![allow(unsafe_code)]
+
 use std::{borrow::Cow, path::Path};
 use std::mem::MaybeUninit;
 

@@ -6,14 +6,14 @@ use windows::Win32::Graphics::Imaging::{
 #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
 pub enum PixelFormat {
     RGBA32bpp,
-    BGRA24bpp,
+    BGR24bpp,
 }
 
 impl PixelFormat {
     pub fn bpp(self) -> u32 {
         match self {
             PixelFormat::RGBA32bpp => 4,
-            PixelFormat::BGRA24bpp => 3,
+            PixelFormat::BGR24bpp => 3,
         }
     }
 
@@ -23,7 +23,7 @@ impl PixelFormat {
 
     pub fn from_guid(guid: &GUID) -> Option<Self> {
         match guid {
-            guid if guid == &GUID_WICPixelFormat24bppBGR => Some(Self::BGRA24bpp),
+            guid if guid == &GUID_WICPixelFormat24bppBGR => Some(Self::BGR24bpp),
             guid if guid == &GUID_WICPixelFormat32bppRGBA => Some(Self::RGBA32bpp),
             _ => None,
         }
@@ -34,7 +34,7 @@ impl From<PixelFormat> for &'static GUID {
     fn from(format: PixelFormat) -> &'static GUID {
         match format {
             PixelFormat::RGBA32bpp => &GUID_WICPixelFormat32bppRGBA,
-            PixelFormat::BGRA24bpp => &GUID_WICPixelFormat24bppBGR,
+            PixelFormat::BGR24bpp => &GUID_WICPixelFormat24bppBGR,
         }
     }
 }
