@@ -11,7 +11,7 @@ windows = { version = "0.39.0", features = ["Win32_Graphics_Dxgi_Common"], optio
 windows-compat = { path = "../windows-compat" }
 
 [build-dependencies]
-vcpkg = { version = "0.2.15", optional = false }
+vcpkg = { version = "0.2.15", optional = true }
 
 [target.'cfg(windows)'.build-dependencies]
 vcpkg = { version = "0.2.15"  }

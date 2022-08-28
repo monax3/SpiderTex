@@ -191,6 +191,7 @@ extern "C" {
 }
 
 #[test]
+#[cfg_attr(not(feature = "vcpkg"), ignore)]
 fn test_dxtex_sizes() {
     #[repr(C)]
     #[derive(Default)]

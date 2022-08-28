@@ -51,6 +51,11 @@ fn run(mut inputs: Inputs) -> Result<(String, Warnings)> {
 }
 
 fn main() {
+
+}
+
+#[cfg(disabled)] // dev
+fn main() {
     log_for_tests(true);
 
     match run(inputs::gather_from_args()) {
@@ -90,7 +95,7 @@ fn save_rgb(image: &DXTImage, array_index: usize, file: &Utf8Path) -> Result<()>
 
 // FIXME: to compile on non-windows, needs image-rs here
 #[cfg(not(windows))]
-fn save_rgb(image: &DXTImage, file: &Utf8Path) -> Result<()> {
+fn save_rgb(image: &DXTImage, array_index: usize, file: &Utf8Path) -> Result<()> {
     unimplemented!()
     // image.save_wic(0, )
     // let wic = windows_imaging::wic()?;

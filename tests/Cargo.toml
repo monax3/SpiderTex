@@ -7,9 +7,12 @@ edition = "2021"
 
 [dependencies]
 camino = "1.1.1"
-directxtex = { version = "0.1.0", path = "../directxtex", features = ["windows-imaging"] }
+directxtex = { version = "0.1.0", path = "../directxtex" }
 image = "0.24.3"
 texturesofspiderman = { version = "1.1.0-beta7", path = "../texturesofspiderman" }
 tracing = "0.1.36"
 tracing-subscriber = { version = "0.3.15", features = ["std", "fmt", "env-filter"] }
+
+[target.'cfg(windows)'.dependencies]
+directxtex = { version = "0.1.0", path = "../directxtex", features = ["windows-imaging"] }
 windows-imaging = { version = "0.1.0", path = "../windows-imaging" }

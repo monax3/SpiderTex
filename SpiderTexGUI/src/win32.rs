@@ -1,4 +1,5 @@
 #![allow(unsafe_code)] // no FFI without unsafe
+#![cfg(windows)]
 
 use std::ffi::CString;
 use std::fmt::Write;
