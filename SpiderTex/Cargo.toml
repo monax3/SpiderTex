@@ -11,6 +11,7 @@ camino = "1.1.1"
 directxtex = { path = "../directxtex" }
 eframe = "0.19.0"
 texturesofspiderman = { path = "../texturesofspiderman" }
+texturesofspiderman-egui = { version = "0.1.0", path = "../texturesofspiderman-egui" }
 tracing = "0.1.36"
 tracing-egui-repaint = { version = "1.0.0-rc1", path = "../tracing-egui-repaint" }
 tracing-messagevec = { version = "0.1.0", path = "../tracing-messagevec" }

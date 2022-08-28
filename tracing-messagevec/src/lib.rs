@@ -3,6 +3,8 @@ use std::sync::{Arc, Weak};
 use tracing::{field::Visit, Event, Level, Subscriber};
 use tracing_subscriber::{layer::Context, registry, Layer};
 
+pub type LogArc<T> = Arc<AppendOnlyVec<(Level, T)>>;
+
 pub struct MessageVec<T>(Weak<AppendOnlyVec<(Level, T)>>);
 
 impl<T> MessageVec<T> {
