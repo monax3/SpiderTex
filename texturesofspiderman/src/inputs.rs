@@ -270,7 +270,7 @@ pub fn walk_new<'a>(
 #[test]
 fn test_walk_new() {
     use tracing_subscriber::EnvFilter;
-    tracing_subscriber::fmt().with_env_filter(EnvFilter::try_from_default_env().unwrap()).without_time().with_line_number(true).with_file(true).init();
+    tracing_subscriber::fmt().with_env_filter(EnvFilter::from_default_env()).without_time().with_line_number(true).with_file(true).init();
 
     // crate::util::log_for_tests(true);
     let paths = ["src", "tests"]

@@ -1,5 +1,5 @@
 use eframe::{
-    egui::{Style, Visuals},
+    egui::{Style, Visuals, CentralPanel},
     epaint::FontId,
     run_native, App, NativeOptions,
 };
@@ -61,7 +61,7 @@ pub struct LogWindow {
 
 impl App for LogWindow {
     fn update(&mut self, ctx: &eframe::egui::Context, frame: &mut eframe::Frame) {
-        todo!()
+        CentralPanel::new();
     }
 }
 

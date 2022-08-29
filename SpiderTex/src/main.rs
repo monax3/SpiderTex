@@ -51,7 +51,7 @@ fn run(mut inputs: Inputs) -> Result<(String, Warnings)> {
 }
 
 fn main() {
-
+    egui::run();
 }
 
 #[cfg(disabled)] // dev

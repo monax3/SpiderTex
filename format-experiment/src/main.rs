@@ -126,17 +126,17 @@ fn unpack<'a>(
     })
 }
 
-const BASE_32: &[u8] = b"23456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz";
+// const BASE_32: &[u8] = b"23456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz";
 
-fn to_base32(bytes: impl Iterator<Item = u8>) -> impl Iterator<Item = u8> {
-    const BITS: u8 = 5;
+// fn to_base32(bytes: impl Iterator<Item = u8>) -> impl Iterator<Item = u8> {
+//     const BITS: u8 = 5;
 
-    let mut rem: u8 = 0;
-    let mut rem_bits: u8 = 0;
+//     let mut rem: u8 = 0;
+//     let mut rem_bits: u8 = 0;
 
-    std::iter::from_fn(move || {
-        if let Some(next) = bytes.next() {
-            let i = next & ((1 << bits) - 1);
-        }
-    })
-}
+//     std::iter::from_fn(move || {
+//         if let Some(next) = bytes.next() {
+//             let i = next & ((1 << bits) - 1);
+//         }
+//     })
+// }

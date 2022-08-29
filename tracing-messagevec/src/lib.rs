@@ -4,7 +4,14 @@ use tracing::{field::Visit, Event, Subscriber};
 use tracing_subscriber::{layer::Context, registry, Layer};
 pub use tracing::Level;
 
-pub type LogArc<T> = Arc<AppendOnlyVec<(Level, T)>>;
+pub struct LogMessages<T>(Arc<AppendOnlyVec<(Level, T)>>);
+
+impl<T> LogMessages<T> {
+    pub fn iter(&self) -> impl Iterator<Item = (Level, T)> + ExactSizeIterator + DoubleEndedIterator {
+        self.0.iter()
+    }
+}
+
 pub struct MessageVec<T>(Weak<AppendOnlyVec<(Level, T)>>);
 
 impl<T> MessageVec<T> {
