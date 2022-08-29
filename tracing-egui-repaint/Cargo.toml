@@ -10,3 +10,7 @@ edition = "2021"
 egui = { version = "0.19.0", default-features = false }
 tracing = { version = "0.1.36", default-features = false }
 tracing-subscriber = { version = "0.3.15", default-features = false }
+tracing-oncecell = { path = "../tracing-oncecell", optional = true }
+
+[features]
+default = ["tracing-oncecell"]

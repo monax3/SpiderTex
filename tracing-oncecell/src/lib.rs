@@ -9,21 +9,22 @@ use tracing_subscriber::{
     Layer,
 };
 
-pub fn maybe_set_oncecell<T>(weak: Weak<OnceCell<T>>, value: T) {
-    if let Some(arc) = weak.upgrade() {
-        let _ = arc.set(value);
+pub struct OnceCellHandle<T>(Weak<OnceCell<T>>);
+impl<T> OnceCellHandle<T> {
+    pub fn maybe_set(&self, value: T) {
+        if let Some(arc) = self.0.upgrade() {
+            let _ = arc.set(value);
+        }
     }
+}
+
+pub fn once_cell<T>() -> (OnceCellLayer<T>, OnceCellHandle<T>) {
+    let arc = Arc::new(OnceCell::new());
+    let weak = Arc::downgrade(&arc);
+    (OnceCellLayer(arc), OnceCellHandle(weak))
 }
 
 pub struct OnceCellLayer<T>(Arc<OnceCell<T>>);
-
-impl<T> OnceCellLayer<T> {
-    pub fn new() -> (Self, Weak<OnceCell<T>>) {
-        let arc = Arc::new(OnceCell::new());
-        let weak = Arc::downgrade(&arc);
-        (Self(arc), weak)
-    }
-}
 
 impl<T, S> Layer<S> for OnceCellLayer<T>
 where
@@ -73,7 +74,7 @@ where
     fn event_enabled(&self, event: &tracing::Event<'_>, ctx: Context<'_, S>) -> bool {
         self.0
             .get()
-            .map_or(false, |layer| layer.event_enabled(event, ctx))
+            .map_or(true, |layer| layer.event_enabled(event, ctx))
     }
 
     fn on_event(&self, event: &tracing::Event<'_>, ctx: Context<'_, S>) {

@@ -1,27 +1,41 @@
 pub use append_only_vec::AppendOnlyVec;
 use std::sync::{Arc, Weak};
+pub use tracing::Level;
 use tracing::{field::Visit, Event, Subscriber};
 use tracing_subscriber::{layer::Context, registry, Layer};
-pub use tracing::Level;
 
-pub struct LogMessages<T>(Arc<AppendOnlyVec<(Level, T)>>);
+#[derive(Clone)]
+pub struct LogReader<T>(Arc<AppendOnlyVec<(Level, T)>>);
 
-impl<T> LogMessages<T> {
-    pub fn iter(&self) -> impl Iterator<Item = (Level, T)> + ExactSizeIterator + DoubleEndedIterator {
+impl<T> LogReader<T> {
+    pub fn iter(
+        &self,
+    ) -> impl Iterator<Item = &(Level, T)> + ExactSizeIterator + DoubleEndedIterator {
         self.0.iter()
     }
-}
 
-pub struct MessageVec<T>(Weak<AppendOnlyVec<(Level, T)>>);
-
-impl<T> MessageVec<T> {
-    pub fn new() -> (Self, Arc<AppendOnlyVec<(Level, T)>>) {
-        let ret = Arc::new(AppendOnlyVec::new());
-        (Self(Arc::downgrade(&ret)), ret)
+    pub fn len(&self) -> usize {
+        self.0.len()
     }
 }
 
-impl<S, T> Layer<S> for MessageVec<T>
+impl<T> std::ops::Index<usize> for LogReader<T> {
+    type Output = (Level, T);
+
+    fn index(&self, index: usize) -> &Self::Output {
+        &self.0[index]
+    }
+}
+
+pub fn new<T>() -> (LogReader<T>, LogWriter<T>) {
+    let reader = LogReader(Arc::new(AppendOnlyVec::new()));
+    let writer = LogWriter(Arc::downgrade(&reader.0));
+    (reader, writer)
+}
+
+pub struct LogWriter<T>(Weak<AppendOnlyVec<(Level, T)>>);
+
+impl<S, T> Layer<S> for LogWriter<T>
 where
     S: Subscriber + for<'a> registry::LookupSpan<'a>,
     T: std::fmt::Write + Default + 'static,

@@ -18,11 +18,17 @@ use texturesofspiderman::inputs::Inputs;
 use texturesofspiderman::prelude::*;
 use texturesofspiderman::util::{log_for_tests};
 use texturesofspiderman::{inputs, APP_TITLE};
+use std::sync::mpsc;
 
 #[cfg(windows)]
 use texturesofspiderman::util::{message_box_error, message_box_ok};
 
-mod egui;
+pub mod gui  {
+    pub mod noninteractive;
+    pub mod widgets {
+        pub mod log;
+    }
+}
 
 #[cfg(not(windows))]
 fn message_box_error(text: impl Into<String>, _caption: &str) {
@@ -34,6 +40,7 @@ fn message_box_ok(text: impl Into<String>, _caption: &str) {
     event!(INFO, "{}", text.into())
 }
 
+#[cfg(windows)]
 fn run(mut inputs: Inputs) -> Result<(String, Warnings)> {
     inputs.add_pairs();
 
@@ -51,7 +58,26 @@ fn run(mut inputs: Inputs) -> Result<(String, Warnings)> {
 }
 
 fn main() {
-    egui::run();
+    use tracing_subscriber::prelude::*;
+    use tracing_egui_repaint::oncecell::repaint_once_cell;
+
+    let (log_reader, log_writer) = tracing_messagevec::new::<String>();
+    let (repaint_layer, repaint_handle) =
+        repaint_once_cell();
+
+    tracing_subscriber::registry()
+        .with(
+            tracing_subscriber::fmt::layer()
+                .without_time()
+                .with_target(false),
+        )
+        .with(repaint_layer)
+        .with(log_writer)
+        .init();
+
+    let (tx, rx) = mpsc::channel();
+
+    gui::noninteractive::show(repaint_handle, rx, log_reader.clone());
 }
 
 #[cfg(disabled)] // dev
@@ -105,6 +131,7 @@ fn save_rgb(image: &DXTImage, array_index: usize, file: &Utf8Path) -> Result<()>
     // // rgb.save(&file, CONTAINER_PNG)
 }
 
+#[cfg(windows)]
 fn export_texture(
     format: TextureFormat,
     inputs: &[Utf8PathBuf],
@@ -163,6 +190,7 @@ fn export_texture(
     Ok(output_count)
 }
 
+#[cfg(windows)]
 fn export_textures(groups: impl IntoIterator<Item = Categorized>) -> Result<(String, Warnings)> {
     let mut input_count: usize = 0;
     let mut output_count: usize = 0;
@@ -227,6 +255,7 @@ fn export_textures(groups: impl IntoIterator<Item = Categorized>) -> Result<(Str
     ))
 }
 
+#[cfg(windows)]
 fn import_images(groups: impl IntoIterator<Item = Categorized>) -> Result<(String, Warnings)> {
     let mut input_count: usize = 0;
     let mut output_count: usize = 0;
@@ -311,6 +340,7 @@ fn import_images(groups: impl IntoIterator<Item = Categorized>) -> Result<(Strin
     ))
 }
 
+#[cfg(windows)]
 fn bring_dx_to_format<'a>(
     image: &'a DXTImage,
     format: DXGI_FORMAT,
@@ -358,6 +388,7 @@ fn bring_dx_to_format<'a>(
     }
 }
 
+#[cfg(windows)]
 fn load_image_array(
     array_size: usize,
     compressed_format: DXGI_FORMAT,
@@ -404,6 +435,7 @@ fn load_image_array(
     .map(|img| (img, warnings))?)
 }
 
+#[cfg(windows)]
 fn import_image(
     format: TextureFormat,
     inputs: &[Utf8PathBuf],
@@ -532,6 +564,7 @@ fn import_image(
     Ok((output_count, warnings))
 }
 
+#[cfg(windows)]
 #[test]
 fn test_import() {
     log_for_tests(true);
@@ -547,6 +580,7 @@ fn test_import() {
     event!(INFO, message = %string);
 }
 
+#[cfg(windows)]
 #[test]
 fn test_export() {
     log_for_tests(true);

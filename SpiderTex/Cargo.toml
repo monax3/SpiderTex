@@ -10,9 +10,9 @@ bytemuck = "1.12.1"
 camino = "1.1.1"
 directxtex = { path = "../directxtex" }
 eframe = "0.19.0"
-texturesofspiderman = { path = "../texturesofspiderman" }
-texturesofspiderman-egui = { version = "0.1.0", path = "../texturesofspiderman-egui" }
-tracing = "0.1.36"
+once_cell = "1.13.1"
+texturesofspiderman = { version = "1.1.0-beta7", path = "../texturesofspiderman" }
+tracing = { version = "0.1.36", features = ["max_level_trace", "release_max_level_trace"]}
 tracing-egui-repaint = { version = "1.0.0-rc1", path = "../tracing-egui-repaint" }
 tracing-messagevec = { version = "0.1.0", path = "../tracing-messagevec" }
 tracing-oncecell = { version = "1.0.0-beta1", path = "../tracing-oncecell" }
