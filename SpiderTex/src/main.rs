@@ -77,7 +77,21 @@ fn main() {
 
     let (tx, rx) = mpsc::channel();
 
-    gui::noninteractive::show(repaint_handle, rx, log_reader.clone());
+    std::thread::spawn(move || {
+        let lines: Vec<_> = include_str!("main.rs").lines().collect();
+
+        let total_lines = lines.len();
+        for (i, line) in lines.iter().enumerate() {
+            event!(INFO, "{line}");
+            let pct = (i as f32) / (total_lines as f32);
+            let _ = tx.send(pct);
+            std::thread::sleep(std::time::Duration::from_millis(5));
+            // break;
+        }
+        let _ = tx.send(1.0);
+    });
+
+    gui::noninteractive::show(repaint_handle, rx, log_reader);
 }
 
 #[cfg(disabled)] // dev

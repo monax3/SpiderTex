@@ -1,12 +1,12 @@
 use eframe::{
-    egui::{vec2, CentralPanel, ProgressBar, Style, TopBottomPanel, Visuals},
+    egui::{vec2, CentralPanel, ProgressBar, Style, TopBottomPanel, Visuals, Layout},
     epaint::FontId,
     run_native, App, NativeOptions,
 };
+use std::sync::mpsc;
 use tracing::{event, Level};
 use tracing_egui_repaint::oncecell::RepaintHandle;
 use tracing_messagevec::{LogReader, LogWriter};
-use std::sync::mpsc;
 
 use super::widgets::log::LogWidget;
 use crate::APP_TITLE;
@@ -40,8 +40,12 @@ pub fn test_log() {
     }
 }
 
-pub fn show(repaint_handle: RepaintHandle, progress_rx: mpsc::Receiver<f32>, log_reader: LogReader<String>) {
-    let window_size = vec2(200.0, 600.0);
+pub fn show(
+    repaint_handle: RepaintHandle,
+    progress_rx: mpsc::Receiver<f32>,
+    log_reader: LogReader<String>,
+) {
+    let window_size = vec2(500.0, 600.0);
 
     run_native(
         APP_TITLE,
@@ -114,13 +118,26 @@ impl App for Noninteractive {
             self.state = progress.into();
         }
 
-        CentralPanel::default().show(ctx, |ui| {
-            ui.add(LogWidget(&self.log_reader));
-        });
-
         // TODO: turn this into a close button when complete
         TopBottomPanel::bottom("Progress").show(ctx, |ui| {
-            ui.add(ProgressBar::new(self.state.as_f32()).animate(true));
+            let line_height = ui.text_style_height(&eframe::egui::TextStyle::Monospace);
+
+            ui.with_layout(Layout::centered_and_justified(eframe::egui::Direction::TopDown), |ui| {
+
+            ui.set_width(ui.available_width());
+            ui.set_height(line_height * 2.0);
+
+            if self.state.is_complete() {
+                ui.button("Close");
+            } else {
+                ui.add(ProgressBar::new(self.state.as_f32()).animate(true));
+            }
+
+            });
+        });
+
+        CentralPanel::default().show(ctx, |ui| {
+            ui.add(LogWidget(&self.log_reader));
         });
     }
 
