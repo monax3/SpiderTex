@@ -113,12 +113,11 @@ pub struct Noninteractive {
 }
 
 impl App for Noninteractive {
-    fn update(&mut self, ctx: &eframe::egui::Context, _frame: &mut eframe::Frame) {
+    fn update(&mut self, ctx: &eframe::egui::Context, frame: &mut eframe::Frame) {
         if let Some(progress) = self.rx.try_iter().last() {
             self.state = progress.into();
         }
 
-        // TODO: turn this into a close button when complete
         TopBottomPanel::bottom("Progress").show(ctx, |ui| {
             let line_height = ui.text_style_height(&eframe::egui::TextStyle::Monospace);
 
@@ -126,9 +125,11 @@ impl App for Noninteractive {
 
             ui.set_width(ui.available_width());
             ui.set_height(line_height * 2.0);
-
+            /* new version: layout two columns into galleys with ui.fonts().layout_job() */
             if self.state.is_complete() {
-                ui.button("Close");
+                if ui.button("Close").clicked() {
+                    frame.close();
+                }
             } else {
                 ui.add(ProgressBar::new(self.state.as_f32()).animate(true));
             }
