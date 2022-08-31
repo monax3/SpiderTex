@@ -22,6 +22,7 @@ allow = [
     "clippy::missing_safety_doc",
     "clippy::missing_errors_doc",
     "clippy::missing_panics_doc",
+    "clippy::cargo_common_metadata",
 
     # Often worse for readability
     "clippy::module_name_repetitions",

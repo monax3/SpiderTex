@@ -1,9 +1,10 @@
 [package]
-name = "SpiderTex"
-version = "0.1.0"
+name = "texturesofspiderman-bin"
+version = "1.2.0-rc1"
 edition = "2021"
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/monax3/SpiderTex"
+default-run = "SpiderTex"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -21,12 +22,17 @@ tracing-messagevec = { version = "0.1.0", path = "../tracing-messagevec" }
 tracing-oncecell = { version = "1.0.0-beta1", path = "../tracing-oncecell" }
 tracing-subscriber = { version = "0.3.15", features = ["registry"] }
 dxgi-format = { path = "../dxgi-format" }
+backtrace = "0.3.66"
+parking_lot = "0.12.1"
+image = { version = "0.24.3", default-features = false }
+arboard = "2.1.1"
 
 [target.'cfg(windows)'.dependencies]
 directxtex = { path = "../directxtex", features = ["windows-imaging"] }
 windows-imaging = { path = "../windows-imaging" }
 windows = { version = "0.39.0", features = [
     "Win32_Foundation",
+    "Win32_Graphics_Gdi",
     "Win32_System_LibraryLoader",
     "Win32_UI_WindowsAndMessaging",
 ]}

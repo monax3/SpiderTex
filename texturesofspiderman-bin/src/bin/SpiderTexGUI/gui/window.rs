@@ -18,7 +18,6 @@ use eframe::egui::{
 };
 use eframe::emath::Align;
 use eframe::{run_native, App, Frame as EFrame, NativeOptions};
-use image::DynamicImage;
 use texturesofspiderman::formats::TextureFormat;
 use texturesofspiderman::prelude::*;
 

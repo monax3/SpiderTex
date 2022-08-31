@@ -4,6 +4,7 @@ use std::fmt::Display;
 
 #[allow(clippy::wildcard_imports)] use windows::Win32::Graphics::Dxgi::Common::*;
 pub use windows::Win32::Graphics::Dxgi::Common::DXGI_FORMAT;
+pub use windows::Win32::Graphics::Dxgi::Common::DXGI_FORMAT_R8G8B8A8_UNORM as RGBA8;
 
 // FIXME: update these
 pub const HDR_FORMATS: &[DXGI_FORMAT] = &[

@@ -1,6 +1,8 @@
+// FIXME: file types etc can be found with IWICBitmapDecoderInfo
+
 use windows::core::GUID;
 use windows::Win32::Graphics::Imaging::{
-    GUID_ContainerFormatPng, GUID_WICPixelFormat24bppBGR, GUID_WICPixelFormat32bppRGBA,
+    GUID_ContainerFormatPng, GUID_ContainerFormatIco, GUID_WICPixelFormat24bppBGR, GUID_WICPixelFormat32bppRGBA,
 };
 
 #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
@@ -41,12 +43,14 @@ impl From<PixelFormat> for &'static GUID {
 
 pub enum Container {
     Png,
+    Ico,
 }
 
 impl Container {
     pub fn extension(self) -> &'static str {
         match self {
             Container::Png => "png",
+            Container::Ico => "ico",
         }
     }
 
@@ -54,16 +58,19 @@ impl Container {
         self.into()
     }
 
+    // FIXME: This should be a try_from
     pub fn from_guid(guid: &GUID) -> Option<Self> {
         match guid {
             guid if guid == &GUID_ContainerFormatPng => Some(Self::Png),
+            guid if guid == &GUID_ContainerFormatIco => Some(Self::Ico),
             _ => None,
         }
     }
 
+    // FIXME: This chould? be a try_from
     pub fn from_extension(ext: &str) -> Option<Self> {
         match ext {
-            ext if ext.eq_ignore_ascii_case("png") => Some(Self::Png),
+            ext if ext.eq_ignore_ascii_case("ico") => Some(Self::Ico),
             _ => None,
         }
     }
@@ -73,6 +80,7 @@ impl From<Container> for &'static GUID {
     fn from(container: Container) -> &'static GUID {
         match container {
             Container::Png => &GUID_ContainerFormatPng,
+            Container::Ico => &GUID_ContainerFormatIco,
         }
     }
 }

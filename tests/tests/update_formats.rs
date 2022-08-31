@@ -32,6 +32,7 @@ struct Override {
     header:  String,
 }
 
+#[cfg(disabled)]
 fn load_overrides(registry: &mut Registry) -> Result<()> {
     const OVERRIDES: &str = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/overrides.json"));
     let overrides: Vec<Override> = serde_json::from_str(OVERRIDES)?;
@@ -51,7 +52,7 @@ fn main() -> Result<()> {
     texturesofspiderman::util::log_for_tests(true);
 
     let mut registry = Registry::load()?;
-    load_overrides(&mut registry)?;
+    // load_overrides(&mut registry)?;
 
     let testdir = Utf8Path::new(TESTDATA);
 

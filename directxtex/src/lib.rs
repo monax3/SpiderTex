@@ -1,39 +1,31 @@
 #![allow(unsafe_code)]
 
-use std::{borrow::Cow, path::Path};
+use std::borrow::Cow;
 use std::mem::MaybeUninit;
+use std::path::Path;
 
-use windows_compat::{Result, HSTRING, errors::E_INVALIDARG};
-use dxgi_format::{DXGI_FORMAT, DxgiFormatExt};
 // use windows::Win32::Graphics::Dxgi::Common::DXGI_FORMAT_R8G8B8A8_UNORM;
-
 use directxtex_sys::DXPtr;
-#[allow(clippy::wildcard_imports)]
-use directxtex_sys::*;
+#[allow(clippy::wildcard_imports)] use directxtex_sys::*;
 pub use directxtex_sys::{TexMetadata, TEX_DIMENSION, TEX_FILTER_FLAGS};
-
-#[cfg(feature = "windows-imaging")]
-pub use windows_imaging::Container;
-
-#[must_use]
-#[inline]
-pub fn is_compressed(format: DXGI_FORMAT) -> bool {
-    unsafe { IsCompressed(format) > 0 }
-}
+pub use dxgi_format::{DxgiFormatExt, DXGI_FORMAT, self};
+use windows_compat::errors::E_INVALIDARG;
+use windows_compat::{Result, HSTRING};
+#[cfg(feature = "windows-imaging")] pub use windows_imaging::Container;
 
 #[must_use]
 #[inline]
-pub fn is_srgb(format: DXGI_FORMAT) -> bool {
-    unsafe { IsSRGB(format) > 0 }
-}
+pub fn is_compressed(format: DXGI_FORMAT) -> bool { unsafe { IsCompressed(format) > 0 } }
+
+#[must_use]
+#[inline]
+pub fn is_srgb(format: DXGI_FORMAT) -> bool { unsafe { IsSRGB(format) > 0 } }
 
 #[repr(transparent)]
 pub struct DXTImage(DXPtr);
 
 impl Drop for DXTImage {
-    fn drop(&mut self) {
-        let _ignore = unsafe { V2_FreeImage(self.0) };
-    }
+    fn drop(&mut self) { let _ignore = unsafe { V2_FreeImage(self.0) }; }
 }
 
 impl DXTImage {
@@ -78,7 +70,7 @@ impl DXTImage {
             )
             .ok()
             .map(|_| DXTImage(out.assume_init()))
-            }
+        }
     }
 
     #[inline]
@@ -105,7 +97,7 @@ impl DXTImage {
             )
             .ok()
             .map(|_| DXTImage(out.assume_init()))
-            }
+        }
     }
 
     // Helper for extracting intermediaries when chaining actions
@@ -118,11 +110,7 @@ impl DXTImage {
     // Helper for chaining actions conditionally
     #[inline]
     pub fn map_if(self, condition: bool, func: impl FnOnce(&Self) -> Result<Self>) -> Result<Self> {
-        if condition {
-            func(&self)
-        } else {
-            Ok(self)
-        }
+        if condition { func(&self) } else { Ok(self) }
     }
 
     #[inline]
@@ -136,9 +124,9 @@ impl DXTImage {
 
         unsafe {
             GenerateMipmaps(self.0, flags, usize::from(mipmaps), out.as_mut_ptr())
-            .ok()
-            .map(|_| DXTImage(out.assume_init()))
-            }
+                .ok()
+                .map(|_| DXTImage(out.assume_init()))
+        }
     }
 
     #[inline]
@@ -156,9 +144,9 @@ impl DXTImage {
 
         unsafe {
             V2_Compress(self.0, to_format, out.as_mut_ptr())
-            .ok()
-            .map(|_| DXTImage(out.assume_init()))
-            }
+                .ok()
+                .map(|_| DXTImage(out.assume_init()))
+        }
     }
 
     #[inline]
@@ -167,9 +155,9 @@ impl DXTImage {
 
         unsafe {
             Resize(self.0, width, height, TEX_FILTER_FLAGS(0), out.as_mut_ptr())
-            .ok()
-            .map(|_| DXTImage(out.assume_init()))
-            }
+                .ok()
+                .map(|_| DXTImage(out.assume_init()))
+        }
     }
 
     #[inline]
@@ -178,9 +166,9 @@ impl DXTImage {
 
         unsafe {
             V2_Decompress(self.0, out.as_mut_ptr())
-            .ok()
-            .map(|_| DXTImage(out.assume_init()))
-            }
+                .ok()
+                .map(|_| DXTImage(out.assume_init()))
+        }
     }
 
     #[inline]
@@ -189,9 +177,54 @@ impl DXTImage {
 
         unsafe {
             V2_Convert(self.0, to_format, flags, out.as_mut_ptr())
-            .ok()
-            .map(|_| DXTImage(out.assume_init()))
+                .ok()
+                .map(|_| DXTImage(out.assume_init()))
+        }
+    }
+
+    // FIXME: maybe this needs converting to a specific format before compression?
+    // FIXME: have more validation
+    // FIXME: go via helper methods
+    #[inline]
+    pub fn into_format(self, to_format: DXGI_FORMAT) -> Result<Self> {
+        let metadata = self.metadata()?;
+        if metadata.format == to_format {
+            return Ok(self);
+        }
+
+        let temp = if is_compressed(metadata.format) {
+            self.decompress()?
+        } else {
+            self
+        };
+
+        if is_compressed(to_format) {
+            temp.compress(to_format)
+        } else {
+            let metadata = temp.metadata()?;
+            if metadata.format == to_format {
+                Ok(temp)
+            } else {
+                temp.convert(to_format, TEX_FILTER_FLAGS::default())
             }
+        }
+    }
+
+    // FIXME: do compress/decompress/convert as needed
+    #[inline]
+    pub fn into_converted(self, to_format: DXGI_FORMAT, flags: TEX_FILTER_FLAGS) -> Result<Self> {
+        let metadata = self.metadata()?;
+        if metadata.format == to_format {
+            Ok(self)
+        } else {
+            let mut out = MaybeUninit::uninit();
+
+            unsafe {
+                V2_Convert(self.0, to_format, flags, out.as_mut_ptr())
+                    .ok()
+                    .map(|_| DXTImage(out.assume_init()))
+            }
+        }
     }
 
     #[inline]
@@ -200,9 +233,9 @@ impl DXTImage {
 
         unsafe {
             V2_PremultiplyAlpha(self.0, reverse, out.as_mut_ptr())
-            .ok()
-            .map(|_| DXTImage(out.assume_init()))
-            }
+                .ok()
+                .map(|_| DXTImage(out.assume_init()))
+        }
     }
 
     #[inline]
@@ -219,9 +252,7 @@ impl DXTImage {
     #[allow(clippy::len_without_is_empty)]
     #[must_use]
     #[inline]
-    pub fn len(&self) -> usize {
-        unsafe { BufferSize(self.0) }
-    }
+    pub fn len(&self) -> usize { unsafe { BufferSize(self.0) } }
 
     // FIXME: rename to buffer
     pub fn pixels(&self) -> Result<Vec<u8>> {
@@ -236,9 +267,7 @@ impl DXTImage {
         Ok(data)
     }
 
-    pub fn num_images(&self) -> Result<usize> {
-        Ok(unsafe { ImageCount(self.0) })
-    }
+    pub fn num_images(&self) -> Result<usize> { Ok(unsafe { ImageCount(self.0) }) }
 
     pub fn image_len(&self, array_index: usize) -> Result<usize> {
         Ok(unsafe { ImageSize(self.0, array_index) })
@@ -257,25 +286,29 @@ impl DXTImage {
         Ok(data)
     }
 
-    pub fn save(
-        &self,
-        array_index: usize,
-        file_name: impl AsRef<Path>,
-    ) -> Result<()> {
+    pub fn save(&self, array_index: usize, file_name: impl AsRef<Path>) -> Result<()> {
         let file_name = file_name.as_ref();
-
 
         match file_name.extension().and_then(|ext| ext.to_str()) {
             Some(ext) if ext.eq_ignore_ascii_case("dds") => self.save_dds(file_name.as_os_str()),
-            Some(ext) if ext.eq_ignore_ascii_case("tga") => self.save_tga(array_index, file_name.as_os_str()),
-            Some(ext) if ext.eq_ignore_ascii_case("hdr") => self.save_hdr(array_index, file_name.as_os_str()),
-            Some(ext) if ext.eq_ignore_ascii_case("exr") => self.save_exr(array_index, file_name.as_os_str()),
+            Some(ext) if ext.eq_ignore_ascii_case("tga") => {
+                self.save_tga(array_index, file_name.as_os_str())
+            }
+            Some(ext) if ext.eq_ignore_ascii_case("hdr") => {
+                self.save_hdr(array_index, file_name.as_os_str())
+            }
+            Some(ext) if ext.eq_ignore_ascii_case("exr") => {
+                self.save_exr(array_index, file_name.as_os_str())
+            }
             #[cfg(feature = "windows-imaging")]
-            Some(ext) =>
-                if let Some(container) = Container::from_extension(ext) { self.save_wic(array_index, container, file_name.as_os_str()) } else {
+            Some(ext) => {
+                if let Some(container) = Container::from_extension(ext) {
+                    self.save_wic(array_index, container, file_name.as_os_str())
+                } else {
                     E_INVALIDARG.ok()
                 }
-            _ => E_INVALIDARG.ok()
+            }
+            _ => E_INVALIDARG.ok(),
         }
     }
 
@@ -455,7 +488,7 @@ pub fn load(file_name: impl AsRef<Path>) -> Result<DXTImage> {
         Some(ext) if ext.eq_ignore_ascii_case("exr") => load_exr(file_name.as_os_str()),
         #[cfg(feature = "windows-imaging")]
         Some(_) => load_wic(file_name.as_os_str()),
-        _ => Err(E_INVALIDARG.into())
+        _ => Err(E_INVALIDARG.into()),
     }
 }
 
@@ -539,6 +572,24 @@ pub fn load_wic(file_name: impl Into<HSTRING>) -> Result<DXTImage> {
     }
 }
 
+pub fn load_wic_from_memory(buffer: &[u8]) -> Result<DXTImage> {
+    let mut handle = MaybeUninit::uninit();
+
+    // FIXME initialize_com()?;
+
+    unsafe {
+        LoadFromWICMemory(
+            buffer.as_ptr().cast(),
+            buffer.len(),
+            0,
+            std::ptr::null_mut(),
+            handle.as_mut_ptr(),
+        )
+        .ok()
+        .map(|_| DXTImage(handle.assume_init()))
+    }
+}
+
 pub fn metadata(file_name: impl AsRef<Path>) -> Result<TexMetadata> {
     let file_name = file_name.as_ref();
 
@@ -549,7 +600,7 @@ pub fn metadata(file_name: impl AsRef<Path>) -> Result<TexMetadata> {
         Some(ext) if ext.eq_ignore_ascii_case("exr") => metadata_from_exr(file_name.as_os_str()),
         #[cfg(feature = "windows-imaging")]
         Some(_) => metadata_from_wic(file_name.as_os_str()),
-        _ => Err(E_INVALIDARG.into())
+        _ => Err(E_INVALIDARG.into()),
     }
 }
 

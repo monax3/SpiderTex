@@ -15,7 +15,7 @@ fn windows() {
         "/app_manifest.xml"
     )));
 
-    res.set_icon("../SpiderTex.ico");
+    res.set_icon("SpiderTex.ico");
 
     res.compile().expect("Failed to compile resources");
 }

@@ -17,7 +17,7 @@ pub mod inputs;
 // pub mod rgb;
 pub mod texture_file;
 
-pub const APP_TITLE: &str = concat!("Spider-Man Texture Converter v", env!("CARGO_PKG_VERSION"));
+pub(crate) const APP_TITLE: &str = concat!("Spider-Man Texture Converter v", env!("CARGO_PKG_VERSION"));
 
 #[cfg(doc)]
 #[doc(inline)]
@@ -30,7 +30,7 @@ pub const IMAGERS_RESIZE_FILTER: image::imageops::FilterType = image::imageops::
 pub const DEFAULT_IMAGE_FORMAT: ImageFormat = ImageFormat::Png;
 
 pub mod prelude {
-    pub use tracing::{event, instrument, span};
+    pub use tracing::{event, instrument, span, Level};
     pub const ERROR: tracing::Level = tracing::Level::ERROR;
     pub const WARN: tracing::Level = tracing::Level::WARN;
     pub const INFO: tracing::Level = tracing::Level::INFO;

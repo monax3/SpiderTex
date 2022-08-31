@@ -3,6 +3,8 @@
 #![allow(non_upper_case_globals)]
 #![allow(unsafe_code)] // no FFI without unsafe
 
+use std::ffi::c_void;
+
 use dxgi_format::DXGI_FORMAT;
 use windows_compat::{HRESULT, GUID};
 
@@ -175,6 +177,14 @@ extern "C" {
 
     pub fn LoadFromWICFile(
         file: *const u16,
+        wic_flags: WIC_FLAGS,
+        metadata: *mut TexMetadata,
+        out: *mut DXPtr,
+    ) -> HRESULT;
+
+    pub fn LoadFromWICMemory(
+        source: *const c_void,
+        size: usize,
         wic_flags: WIC_FLAGS,
         metadata: *mut TexMetadata,
         out: *mut DXPtr,

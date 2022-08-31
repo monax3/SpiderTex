@@ -1,59 +1,36 @@
 use eframe::{
     egui::{vec2, CentralPanel, ProgressBar, Style, TopBottomPanel, Visuals, Layout},
     epaint::FontId,
-    run_native, App, NativeOptions,
+    run_native, App, NativeOptions, IconData,
 };
 use std::sync::mpsc;
 use tracing::{event, Level};
 use tracing_egui_repaint::oncecell::RepaintHandle;
 use tracing_messagevec::{LogReader, LogWriter};
-
-use super::widgets::log::LogWidget;
+use texturesofspiderman::prelude::*;
 use crate::APP_TITLE;
-
-#[cfg(disabled)]
-pub fn test_log() {
-    use tracing_subscriber::prelude::*;
-
-    let (log_reader, log_writer) = tracing_messagevec::new::<String>();
-    let (repaint_layer, repaint_handle) =
-        tracing_oncecell::OnceCellLayer::<tracing_egui_repaint::Repaint>::new();
-
-    tracing_subscriber::registry()
-        .with(
-            tracing_subscriber::fmt::layer()
-                .without_time()
-                .with_target(false),
-        )
-        .with(repaint_layer)
-        .with(log_writer)
-        .init();
-
-    event!(Level::DEBUG, "debug message");
-    event!(Level::TRACE, "trace message");
-    event!(Level::WARN, "a warning");
-    event!(Level::ERROR, "this is an error");
-
-    eprintln!("printing log:");
-    for (level, message) in log_reader.iter() {
-        eprintln!("{level:>5} {message}");
-    }
-}
+use crate::gui::widgets;
 
 pub fn show(
     repaint_handle: RepaintHandle,
     progress_rx: mpsc::Receiver<f32>,
     log_reader: LogReader<String>,
-) {
-    let window_size = vec2(500.0, 600.0);
+) -> Result<()> {
+    let window_size = vec2(400.0, 400.0);
+
+    #[cfg(windows)]
+    let icon_data = Some(crate::win32::icon_data()?);
+    #[cfg(not(windows))] // FIXME, maybe
+    let icon_data = None;
 
     run_native(
         APP_TITLE,
         NativeOptions {
             initial_window_size: Some(window_size),
-            min_window_size: Some(window_size),
+            min_window_size: Some(vec2(200.0, 200.0)),
             drag_and_drop_support: false,
             resizable: true,
+            icon_data,
             ..Default::default()
         },
         Box::new(move |cc| {
@@ -66,56 +43,32 @@ pub fn show(
             });
 
             Box::new(Noninteractive {
-                state: State::Waiting,
+                progress: 0.0,
                 rx: progress_rx,
                 log_reader,
             })
         }),
     );
-}
 
-enum State {
-    Waiting,
-    Progress(f32),
-    Complete,
-}
-
-impl State {
-    fn as_f32(&self) -> f32 {
-        match self {
-            State::Waiting => 0.0,
-            State::Progress(progress) => *progress,
-            State::Complete => 1.0,
-        }
-    }
-
-    fn is_complete(&self) -> bool {
-        matches!(self, State::Complete)
-    }
-}
-
-impl From<f32> for State {
-    fn from(progress: f32) -> Self {
-        if progress <= 0.0 {
-            State::Waiting
-        } else if progress >= 1.0 {
-            State::Complete
-        } else {
-            State::Progress(progress)
-        }
-    }
+    Ok(())
 }
 
 pub struct Noninteractive {
-    state: State,
+    progress: f32,
     rx: mpsc::Receiver<f32>,
     log_reader: LogReader<String>,
+}
+
+impl Noninteractive {
+    fn is_complete(&self) -> bool {
+        self.progress >= 1.0
+    }
 }
 
 impl App for Noninteractive {
     fn update(&mut self, ctx: &eframe::egui::Context, frame: &mut eframe::Frame) {
         if let Some(progress) = self.rx.try_iter().last() {
-            self.state = progress.into();
+            self.progress = progress;
         }
 
         TopBottomPanel::bottom("Progress").show(ctx, |ui| {
@@ -125,24 +78,24 @@ impl App for Noninteractive {
 
             ui.set_width(ui.available_width());
             ui.set_height(line_height * 2.0);
-            /* new version: layout two columns into galleys with ui.fonts().layout_job() */
-            if self.state.is_complete() {
+
+            if self.is_complete() {
                 if ui.button("Close").clicked() {
                     frame.close();
                 }
             } else {
-                ui.add(ProgressBar::new(self.state.as_f32()).animate(true));
+                ui.add(ProgressBar::new(self.progress).animate(true));
             }
 
             });
         });
 
         CentralPanel::default().show(ctx, |ui| {
-            ui.add(LogWidget(&self.log_reader));
+            ui.add(widgets::LogWidget(&self.log_reader))
         });
     }
 
     fn on_close_event(&mut self) -> bool {
-        self.state.is_complete()
+        self.is_complete()
     }
 }

@@ -1,8 +1,7 @@
 [workspace]
 members = [
     "texturesofspiderman",
-    "SpiderTex",
-    # "SpiderTexGUI",
+    "texturesofspiderman-bin",
     # "format-experiment",
     "tracing-egui-repaint",
     "tracing-oncecell",
@@ -13,6 +12,6 @@ members = [
     "windows-imaging",
     "windows-compat",
     "initialize-com",
-    # "tests",
+    "tests",
 ]
 resolver = "2"

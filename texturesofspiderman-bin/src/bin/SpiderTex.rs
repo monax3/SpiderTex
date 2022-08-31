@@ -1,5 +1,3 @@
-// FIXME: make this tool work again too, with panic handler
-
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 #![allow(non_snake_case)]
 
@@ -17,18 +15,15 @@ use texturesofspiderman::images::Warnings;
 use texturesofspiderman::inputs::Inputs;
 use texturesofspiderman::prelude::*;
 use texturesofspiderman::util::{log_for_tests};
-use texturesofspiderman::{inputs, APP_TITLE};
+use texturesofspiderman::{inputs};
+use texturesofspiderman_bin::{gui, APP_TITLE, setup_logging};
+use tracing_egui_repaint::oncecell::RepaintHandle;
+use tracing_messagevec::LogReader;
 use std::sync::mpsc;
 
 #[cfg(windows)]
-use texturesofspiderman::util::{message_box_error, message_box_ok};
+use texturesofspiderman::util::{message_box_error};
 
-pub mod gui  {
-    pub mod noninteractive;
-    pub mod widgets {
-        pub mod log;
-    }
-}
 
 #[cfg(not(windows))]
 fn message_box_error(text: impl Into<String>, _caption: &str) {
@@ -58,40 +53,28 @@ fn run(mut inputs: Inputs) -> Result<(String, Warnings)> {
 }
 
 fn main() {
-    use tracing_subscriber::prelude::*;
-    use tracing_egui_repaint::oncecell::repaint_once_cell;
+    let (log_reader, repaint_handle) = setup_logging();
 
-    let (log_reader, log_writer) = tracing_messagevec::new::<String>();
-    let (repaint_layer, repaint_handle) =
-        repaint_once_cell();
-
-    tracing_subscriber::registry()
-        .with(
-            tracing_subscriber::fmt::layer()
-                .without_time()
-                .with_target(false),
-        )
-        .with(repaint_layer)
-        .with(log_writer)
-        .init();
+    let _com = initialize_com::com_initialized().unwrap();
 
     let (tx, rx) = mpsc::channel();
 
-    std::thread::spawn(move || {
-        let lines: Vec<_> = include_str!("main.rs").lines().collect();
+    // std::thread::spawn(move || {
+    //     let lines: Vec<_> = include_str!("SpiderTex.rs").lines().collect();
 
-        let total_lines = lines.len();
-        for (i, line) in lines.iter().enumerate() {
-            event!(INFO, "{line}");
-            let pct = (i as f32) / (total_lines as f32);
-            let _ = tx.send(pct);
-            std::thread::sleep(std::time::Duration::from_millis(5));
-            // break;
-        }
-        let _ = tx.send(1.0);
-    });
+    //     let total_lines = lines.len();
+    //     for (i, line) in lines.iter().enumerate() {
+    //         event!(INFO, "{line}");
+    //         let pct = (i as f32) / (total_lines as f32);
+    //         let _ = tx.send(pct);
+    //         // std::thread::sleep(std::time::Duration::from_millis(2));
+    //         // break;
+    //     }
+    //     let _ = tx.send(1.0);
+    // });
+    _ = tx.send(1.0);
 
-    gui::noninteractive::show(repaint_handle, rx, log_reader);
+    gui::noninteractive::show(repaint_handle, rx, log_reader).unwrap();
 }
 
 #[cfg(disabled)] // dev

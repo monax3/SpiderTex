@@ -241,7 +241,7 @@ pub fn walk_new<'a>(
 
     std::iter::from_fn(move || loop {
         while let Some(walkdir) = dirs.front_mut() {
-            while let Some(entry) = walkdir.next() {
+            for entry in walkdir {
                 match entry {
                     Ok(entry) => {
                         if entry.path().is_file() {

@@ -10,7 +10,7 @@ use windows::core::HSTRING;
 use windows::Win32::Graphics::Imaging::D2D::IWICImagingFactory2;
 use windows::Win32::Graphics::Imaging::{
     CLSID_WICImagingFactory, CLSID_WICImagingFactory2, WICBitmapDitherTypeNone,
-    WICBitmapEncoderNoCache, WICBitmapPaletteTypeMedianCut,
+    WICBitmapEncoderNoCache, WICBitmapPaletteTypeMedianCut, WICDecodeMetadataCacheOnDemand, IWICBitmapFrameDecode,
 };
 pub use windows::Win32::Graphics::Imaging::{
     IWICBitmap, IWICBitmapSource, IWICFormatConverter, IWICImagingFactory, WICRect,
@@ -38,19 +38,6 @@ pub fn wic2() -> Result<IWICImagingFactory2> {
     unsafe { CoCreateInstance(&CLSID_WICImagingFactory2, None, CLSCTX_INPROC_SERVER) }
 }
 
-// pub trait AsWICImagingFactory {
-//     fn as_wic_factory<'a>(&'a self) -> &'a IWICImagingFactory;
-// }
-
-// impl<T> AsWICImagingFactory for T
-// where
-//     for<'a> &'a IWICImagingFactory: From<&'a T>,
-// {
-//     fn as_wic_factory<'a>(&'a self) -> &'a IWICImagingFactory {
-//         self.into()
-//     }
-// }
-
 pub fn bitmap_from_memory<'wic, WIC> (
     factory: WIC,
     format: PixelFormat,
@@ -64,6 +51,27 @@ pub fn bitmap_from_memory<'wic, WIC> (
     unsafe {
         factory.CreateBitmapFromMemory(width as u32, height as u32, format.as_guid(), stride, data)
     }
+}
+pub fn container_from_memory<'wic, WIC>(
+    factory: WIC,
+    container: Container,
+    data: &[u8],
+) -> Result<IWICBitmapFrameDecode> where &'wic IWICImagingFactory: From<WIC> {
+    let factory: &IWICImagingFactory = factory.into();
+
+    let stream = unsafe {
+        let stream = factory.CreateStream()?;
+        stream.InitializeFromMemory(data)?;
+        stream
+    };
+
+    let decoder = unsafe {
+        let decoder = factory.CreateDecoder(container.as_guid(), std::ptr::null())?;
+        decoder.Initialize(&stream, WICDecodeMetadataCacheOnDemand)?;
+        decoder
+    };
+
+    unsafe { decoder.GetFrame(0) }
 }
 
 // pub fn bitmap_from_directxtex(&self, image: &DXImage, array_index: usize) -> Result<WICSource> {
@@ -91,11 +99,6 @@ pub fn bitmap_from_memory<'wic, WIC> (
 
 pub trait Bitmap {
     fn as_wic_bitmap(&self) -> &IWICBitmap;
-
-    fn pixel_format(&self) -> Result<PixelFormat> {
-        unsafe { self.as_wic_bitmap().GetPixelFormat() }
-            .map(|guid| PixelFormat::from_guid(&guid).unwrap_or_else(|| unimplemented!()))
-    }
 }
 
 // compiler bug workaround
@@ -131,6 +134,36 @@ pub trait BitmapSource {
             Width: width.try_into().unwrap_or(i32::MAX),
             Height: width.try_into().unwrap_or(i32::MAX),
         })
+    }
+
+    fn pixels(&self) -> Result<Vec<u8>> {
+        // FIXME: deal with stride, bpp
+        // FIXME: stride can be done with IWICPixelFormatInfo
+        // FIXME: don't load icon 1, make transparency work
+
+        let rect = self.rect()?;
+        let bpp = self.pixel_format()?.bpp() as u32;
+
+        let stride = (rect.Width as u32) * bpp;
+        let size = (rect.Height as u32) * stride;
+
+        unsafe {
+            // is there a better solutionhere than a blank buffer?
+            // let mut buffer = Vec::with_capacity(size as usize);
+            let mut buffer = vec![0; size as usize];
+
+            eprintln!("copy pixels with stride {stride}, buf_size {}",buffer.len());
+
+            self.as_wic_bitmap_source().CopyPixels(&rect, stride, &mut buffer).map(|_| {
+                buffer.set_len(size as usize);
+                buffer
+            })
+        }
+    }
+
+    fn pixel_format(&self) -> Result<PixelFormat> {
+        unsafe { self.as_wic_bitmap_source().GetPixelFormat() }
+            .map(|guid| PixelFormat::from_guid(&guid).unwrap_or_else(|| unimplemented!()))
     }
 
     fn convert_to_pixel_format<'wic, WIC>(
@@ -219,6 +252,12 @@ impl BitmapSource for IWICBitmapSource {
 }
 
 impl BitmapSource for IWICFormatConverter {
+    fn as_wic_bitmap_source(&self) -> &IWICBitmapSource {
+        self.into()
+    }
+}
+
+impl BitmapSource for IWICBitmapFrameDecode {
     fn as_wic_bitmap_source(&self) -> &IWICBitmapSource {
         self.into()
     }
