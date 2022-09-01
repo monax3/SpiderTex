@@ -20,3 +20,7 @@ windows = { version = "0.39.0", features = [
     "Win32_System_Com_StructuredStorage",
     "Win32_System_SystemServices",
 ] }
+
+[dev-dependencies]
+strum = { version = "0.24.1", features = ["derive"] }
+initialize-com = { path = "../initialize-com" }
