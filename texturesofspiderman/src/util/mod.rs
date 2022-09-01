@@ -5,10 +5,6 @@ pub use panic::{catch_panics, downcast_str};
 mod walkdir;
 use camino::Utf8PathBuf;
 pub use self::walkdir::{walkdir, WalkArgs};
-#[cfg(windows)]
-mod win32;
-#[cfg(windows)]
-pub use win32::{open_files_dialog, message_box_ok, message_box_error};
 
 use crate::prelude::*;
 

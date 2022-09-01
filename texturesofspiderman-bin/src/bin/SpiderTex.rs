@@ -2,9 +2,12 @@
 #![allow(non_snake_case)]
 
 use std::borrow::Cow;
+use std::ffi::OsString;
 use std::fs::File;
 use std::io::prelude::*;
 use std::io::BufWriter;
+use std::path::PathBuf;
+use std::process::ExitCode;
 
 use camino::{Utf8Path, Utf8PathBuf};
 use directxtex::{DXTImage, TEX_FILTER_FLAGS};
@@ -20,9 +23,7 @@ use texturesofspiderman_bin::{gui, APP_TITLE, setup_logging};
 use tracing_egui_repaint::oncecell::RepaintHandle;
 use tracing_messagevec::LogReader;
 use std::sync::mpsc;
-
-#[cfg(windows)]
-use texturesofspiderman::util::{message_box_error};
+use texturesofspiderman_bin as lib;
 
 
 #[cfg(not(windows))]
@@ -35,7 +36,7 @@ fn message_box_ok(text: impl Into<String>, _caption: &str) {
     event!(INFO, "{}", text.into())
 }
 
-#[cfg(windows)]
+#[cfg(disabled)]
 fn run(mut inputs: Inputs) -> Result<(String, Warnings)> {
     inputs.add_pairs();
 
@@ -52,7 +53,24 @@ fn run(mut inputs: Inputs) -> Result<(String, Warnings)> {
     }
 }
 
-fn main() {
+fn display_help() -> ExitCode {
+    const HELP_MESSAGE: &str = "To use this program, drag files (.texture or images) to the program executable.";
+
+    #[cfg(windows)]
+    lib::win32::message_box_ok(HELP_MESSAGE, APP_TITLE);
+
+    #[cfg(not(windows))]
+    eprintln!("{HELP_MESSAGE}");
+
+    ExitCode::FAILURE
+}
+
+fn main() -> ExitCode {
+    let args: Vec<OsString> = std::env::args_os().skip(1).collect();
+    if args.is_empty() {
+        return display_help();
+    }
+
     let (log_reader, repaint_handle) = setup_logging();
 
     let _com = initialize_com::com_initialized().unwrap();
@@ -72,9 +90,29 @@ fn main() {
     //     }
     //     let _ = tx.send(1.0);
     // });
-    _ = tx.send(1.0);
 
+    std::thread::spawn(move|| run(tx, args.into_iter()));
     gui::noninteractive::show(repaint_handle, rx, log_reader).unwrap();
+    ExitCode::SUCCESS
+}
+
+fn run<FILE>(tx: mpsc::Sender<f32>, iter: impl Iterator<Item = FILE> + ExactSizeIterator) where FILE: Into<PathBuf> {
+    let groups = inputs::gather_from_iter(iter);
+
+    let len = groups.len();
+    for (i, (base_name, grouped)) in groups.into_iter().enumerate() {
+        let group = FileGroup(grouped);
+        let scanned = group.scan(&base_name);
+        // event!(Level::DEBUG, "{k}: {group:?}");
+
+        let pg = (i as f32) / (len as f32);
+        if tx.send(pg).log_failure_as("Failed to send progress to UI").is_err() {
+            return;
+        }
+        std::thread::sleep(std::time::Duration::from_millis(100));
+    }
+
+    _ = tx.send(1.0).log_failure_as("Failed to send progress to UI");
 }
 
 #[cfg(disabled)] // dev
@@ -128,7 +166,7 @@ fn save_rgb(image: &DXTImage, array_index: usize, file: &Utf8Path) -> Result<()>
     // // rgb.save(&file, CONTAINER_PNG)
 }
 
-#[cfg(windows)]
+#[cfg(disabled)]
 fn export_texture(
     format: TextureFormat,
     inputs: &[Utf8PathBuf],
@@ -187,7 +225,7 @@ fn export_texture(
     Ok(output_count)
 }
 
-#[cfg(windows)]
+#[cfg(disabled)]
 fn export_textures(groups: impl IntoIterator<Item = Categorized>) -> Result<(String, Warnings)> {
     let mut input_count: usize = 0;
     let mut output_count: usize = 0;
@@ -252,7 +290,7 @@ fn export_textures(groups: impl IntoIterator<Item = Categorized>) -> Result<(Str
     ))
 }
 
-#[cfg(windows)]
+#[cfg(disabled)]
 fn import_images(groups: impl IntoIterator<Item = Categorized>) -> Result<(String, Warnings)> {
     let mut input_count: usize = 0;
     let mut output_count: usize = 0;
@@ -561,7 +599,7 @@ fn import_image(
     Ok((output_count, warnings))
 }
 
-#[cfg(windows)]
+#[cfg(disabled)]
 #[test]
 fn test_import() {
     log_for_tests(true);
@@ -577,7 +615,7 @@ fn test_import() {
     event!(INFO, message = %string);
 }
 
-#[cfg(windows)]
+#[cfg(disabled)]
 #[test]
 fn test_export() {
     log_for_tests(true);

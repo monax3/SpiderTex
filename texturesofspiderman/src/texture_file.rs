@@ -8,6 +8,7 @@
 use std::fs::File;
 use std::io::prelude::*;
 use std::io::{BufReader, SeekFrom};
+use std::path::Path;
 
 use bytemuck::{Pod, Zeroable};
 use camino::Utf8Path;
@@ -339,6 +340,16 @@ impl Header {
         self.hdr().check();
         self.fmt().check(format);
     }
+}
+
+pub fn read_header_new<FILE: AsRef<Path>>(texture_file: FILE) -> Result<Option<FormatHeader>> {
+    let mut reader = BufReader::new(File::open(texture_file)?);
+    let mut header_buffer = [0_u8; TEXTURE_HEADER_SIZE];
+    reader.read_exact(&mut header_buffer)?;
+
+    let header: &Header =
+        bytemuck::try_from_bytes(&header_buffer).expect("read_textures has the wrong buffer size");
+    Ok(header.has_magic().then_some(*header.fmt()))
 }
 
 pub fn read_header(texture_file: &Utf8Path) -> Result<(Option<FormatHeader>, impl Read)> {

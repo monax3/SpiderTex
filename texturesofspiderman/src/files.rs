@@ -1,5 +1,6 @@
 use std::borrow::Cow;
-use std::collections::{BTreeSet, HashSet};
+use std::collections::{BTreeMap, BTreeSet, HashSet};
+use std::path::{Path, PathBuf};
 
 use camino::{Utf8Path, Utf8PathBuf};
 
@@ -11,41 +12,12 @@ const GROUP_SEP: char = '#';
 
 #[must_use]
 #[cfg_attr(feature = "debug-inputs", instrument(level = "trace", ret))]
-pub fn base_name(file: &Utf8Path) -> &str {
-    let path_sep = file.as_str()
-        .rfind(|c| std::path::is_separator(c)).unwrap_or_default();
+pub fn base_name(name: &str) -> &str {
+    let name = name.split_once('.').map_or(name, |(first, _)| first);
+    let name = name.rsplit_once(GROUP_SEP).map_or(name, |(first, _)| first);
+    let name = name.strip_suffix("_hd").unwrap_or(name);
 
-    let without_ext = file
-        .as_str()[path_sep..]
-        .find('.')
-        .map_or(file.as_str(), |pos| &file.as_str()[.. path_sep + pos]);
-
-    event!(TRACE, f = file.as_str(), without_ext);
-
-    // let without_ext = file
-    //     .as_str()
-    //     .rfind('.')
-    //     .map_or(file.as_str(), |pos| &file.as_str()[.. pos]);
-
-    let without_seps = without_ext
-        .rfind(|c| c == GROUP_SEP)
-        .map_or(without_ext, |sep| &without_ext[.. sep]);
-    // let without_custom = without_seps.strip_suffix(".custom").or_else(|| without_seps.strip_suffix(".customhd")).unwrap_or(without_seps);
-    // let without_suffix = without_custom.strip_suffix("_hd").unwrap_or(without_custom);
-    let without_suffix = without_seps.strip_suffix("_hd").unwrap_or(without_seps);
-
-    // let without_path = without_suffix
-    //     .rfind(|c| std::path::is_separator(c))
-    //     .map_or(without_suffix, |path_sep| &without_suffix[path_sep + 1 ..]);
-
-    #[cfg(feature = "debug-inputs")]
-    {
-        tracing::Span::current().record("without_ext", without_ext);
-        tracing::Span::current().record("without_seps", without_seps);
-        tracing::Span::current().record("without_suffix", without_suffix);
-    }
-
-    without_suffix
+    name
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -184,13 +156,19 @@ impl<GROUP> std::ops::Deref for FileGroup<GROUP> {
 // impl<GROUP: FileGroupInfo> FileGroupNg<GROUP> {
 // }
 
-impl FileGroupInfo for Uncategorized {
+impl FileGroupInfo for Grouped {
     fn iter_inputs<'a>(&'a self) -> Box<dyn Iterator<Item = Cow<'a, FileStatus>> + 'a> {
-        make_filestatus_iter(&self.0)
+        make_filestatus_iter(self.0.iter().filter_map(|f| Utf8Path::from_path(f)))
     }
 
     fn input(&self) -> Cow<'_, FileStatus> {
-        Cow::Owned(FileStatus::Ok(Warnings::new(), self.0.clone()))
+        Cow::Owned(FileStatus::Ok(
+            Warnings::new(),
+            self.0
+                .iter()
+                .filter_map(|f| Utf8Path::from_path(f).map(|u| u.to_owned()))
+                .collect(),
+        ))
     }
 }
 
@@ -232,11 +210,43 @@ impl FileGroupInfo for Scanned {
     fn output_format(&self) -> Option<&OutputFormat> { Some(&self.output) }
 }
 
+pub struct FileGroups<GROUP>(BTreeMap<String, GROUP>);
+
+impl<GROUP> FileGroups<GROUP> {
+    pub fn len(&self) -> usize { self.0.len() }
+
+    pub fn is_empty(&self) -> bool { self.0.is_empty() }
+}
+
+impl<GROUP> IntoIterator for FileGroups<GROUP> {
+    type IntoIter = std::collections::btree_map::IntoIter<String, GROUP>;
+    type Item = (String, GROUP);
+
+    fn into_iter(self) -> Self::IntoIter { self.0.into_iter() }
+}
+
+impl<GROUP, G> FromIterator<(String, G)> for FileGroups<GROUP>
+where G: Into<GROUP>
+{
+    fn from_iter<T: IntoIterator<Item = (String, G)>>(iter: T) -> Self {
+        Self(
+            iter.into_iter()
+                .map(|(key, value)| (key, value.into()))
+                .collect(),
+        )
+    }
+}
+
 #[derive(Debug)]
 pub struct FileGroup<GROUP>(pub GROUP);
 
-#[derive(Debug)]
-pub struct Uncategorized(pub Vec<Utf8PathBuf>);
+#[derive(Default, Debug)]
+#[repr(transparent)]
+pub struct Grouped(BTreeSet<PathBuf>);
+
+impl From<BTreeSet<PathBuf>> for Grouped {
+    fn from(grouped: BTreeSet<PathBuf>) -> Self { Self(grouped) }
+}
 
 #[derive(Debug)]
 pub struct Categorized {
@@ -252,6 +262,13 @@ pub struct Scanned {
 }
 
 #[derive(Debug)]
+pub struct Scanned2 {
+    pub texture_format: Option<TextureFormat>,
+    pub images: Vec<Utf8PathBuf>,
+    pub textures: Vec<Utf8PathBuf>,
+}
+
+#[derive(Debug)]
 pub enum OutputFormat {
     Exact {
         format:  TextureFormat,
@@ -259,6 +276,62 @@ pub enum OutputFormat {
     },
     Candidates(Vec<TextureFormat>),
     Unknown,
+}
+
+fn unique_dirs<'a>(
+    iter: impl Iterator<Item = &'a Path> + 'a,
+) -> impl Iterator<Item = &'a Path> + 'a {
+    let dirs: HashSet<&Path> = iter.filter_map(Path::parent).collect();
+    dirs.into_iter()
+}
+
+fn try_read_format(file: &Path) -> Option<TextureFormat> {
+    //FIXME
+    let utf8_file = Utf8Path::from_path(file).unwrap();
+
+    texture_file::read_header_new(file)
+        .log_failure_with(|| format!("Error reading from {}", file.display()))
+        .ok()
+        .flatten()
+        .map(|header| header.to())
+}
+
+impl Grouped {
+    pub fn find_format(&self, base_name: &str) -> Option<TextureFormat> {
+        // FIXME, this is where adding json/formatid would happen
+        for file in &self.0 {
+            if let Some(format) = try_read_format(file) {
+                event!(Level::INFO, "Found format header in {}", file.display());
+                return Some(format);
+            }
+        }
+
+        for dir in unique_dirs(self.0.iter().map(PathBuf::as_path)) {
+            let texture_file = dir.join(base_name).with_extension("texture");
+            if !self.0.contains(&texture_file) && texture_file.exists() {
+                event!(Level::TRACE, "Trying {}", texture_file.display());
+                if let Some(format) = try_read_format(&texture_file) {
+                    event!(
+                        Level::TRACE,
+                        "Found header format header in {}",
+                        texture_file.display()
+                    );
+                    return Some(format);
+                }
+            }
+        }
+
+        None
+    }
+}
+
+impl FileGroup<Grouped> {
+    pub fn scan(self, base_name: &str) -> Result<FileGroup<Scanned2>> {
+        let format = self.0.find_format(base_name);
+        let Grouped(files) = self.0;
+
+        todo!()
+    }
 }
 
 impl FileGroup<Categorized> {
@@ -367,7 +440,7 @@ impl FileGroup<Categorized> {
 #[must_use]
 #[cfg_attr(feature = "debug-inputs", instrument(ret))]
 pub fn ng_format_for_image_file(image_file: &Utf8Path) -> Option<TextureFormat> {
-    let file = Utf8PathBuf::from(base_name(image_file));
+    let file = Utf8PathBuf::from(base_name(image_file.file_name()?));
 
     try_read_meta(&file)
         .or_else(|| ng_format_for_texture_file(&file.with_extension("texture")))
@@ -384,14 +457,14 @@ pub fn ng_format_for_texture_file(texture_file: &Utf8Path) -> Option<TextureForm
     // FIXME
     let texture_file = texture_file.with_extension("texture");
 
-        if texture_file.exists() {
-            texture_file::read_header(&texture_file)
-                .log_failure_with(|| format!("Failed to read header of {texture_file}"))
-                .ok()
-                .and_then(|(header, _)| header.map(|header| header.to()))
-        } else {
-            None
-        }
+    if texture_file.exists() {
+        texture_file::read_header(&texture_file)
+            .log_failure_with(|| format!("Failed to read header of {texture_file}"))
+            .ok()
+            .and_then(|(header, _)| header.map(|header| header.to()))
+    } else {
+        None
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -482,7 +555,7 @@ pub fn output_files(
 #[must_use]
 pub fn as_images(texture_format: &TextureFormat, files: &[Utf8PathBuf]) -> Vec<Utf8PathBuf> {
     if let Some(first) = files.get(0).log_failure_as("as_images on an empty Vec") {
-        let base = base_name(first);
+        let base = base_name(first.file_name().unwrap());
         let image_format = texture_format.default_image_format();
         let num_images = texture_format.num_images();
 
@@ -510,14 +583,18 @@ pub fn as_images(texture_format: &TextureFormat, files: &[Utf8PathBuf]) -> Vec<U
 #[must_use]
 pub fn as_textures(format: &TextureFormat, files: &[Utf8PathBuf]) -> Vec<Utf8PathBuf> {
     if let Some(first) = files.get(0).log_failure_as("as_textures on an empty Vec") {
-        let mut base_name = base_name(first).to_string();
+        let mut base_name = base_name(first.file_name().unwrap()).to_string();
 
         let texture = first.with_file_name(&base_name).with_extension("texture");
         // panic!("{files:?} ---- {texture} ---- {base_name}");
 
         if format.has_highres() {
-            let raw = first.with_file_name(&base_name).with_extension("customhd.texture");
-            let texture = first.with_file_name(&base_name).with_extension("custom.texture");
+            let raw = first
+                .with_file_name(&base_name)
+                .with_extension("customhd.texture");
+            let texture = first
+                .with_file_name(&base_name)
+                .with_extension("custom.texture");
             vec![raw, texture]
         } else {
             base_name.push_str(".custom.texture");
@@ -576,7 +653,8 @@ pub fn format_for_texture_file(file: &Utf8Path) -> FileFormat {
 
     /*if let Some(format) = registry.get_override(file) {
         FileFormat::MetaOverride(format)
-    } else*/ if !file.exists() {
+    } else*/
+    if !file.exists() {
         FileFormat::Unknown
     } else if let Ok((Some(format), _)) = texture_file::read_header(file).log_failure() {
         FileFormat::FromHeader(format.into())
@@ -589,7 +667,7 @@ pub fn format_for_texture_file(file: &Utf8Path) -> FileFormat {
 
 #[cfg_attr(feature = "debug-inputs", instrument(ret))]
 pub fn format_for_image_file(file: &Utf8Path) -> FileFormat {
-    let file = Utf8PathBuf::from(base_name(file));
+    let file = Utf8PathBuf::from(base_name(file.file_name().unwrap()));
 
     try_read_meta(&file)
         .map(FileFormat::MetaOverride)
@@ -603,7 +681,9 @@ fn try_metafiles(file: &Utf8Path) -> Option<Utf8PathBuf> {
         return Some(meta);
     }
 
-    let meta = file.with_file_name(base_name(file)).with_extension("json");
+    let meta = file
+        .with_file_name(base_name(file.file_name().unwrap()))
+        .with_extension("json");
     (meta.exists()).then_some(meta)
 }
 

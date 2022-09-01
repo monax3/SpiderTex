@@ -1,11 +1,23 @@
 use std::collections::{BTreeMap, BTreeSet, VecDeque};
+use std::ffi::OsStr;
 use std::path::{Path, PathBuf};
 
 use camino::{Utf8Path, Utf8PathBuf};
 
 use crate::files::{
-    base_name, format_for_file, is_ignored_ext, is_image_ext, is_texture_ext, merge_file_formats,
-    Categorized, FileFormat, FileGroup, FileType, InputGroup, Uncategorized,
+    base_name,
+    format_for_file,
+    is_ignored_ext,
+    is_image_ext,
+    is_texture_ext,
+    merge_file_formats,
+    Categorized,
+    FileFormat,
+    FileGroup,
+    FileGroups,
+    FileType,
+    Grouped,
+    InputGroup,
 };
 use crate::prelude::*;
 use crate::util::WalkArgs;
@@ -46,9 +58,10 @@ pub enum Job {
 #[derive(Debug)]
 pub struct Inputs {
     pub textures: Vec<Categorized>,
-    pub images: Vec<Categorized>,
+    pub images:   Vec<Categorized>,
 }
 
+#[cfg(disabled)]
 impl Inputs {
     #[must_use]
     pub fn default_action(&self) -> Action {
@@ -61,15 +74,11 @@ impl Inputs {
 
     #[inline]
     #[must_use]
-    pub fn is_empty(&self) -> bool {
-        self.textures.is_empty() && self.images.is_empty()
-    }
+    pub fn is_empty(&self) -> bool { self.textures.is_empty() && self.images.is_empty() }
 
     #[inline]
     #[must_use]
-    pub fn len(&self) -> usize {
-        self.textures.len() + self.images.len()
-    }
+    pub fn len(&self) -> usize { self.textures.len() + self.images.len() }
 
     pub fn add_pairs(&mut self) {
         for texture in &mut self.textures {
@@ -116,15 +125,13 @@ impl Inputs {
 
 pub struct InputsIter {
     textures: std::vec::IntoIter<Categorized>,
-    images: std::vec::IntoIter<Categorized>,
+    images:   std::vec::IntoIter<Categorized>,
 }
 
 impl Iterator for InputsIter {
     type Item = Categorized;
 
-    fn next(&mut self) -> Option<Self::Item> {
-        self.textures.next().or_else(|| self.images.next())
-    }
+    fn next(&mut self) -> Option<Self::Item> { self.textures.next().or_else(|| self.images.next()) }
 }
 
 impl From<Inputs> for InputsIter {
@@ -132,7 +139,7 @@ impl From<Inputs> for InputsIter {
         let Inputs { textures, images } = inputs;
         InputsIter {
             textures: textures.into_iter(),
-            images: images.into_iter(),
+            images:   images.into_iter(),
         }
     }
 }
@@ -141,9 +148,7 @@ impl IntoIterator for Inputs {
     type IntoIter = InputsIter;
     type Item = Categorized;
 
-    fn into_iter(self) -> Self::IntoIter {
-        InputsIter::from(self)
-    }
+    fn into_iter(self) -> Self::IntoIter { InputsIter::from(self) }
 }
 
 #[must_use]
@@ -164,6 +169,7 @@ pub fn make_job(inputs: Inputs) -> Job {
     }
 }
 
+#[cfg(disabled)]
 fn group_input_files(
     files: impl Iterator<Item = Utf8PathBuf>,
 ) -> BTreeMap<(FileType, String), InputGroup> {
@@ -185,27 +191,23 @@ fn group_input_files(
     groups
 }
 
-pub fn group(
-    iter: impl Iterator<Item = Utf8PathBuf>,
-) -> BTreeMap<(FileType, String), Vec<Utf8PathBuf>> {
-    let mut grouped: BTreeMap<(FileType, String), Vec<Utf8PathBuf>> = BTreeMap::new();
+pub fn group(iter: impl Iterator<Item = PathBuf>) -> FileGroups<Grouped> {
+    let mut grouped: BTreeMap<String, BTreeSet<PathBuf>> = BTreeMap::new();
 
-    for (file_type, file) in iter.filter_map(|file| {
-        Some((
-            FileType::try_from(file.as_ref())
-                .log_failure_with(|| format!("Determining file type of {file}"))
-                .ok()?,
-            file,
-        ))
+    for (key, file) in iter.filter_map(|file| {
+        file.file_name()
+            .and_then(OsStr::to_str)
+            .map(|name| base_name(name).to_string())
+            .map(|base_name| (base_name, file))
     }) {
-        let key = (file_type, base_name(&file).to_string());
-        grouped.entry(key).or_default().push(file);
+        grouped.entry(key).or_default().insert(file);
     }
 
-    grouped
+    FileGroups::from_iter(grouped)
 }
 
-pub fn categorize(grouped: BTreeMap<(FileType, String), Vec<Utf8PathBuf>>) -> Inputs {
+#[cfg(disabled)]
+pub fn categorize(grouped: BTreeMap<String, Vec<PathBuf>>) -> Inputs {
     let (textures, images) = grouped
         .into_iter()
         .map(|((file_type, _), files)| Categorized { file_type, files })
@@ -214,63 +216,65 @@ pub fn categorize(grouped: BTreeMap<(FileType, String), Vec<Utf8PathBuf>>) -> In
     Inputs { textures, images }
 }
 
-pub fn gather_from_args() -> Inputs {
-    let args = std::env::args().skip(1).map(Utf8PathBuf::from);
+pub fn gather_from_args() -> FileGroups<Grouped> {
+    let args = std::env::args_os().skip(1).map(PathBuf::from);
 
-    gather_iter(args)
+    gather_from_iter(args)
 }
 
-pub fn gather(from: impl Into<Utf8PathBuf>) -> Inputs {
-    gather_iter(std::iter::once(from.into()))
+pub fn gather(from: impl Into<PathBuf>) -> FileGroups<Grouped> {
+    gather_from_iter(std::iter::once(from.into()))
 }
 
-pub fn gather_iter<'a>(iter: impl Iterator<Item = Utf8PathBuf> + 'a) -> Inputs {
-    categorize(group(walk(iter)))
+pub fn gather_from_iter<'a, FILE>(iter: impl Iterator<Item = FILE> + 'a) -> FileGroups<Grouped> where FILE: Into<PathBuf> {
+    group(walk(iter))
 }
 
-pub fn walk<'a>(
-    iter: impl Iterator<Item = Utf8PathBuf> + 'a,
-) -> impl Iterator<Item = Utf8PathBuf> + 'a {
-    WalkArgs::new(iter)
-}
-
-pub fn walk_new<'a>(
-    mut iter: impl Iterator<Item = PathBuf> + 'a,
-) -> impl Iterator<Item = PathBuf> + 'a {
+pub fn walk<'a, FILE>(
+    mut iter: impl Iterator<Item = FILE> + 'a,
+) -> impl Iterator<Item = PathBuf> + 'a where FILE: Into<PathBuf> {
     let mut dirs: VecDeque<walkdir::IntoIter> = VecDeque::new();
 
-    std::iter::from_fn(move || loop {
-        while let Some(walkdir) = dirs.front_mut() {
-            for entry in walkdir {
-                match entry {
-                    Ok(entry) => {
-                        if entry.path().is_file() {
-                            return Some(entry.path().to_owned());
+    std::iter::from_fn(move || {
+        loop {
+            while let Some(walkdir) = dirs.front_mut() {
+                for entry in walkdir {
+                    match entry {
+                        Ok(entry) => {
+                            if entry.path().is_file() {
+                                return Some(entry.path().to_owned());
+                            }
+                        }
+                        Err(error) => {
+                            event!(ERROR, "Error building file list: {error}");
                         }
                     }
-                    Err(error) => {
-                        event!(ERROR, "Error building file list: {error}");
-                    }
+                }
+                dirs.pop_front();
+            }
+            if let Some(entry) = iter.next() {
+                let entry: PathBuf = entry.into();
+                if entry.is_dir() {
+                    dirs.push_back(walkdir::WalkDir::new(entry).into_iter());
+                    continue;
+                } else if entry.is_file() {
+                    return Some(entry);
                 }
             }
-            dirs.pop_front();
+            break None;
         }
-        if let Some(entry) = iter.next() {
-            if entry.is_dir() {
-                dirs.push_back(walkdir::WalkDir::new(entry).into_iter());
-                continue;
-            } else if entry.is_file() {
-                return Some(entry);
-            }
-        }
-        break None;
     })
 }
 
 #[test]
 fn test_walk_new() {
     use tracing_subscriber::EnvFilter;
-    tracing_subscriber::fmt().with_env_filter(EnvFilter::from_default_env()).without_time().with_line_number(true).with_file(true).init();
+    tracing_subscriber::fmt()
+        .with_env_filter(EnvFilter::from_default_env())
+        .without_time()
+        .with_line_number(true)
+        .with_file(true)
+        .init();
 
     // crate::util::log_for_tests(true);
     let paths = ["src", "tests"]
@@ -280,7 +284,7 @@ fn test_walk_new() {
     let span = span!(TRACE, "test span", hello = "world", "walking");
     let _entered = span.enter();
 
-    for file in walk_new(paths) {
+    for file in walk(paths) {
         event!(INFO, "{}", file.display());
     }
     event!(TRACE, "a trace");

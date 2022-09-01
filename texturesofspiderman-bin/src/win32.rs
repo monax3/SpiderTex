@@ -1,8 +1,14 @@
-use camino::Utf8Path;
-use windows::core::PCSTR;
-use windows::Win32::System::Com::{CoInitializeEx, COINIT_MULTITHREADED};
+#![cfg(windows)]
+#![allow(unsafe_code)] // FFI, that's the deal
 
-use crate::Result;
+mod icon;
+pub use icon::icon_data;
+
+// FIXME
+// mod open_files;
+// pub use open_files::open_files_dialog;
+
+use windows::core::PCSTR;
 use std::ffi::CString;
 
 use windows::Win32::UI::WindowsAndMessaging::{
@@ -11,9 +17,6 @@ use windows::Win32::UI::WindowsAndMessaging::{
     MB_TASKMODAL,
     MESSAGEBOX_STYLE,
 };
-
-mod open_files;
-pub use open_files::open_files_dialog;
 
 pub fn message_box_ok(text: impl Into<String>, caption: &str) {
     message_box(text, caption, MB_TASKMODAL);
